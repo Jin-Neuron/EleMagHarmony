@@ -323,11 +323,11 @@ namespace DEO
                 }
                 if (data.type == NoteType.On)
                 {
-                    text += parts[data.laneIndex].ToString() + ",On," + period.ToString() + ",";
+                    text += parts[data.laneIndex].ToString() + ",ON," + period.ToString() + ",";
                 }
                 else if (data.type == NoteType.Off)
                 {
-                    text += parts[data.laneIndex].ToString() + ",Off,";
+                    text += parts[data.laneIndex].ToString() + ",OFF,";
                     parts[data.laneIndex] = 0;
                 }
                 if (data.eventTime != 0)
