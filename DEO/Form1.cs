@@ -221,7 +221,7 @@ namespace DEO
         //シリアル関連のメソッド
         private void StartSerial(SerialPort port,string portName)
         {
-            port.BaudRate = 115200;
+            port.BaudRate = 1000000;
             port.PortName = portName;
             port.Open();
         }
