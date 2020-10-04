@@ -221,7 +221,7 @@ namespace DEO
         //シリアル関連のメソッド
         private void StartSerial(SerialPort port,string portName)
         {
-            port.BaudRate = 1000000;
+            port.BaudRate = 2000000;
             port.PortName = portName;
             port.Open();
         }
@@ -317,12 +317,12 @@ namespace DEO
                 //マイコンが制御しやすいようにマイクロ秒単位周期に変換
                 int period = (int)(1000000 / freq);
                 //鳴らすパートを指定し、マイコンに送信
-                if (parts[data.laneIndex] == 0)
-                {
-                    parts[data.laneIndex] = j;
-                }
                 if (data.type == NoteType.On)
                 {
+                    if (parts[data.laneIndex] == 0)
+                    {
+                        parts[data.laneIndex] = j;
+                    }
                     text += parts[data.laneIndex].ToString() + ",ON," + period.ToString() + ",";
                 }
                 else if (data.type == NoteType.Off)
@@ -339,13 +339,39 @@ namespace DEO
                     NoteData nextData = notes[i + 1];
                     if (nextData.eventTime == 0)
                     {
-                        if (data.type == nextData.type)
+                        if (nextData.type == NoteType.On)
                         {
-                            j += 1;
-                        }
-                        else
-                        {
-                            j = 1;
+                            if(j < 2)
+                            {
+                                j += 1;
+                            }
+                            else
+                            {
+                                List<int> partsNum = new List<int>();
+                                for(int k = 0; k < 128; k++)
+                                {
+                                    if(parts[k] > 0)
+                                    {
+                                        partsNum.Add(parts[k]);
+                                    }
+                                }
+                                partsNum.Sort();
+                                if(partsNum.Count < partsNum.Max())
+                                {
+                                    for(int k = 0; k < partsNum.Count - 1; k++)
+                                    {
+                                        if (partsNum[k] + 1 != partsNum[k + 1])
+                                        {
+                                            j = k + 1;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    j += 1;
+                                }
+                            }
                         }
                     }
                     else
