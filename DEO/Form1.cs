@@ -57,7 +57,6 @@ namespace DEO
             public int dataLength;
             public byte[] data;
         };
-        private System.Threading.Timer timer;
         private int harmony = 0;
         private int counter = 0;
         private Status status;
@@ -65,29 +64,27 @@ namespace DEO
         private string title = "";
         private int tempo = 1;
         private delegate void LogTextDelegate(string text);
+        private delegate void StopButtonDelegate();
         private delegate void TrackBarDelegate();
         private delegate void LabelTimeDelegate();
         private bool isDistGuitar = false;
-        private int timePos = 0;
         private List<int> indexes = new List<int>();
         private List<string> files = new List<string>();
         private List<NoteData> PianoNoteList = new List<NoteData>();
         private List<NoteData> GuitarNoteList = new List<NoteData>();
         private List<TempoData> tempoList = new List<TempoData>();
+        private List<string> texts = new List<string>();
+        private List<double> delays = new List<double>();
+        private List<double> temp_delay = new List<double>();
         private HeaderChunkData headerChunk = new HeaderChunkData();
         private CancellationTokenSource _s = null;
-        private TimeSpan maxTime;
         private TimeSpan changeTime;
-
+        System.Timers.Timer tim1 = new System.Timers.Timer();
+        System.Timers.Timer tim2 = new System.Timers.Timer();
+        System.Timers.Timer tim3 = new System.Timers.Timer();
         public Form1()
         {
             InitializeComponent();
-            timer = new System.Threading.Timer(TimerCallBack, null, Timeout.Infinite, Timeout.Infinite);
-            this.FormClosing += (s, e) =>
-              {
-                  timer.Change(Timeout.Infinite, Timeout.Infinite);
-                  timer.Dispose();
-              };
         }
         //フォーム１の初期設定
         private void Form1_Load(object sender, EventArgs e)
@@ -115,12 +112,6 @@ namespace DEO
             }
             UiReset();
         }
-        //スレッドタイマーのコールバックメソッド
-        private void TimerCallBack(object state)
-        {
-            Invoke(new TrackBarDelegate(UpDateTrackBar));
-            Invoke(new LabelTimeDelegate(UpDateLabelTime));
-        }
         //各種シリアルポートの設定
         private void RelayPortSelectButton_Click(object sender, EventArgs e)
         {
@@ -130,7 +121,6 @@ namespace DEO
                 RelayPortSelectButton.Text = "RelayConnect";
                 RelayPortSelectButton.BackColor = Color.FromArgb(255, 192, 192);
                 PortSelectRelay.Enabled = true;
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
@@ -177,7 +167,6 @@ namespace DEO
                 GuitarPortSelectButton.Text = "GuitarConnect";
                 GuitarPortSelectButton.BackColor = Color.FromArgb(255, 192, 192);
                 PortSelectGuitar.Enabled = true;
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
@@ -221,7 +210,7 @@ namespace DEO
         //シリアル関連のメソッド
         private void StartSerial(SerialPort port,string portName)
         {
-            port.BaudRate = 2000000;
+            port.BaudRate = 115200;
             port.PortName = portName;
             port.Open();
         }
@@ -231,26 +220,90 @@ namespace DEO
             UiReset();
         }
         //非同期処理によるギターとリレーの同時通信
-        private async Task SendSerial(CancellationToken token)
+        private void SendSerial()
         {
             try
             {
-                List<Task> arrayTask = new List<Task>();
-                Task task = Task.Run(() => TempoControll(token));
-                arrayTask.Add(task);
+                temp_delay.Clear();
+                delays.Clear();
+                texts.Clear();
+                TempoControll();
+                tempo = (int)tempoList[0].bpm;
+                Invoke(new LogTextDelegate(WriteLogText), "tempo = " + tempo.ToString() + ",");
+                if (temp_delay.Count > 0)
+                {
+                    int i = 0;
+                    tim1 = new System.Timers.Timer();
+                    tim1.Interval = 1;
+                    Int64 lastTime = DateTime.Now.Ticks / 10000;
+                    tim1.Elapsed += (s, e) =>
+                    {
+                        if((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)temp_delay[i])
+                        {
+                            tim1.Stop();
+                            lastTime += (Int64)delays[i];
+                            i++;
+                            Invoke(new LogTextDelegate(WriteLogText), "tempo = " + ((int)tempoList[i].bpm).ToString() + ",");
+                            if (i < temp_delay.Count)
+                            {
+                                tim1.Start();
+                            }
+                        }
+                    };
+                    tim1.Start();
+                }
                 if (serialPort1.IsOpen)
                 {
-                    task = Task.Run(() => SendNoteData(serialPort1, PianoNoteList, "piano", token));
-                    arrayTask.Add(task);
+                    int i = 0;
+                    SendNoteData(serialPort1, PianoNoteList, "piano");
+                    tim2 = new System.Timers.Timer();
+                    tim2.Interval = 1;
+                    Int64 lastTime = DateTime.Now.Ticks / 10000;
+                    tim2.Elapsed += (s, e) =>
+                    {
+                        if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)delays[i])
+                        {
+                            tim2.Stop();
+                            Invoke(new LogTextDelegate(WriteLogText), "piano send: " + texts[i]);
+                            serialPort1.Write(texts[i]);
+                            lastTime += (Int64)delays[i];
+                            i++;
+                            if (i < delays.Count)
+                            {
+                                tim2.Start();
+                            }
+                            else
+                            {
+                                Invoke(new StopButtonDelegate(Stp));
+                            }
+                        }
+                    };
+                    tim2.Start();
                 }
-                if (serialPort2.IsOpen)
+                //ギターパート、現段階では動かない
+                /*if (serialPort2.IsOpen)
                 {
-                    task = Task.Run(() => SendNoteData(serialPort2, GuitarNoteList, "guitar", token));
-                    arrayTask.Add(task);
-                }
-                //完了を待つ
-                await Task.WhenAll(arrayTask);
-                counter++;
+                    int i = 0;
+                    SendNoteData(serialPort2, GuitarNoteList, "guitar");
+                    tim3.Elapsed += (s, e) =>
+                    {
+                        tim3.Stop();
+                        Invoke(new LogTextDelegate(WriteLogText), "guitar send: " + texts[i]);
+                        serialPort2.Write(texts[i]);
+                        i++;
+                        if (i < delays.Count)
+                        {
+                            tim3.Interval = delays[i];
+                            tim3.Start();
+                        }
+                        else
+                        {
+                            Invoke(new StopButtonDelegate(Stp));
+                        }
+                    };
+                    tim3.Interval = delays[0];
+                    tim3.Start();
+                }*/
             }
             catch{//例外を無視
             }
@@ -258,7 +311,7 @@ namespace DEO
             {
                 if (counter < files.Count)
                 {
-                    await Task.Delay(1000, token);
+                    Task.Delay(1000);
                     StartButton.Enabled = true;
                     StopButton.Enabled = false;
                     StartButton.PerformClick();
@@ -266,39 +319,37 @@ namespace DEO
                 else
                 {
                     counter = 0;
-                    StopButton.PerformClick();
+                    Invoke(new StopButtonDelegate(Stp));
                 }
             }
             else if (status == Status.TestMode)
             {
                 counter = 0;
-                StopButton.PerformClick();
             }
         }
         //テンポ制御用メソッド
-        private async Task TempoControll(CancellationToken token)
+        private void TempoControll()
         {
             foreach(TempoData data in tempoList)
             {
-                int tmp = (int)data.bpm;
-                int delay = 0;
                 if (data.eventTime != 0)
                 {
-                    delay = (int)((60000 / tempo) * (double)((double)data.eventTime / (double)headerChunk.division));
+                    double delay = Math.Round(60000.0 / data.bpm * (double)data.eventTime / (double)headerChunk.division);
+                    temp_delay.Add(delay);
                 }
-                await Task.Delay(delay, token);
-                tempo = tmp;
-                Invoke(new LogTextDelegate(WriteLogText), "tempo = " + tempo.ToString() + ",");
             }
         }
         //ノート情報制御用メソッド
-        private async Task SendNoteData(SerialPort serial, List<NoteData> notes, string str, CancellationToken token)
+        private void SendNoteData(SerialPort serial, List<NoteData> notes, string str)
         {
             string text = "";
             int i = 0, j = 1;
-            int delay = 0;
+            double delay = 0;
             int[] parts = new int[128];
-            if(str == "guitar")
+            int delay_all = 0;
+            int tempoidx = 0;
+            int tmpd = tempoList[tempoidx + 1].eventTime;
+            if (str == "guitar")
             {
                 if (isDistGuitar)
                 {
@@ -310,7 +361,7 @@ namespace DEO
                     serial.Write("0,");
                 }
             }
-            foreach(NoteData data in notes)
+            foreach (NoteData data in notes)
             {
                 //インデックスから周期を計算
                 double freq = 440.0 * (Math.Pow(2.0, ((data.laneIndex - 69) / 12.0)));
@@ -330,13 +381,20 @@ namespace DEO
                     text += parts[data.laneIndex].ToString() + ",OFF,";
                     parts[data.laneIndex] = 0;
                 }
+                if (tempoidx < temp_delay.Count)
+                {
+                    if (delay_all >= tmpd)
+                        tempoidx++;
+                }
                 if (data.eventTime != 0)
                 {
-                    delay = (int)((60000 / tempo) * (double)((double)data.eventTime / (double)headerChunk.division));
+                    delay = Math.Round(60000.0 * (double)data.eventTime / (double)tempoList[tempoidx].bpm / (double)headerChunk.division);
                 }
                 if (i < notes.Count - 1)
                 {
                     NoteData nextData = notes[i + 1];
+                    delay_all += nextData.eventTime;
+
                     if (nextData.type == NoteType.On)
                     {
                         List<int> partsNum = new List<int>();
@@ -374,18 +432,19 @@ namespace DEO
                         j = parts[nextData.laneIndex];
                     }
                     if(nextData.eventTime != 0)
-                    {
-                        await Task.Delay(delay, token);
+                    {/*
                         Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
-                        serial.Write(text);
+                        serial.Write(text);*/
+                        delays.Add(delay);
+                        texts.Add(text);
                         text = "";
                     }
                 }
                 else
                 {
-                    await Task.Delay(delay, token);
-                    Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
-                    serial.Write(text);
+                    /*Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
+                    serial.Write(text);*/
+                    texts.Add(text);
                     text = "";
                 }
                 i += 1;
@@ -399,37 +458,19 @@ namespace DEO
             LogTextBox.Focus();
             LogTextBox.ScrollToCaret();
         }
-        private void UpDateTrackBar()
+        private void Stp()
         {
-            timePos += 250;
-            if (timePos > trackBar.Maximum)
-            {
-                trackBar.Value = trackBar.Minimum;
-            }
-            else
-            {
-                trackBar.Value = timePos;
-            }
-        }
-        private void UpDateLabelTime()
-        {
-            changeTime += new TimeSpan(0, 0, 0, 0, 250);
-            if (changeTime < maxTime)
-            {
-                LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
-            }
-            else
-            {
-                LabelTime.Text = maxTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
-            }
+            StopButton.PerformClick();
         }
         //タスク取り消用メソッド
         private void TaskCancel()
         {
-            if (_s == null) { return; }
-            _s.Cancel();
-            _s.Dispose();
-            _s = null;
+            tim1.Stop();
+            tim1.Dispose();
+            tim2.Stop();
+            tim2.Dispose();
+            tim3.Stop();
+            tim3.Dispose();
         }
         //UIのリセット用メソッド
         private void UiReset() {
@@ -446,7 +487,6 @@ namespace DEO
             Playlist1.Enabled = false;
             File1.Enabled = false;
             NowPlaying.Enabled = false;
-            trackBar.Enabled = false;
         }
         //チェックボックスのイベント
         private void checkBoxPlaylist_CheckedChanged(object sender, EventArgs e)
@@ -851,29 +891,6 @@ namespace DEO
                 }
             }
         }
-        //曲の長さをカウント
-        private int CountMusicLength(List<NoteData> noteDatas)
-        {
-            int length = 0;
-            int delay = 0;
-            int i = 0;
-            foreach(NoteData data in noteDatas)
-            {
-                if (data.eventTime != 0)
-                {
-                    delay = (int)((60000 / (int)tempoList[i].bpm) * (double)((double)data.eventTime / (double)headerChunk.division));
-                    length += delay;
-                    if(i < tempoList.Count - 1)
-                    {
-                        if(data.eventTime > tempoList[i + 1].eventTime)
-                        {
-                            i++;
-                        }
-                    }
-                }
-            }
-            return length;
-        }
         //ランダムなインデックス作成（シャッフル時）
         private void IndexRandom()
         {
@@ -894,11 +911,10 @@ namespace DEO
             }
         }
         //以下各種音楽再生用ボタンクリックイベント
-        private async void StartButton_Click(object sender, EventArgs e)
+        private void StartButton_Click(object sender, EventArgs e)
         {
             if (this.Enabled)
             {
-                timePos = 0;
                 isDistGuitar = false;
                 StartButton.Enabled = false;
                 StopButton.Enabled = true;
@@ -911,7 +927,6 @@ namespace DEO
                 RepeatCheck.Enabled = false;
                 RandomCheck.Enabled = false;
                 LogTextBox.Text = "";
-                trackBar.Enabled = true;
                 _s = new CancellationTokenSource();
                 if(status == Status.PlaylistMode)
                 {
@@ -928,15 +943,7 @@ namespace DEO
                 try
                 {
                     HeaderChunkAnalysis();
-                    int pianoLength = CountMusicLength(PianoNoteList);
-                    int guitarLength = CountMusicLength(GuitarNoteList);
-                    int musicLength = (pianoLength < guitarLength) ? guitarLength : pianoLength;
-                    trackBar.Maximum = musicLength;
-                    maxTime = TimeSpan.FromMilliseconds(musicLength);
-                    changeTime = new TimeSpan(0, 0, 0);
-                    LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
-                    timer.Change(0, 250);
-                    await SendSerial(_s.Token);
+                    SendSerial();
                 }
                 catch {//例外を無視
                 }
@@ -946,14 +953,11 @@ namespace DEO
         {
             try
             {
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
                 changeTime = new TimeSpan(0, 0, 0);
                 TaskCancel();
                 StartButton.Enabled = true;
                 StopButton.Enabled = false;
-                trackBar.Enabled = false;
-                timePos = 0;
-                trackBar.Value = 0;
+                
                 if (checkBoxPlaylist.Checked)
                 {
                     OpenPlaylistButton.Enabled = true;
@@ -970,7 +974,10 @@ namespace DEO
                 }
                 counter = 0;
                 title = "";
-            }catch(Exception ex)
+                PianoNoteList.Clear();
+                tempoList.Clear();
+            }
+            catch(Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -979,7 +986,6 @@ namespace DEO
         {
             if (NextButton.Enabled)
             {
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
                 TaskCancel();
                 StartButton.Enabled = true;
                 counter++;
@@ -993,7 +999,6 @@ namespace DEO
             if (ReturnButton.Enabled)
             {
                 TaskCancel();
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
                 StartButton.Enabled = true;
                 if (counter <= 1)
                 {
@@ -1013,18 +1018,6 @@ namespace DEO
             if (RandomCheck.Checked)
             {
                 IndexRandom();
-            }
-        }
-        //トラックバーのスクロールの変更はNG
-        private void trackBar_Scroll(object sender, EventArgs e)
-        {
-            if (trackBar.Value >= trackBar.Maximum)
-            {
-                trackBar.Value = trackBar.Minimum;
-            }
-            else
-            {
-                trackBar.Value = timePos;
             }
         }
     }
