@@ -58,11 +58,14 @@
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.LogTextBox = new System.Windows.Forms.TextBox();
+            this.trackBar = new System.Windows.Forms.TrackBar();
+            this.LabelTime = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
             this.SuspendLayout();
             // 
             // openPlaylistDialog
@@ -270,7 +273,7 @@
             this.tableLayoutPanel4.Controls.Add(this.StartButton, 2, 0);
             this.tableLayoutPanel4.Controls.Add(this.StopButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.ReturnButton, 0, 0);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(71, 443);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(65, 457);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -380,7 +383,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel5.Controls.Add(this.RepeatCheck, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.RandomCheck, 1, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(316, 367);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(313, 405);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -397,19 +400,39 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LogTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.LogTextBox.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.LogTextBox.Location = new System.Drawing.Point(68, 511);
+            this.LogTextBox.Location = new System.Drawing.Point(65, 523);
             this.LogTextBox.Multiline = true;
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
             this.LogTextBox.Size = new System.Drawing.Size(676, 137);
             this.LogTextBox.TabIndex = 12;
             // 
+            // trackBar
+            // 
+            this.trackBar.Location = new System.Drawing.Point(74, 357);
+            this.trackBar.Name = "trackBar";
+            this.trackBar.Size = new System.Drawing.Size(679, 45);
+            this.trackBar.TabIndex = 13;
+            this.trackBar.TickStyle = System.Windows.Forms.TickStyle.None;
+            // 
+            // LabelTime
+            // 
+            this.LabelTime.AutoSize = true;
+            this.LabelTime.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.LabelTime.Location = new System.Drawing.Point(622, 405);
+            this.LabelTime.Name = "LabelTime";
+            this.LabelTime.Size = new System.Drawing.Size(128, 24);
+            this.LabelTime.TabIndex = 15;
+            this.LabelTime.Text = "00:00/00:00";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.ClientSize = new System.Drawing.Size(824, 595);
+            this.ClientSize = new System.Drawing.Size(824, 577);
+            this.Controls.Add(this.LabelTime);
+            this.Controls.Add(this.trackBar);
             this.Controls.Add(this.LogTextBox);
             this.Controls.Add(this.tableLayoutPanel5);
             this.Controls.Add(this.NowPlaying);
@@ -433,6 +456,7 @@
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -467,6 +491,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.TextBox LogTextBox;
+        private System.Windows.Forms.TrackBar trackBar;
+        private System.Windows.Forms.Label LabelTime;
     }
 }
 

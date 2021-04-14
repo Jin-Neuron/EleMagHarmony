@@ -63,6 +63,7 @@ namespace DEO
         private string filePath = "";
         private string title = "";
         private int tempo = 1;
+        private int timePos = 0;
         private delegate void LogTextDelegate(string text);
         private delegate void StopButtonDelegate();
         private delegate void TrackBarDelegate();
@@ -77,14 +78,21 @@ namespace DEO
         private List<double> delays = new List<double>();
         private List<double> temp_delay = new List<double>();
         private HeaderChunkData headerChunk = new HeaderChunkData();
-        private CancellationTokenSource _s = null;
+        private TimeSpan maxTime;
         private TimeSpan changeTime;
-        System.Timers.Timer tim1 = new System.Timers.Timer();
-        System.Timers.Timer tim2 = new System.Timers.Timer();
-        System.Timers.Timer tim3 = new System.Timers.Timer();
+        private System.Threading.Timer trackbar_tim;
+        private System.Timers.Timer tim1 = new System.Timers.Timer();
+        private System.Timers.Timer tim2 = new System.Timers.Timer();
+        private System.Timers.Timer tim3 = new System.Timers.Timer();
         public Form1()
         {
             InitializeComponent();
+            trackbar_tim = new System.Threading.Timer(TimerCallBack, null, Timeout.Infinite, Timeout.Infinite);
+            this.FormClosing += (s, e) =>
+            {
+                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
+                trackbar_tim.Dispose();
+            };
         }
         //フォーム１の初期設定
         private void Form1_Load(object sender, EventArgs e)
@@ -112,6 +120,12 @@ namespace DEO
             }
             UiReset();
         }
+        //スレッドタイマーのコールバックメソッド
+        private void TimerCallBack(object state)
+        {
+            Invoke(new TrackBarDelegate(UpDateTrackBar));
+            Invoke(new LabelTimeDelegate(UpDateLabelTime));
+        }
         //各種シリアルポートの設定
         private void RelayPortSelectButton_Click(object sender, EventArgs e)
         {
@@ -121,6 +135,7 @@ namespace DEO
                 RelayPortSelectButton.Text = "RelayConnect";
                 RelayPortSelectButton.BackColor = Color.FromArgb(255, 192, 192);
                 PortSelectRelay.Enabled = true;
+                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
@@ -167,6 +182,7 @@ namespace DEO
                 GuitarPortSelectButton.Text = "GuitarConnect";
                 GuitarPortSelectButton.BackColor = Color.FromArgb(255, 192, 192);
                 PortSelectGuitar.Enabled = true;
+                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
@@ -346,9 +362,9 @@ namespace DEO
             int i = 0, j = 1;
             double delay = 0;
             int[] parts = new int[128];
-            int delay_all = 0;
             int tempoidx = 0;
             int tmpd = tempoList[tempoidx + 1].eventTime;
+            int delay_all = 0;
             if (str == "guitar")
             {
                 if (isDistGuitar)
@@ -458,6 +474,30 @@ namespace DEO
             LogTextBox.Focus();
             LogTextBox.ScrollToCaret();
         }
+        private void UpDateTrackBar()
+        {
+            timePos += 250;
+            if (timePos > trackBar.Maximum)
+            {
+                trackBar.Value = trackBar.Minimum;
+            }
+            else
+            {
+                trackBar.Value = timePos;
+            }
+        }
+        private void UpDateLabelTime()
+        {
+            changeTime += new TimeSpan(0, 0, 0, 0, 250);
+            if (changeTime < maxTime)
+            {
+                LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+            }
+            else
+            {
+                LabelTime.Text = maxTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+            }
+        }
         private void Stp()
         {
             StopButton.PerformClick();
@@ -470,7 +510,8 @@ namespace DEO
             tim2.Stop();
             tim2.Dispose();
             tim3.Stop();
-            tim3.Dispose();
+            tim3.Dispose(); 
+            trackBar.Enabled = false;
         }
         //UIのリセット用メソッド
         private void UiReset() {
@@ -915,6 +956,7 @@ namespace DEO
         {
             if (this.Enabled)
             {
+                timePos = 0;
                 isDistGuitar = false;
                 StartButton.Enabled = false;
                 StopButton.Enabled = true;
@@ -925,9 +967,9 @@ namespace DEO
                 File1.Enabled = false;
                 Playlist1.Enabled = false;
                 RepeatCheck.Enabled = false;
-                RandomCheck.Enabled = false;
+                RandomCheck.Enabled = false; 
+                trackBar.Enabled = true;
                 LogTextBox.Text = "";
-                _s = new CancellationTokenSource();
                 if(status == Status.PlaylistMode)
                 {
                     if(counter >= files.Count)
@@ -944,6 +986,12 @@ namespace DEO
                 {
                     HeaderChunkAnalysis();
                     SendSerial();
+                    int musicLength = (int)delays.Sum();
+                    trackBar.Maximum = musicLength;
+                    maxTime = TimeSpan.FromMilliseconds(musicLength);
+                    changeTime = new TimeSpan(0, 0, 0);
+                    LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+                    trackbar_tim.Change(0, 250);
                 }
                 catch {//例外を無視
                 }
@@ -953,11 +1001,15 @@ namespace DEO
         {
             try
             {
+                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 changeTime = new TimeSpan(0, 0, 0);
                 TaskCancel();
                 StartButton.Enabled = true;
                 StopButton.Enabled = false;
-                
+                trackBar.Enabled = false;
+                timePos = 0;
+                trackBar.Value = 0;
+
                 if (checkBoxPlaylist.Checked)
                 {
                     OpenPlaylistButton.Enabled = true;
@@ -986,6 +1038,7 @@ namespace DEO
         {
             if (NextButton.Enabled)
             {
+                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 TaskCancel();
                 StartButton.Enabled = true;
                 counter++;
@@ -998,6 +1051,7 @@ namespace DEO
         {
             if (ReturnButton.Enabled)
             {
+                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 TaskCancel();
                 StartButton.Enabled = true;
                 if (counter <= 1)
@@ -1018,6 +1072,18 @@ namespace DEO
             if (RandomCheck.Checked)
             {
                 IndexRandom();
+            }
+        }
+        //トラックバーのスクロールの変更はNG
+        private void trackBar_Scroll(object sender, EventArgs e)
+        {
+            if (trackBar.Value >= trackBar.Maximum)
+            {
+                trackBar.Value = trackBar.Minimum;
+            }
+            else
+            {
+                trackBar.Value = timePos;
             }
         }
     }
