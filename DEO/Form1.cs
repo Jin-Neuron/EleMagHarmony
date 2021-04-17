@@ -74,10 +74,10 @@ namespace DEO
         private List<NoteData> PianoNoteList = new List<NoteData>();
         private List<NoteData> GuitarNoteList = new List<NoteData>();
         private List<TempoData> tempoList = new List<TempoData>();
-        private List<string> texts = new List<string>();
-        private List<double> delays = new List<double>();
+        private List<List<string>> texts = new List<List<string>>();
+        private List<List<double>> delays = new List<List<double>>();
         private List<double> temp_delay = new List<double>();
-        private List<string> bins = new List<string>();
+        private List<List<string>> bins = new List<List<string>>();
         private HeaderChunkData headerChunk = new HeaderChunkData();
         private TimeSpan maxTime;
         private TimeSpan changeTime;
@@ -244,6 +244,7 @@ namespace DEO
                 temp_delay.Clear();
                 delays.Clear();
                 texts.Clear();
+                bins.Clear();
                 TempoControll();
                 tempo = (int)tempoList[0].bpm;
                 Invoke(new LogTextDelegate(WriteLogText), "tempo = " + tempo.ToString() + ",");
@@ -258,7 +259,7 @@ namespace DEO
                         if((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)temp_delay[i])
                         {
                             tim1.Stop();
-                            lastTime += (Int64)delays[i];
+                            lastTime += (Int64)delays[0][i];
                             i++;
                             Invoke(new LogTextDelegate(WriteLogText), "tempo = " + ((int)tempoList[i].bpm).ToString() + ",");
                             if (i < temp_delay.Count)
@@ -272,18 +273,17 @@ namespace DEO
                 if (serialPort1.IsOpen)
                 {
                     int i = 0;
-                    SendNoteData(serialPort1, PianoNoteList, "piano");
                     tim2 = new System.Timers.Timer();
                     tim2.Interval = 1;
                     Int64 lastTime = DateTime.Now.Ticks / 10000;
                     tim2.Elapsed += (s, e) =>
                     {
-                        if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)delays[i])
+                        if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)delays[0][i])
                         {
                             tim2.Stop();
                             Invoke(new LogTextDelegate(WriteLogText), "piano send: " + texts[i]);
-                            serialPort1.Write(texts[i]);
-                            lastTime += (Int64)delays[i];
+                            serialPort1.Write(bins[0][i]);
+                            lastTime += (Int64)delays[0][i];
                             i++;
                             if (i < delays.Count)
                             {
@@ -357,7 +357,7 @@ namespace DEO
             }
         }
         //ノート情報制御用メソッド
-        private void SendNoteData(SerialPort serial, List<NoteData> notes, string str)
+        private void StoreNoteData(SerialPort serial, List<NoteData> notes, string str)
         {
             string text = "";
             string binTxt = "";
@@ -368,16 +368,20 @@ namespace DEO
             int tmpd = tempoList[tempoidx + 1].eventTime;
             int delay_all = 0;
             int dataLen = 0;
+            int idx = (str == "guitar") ? 1 : 0;
+            delays.Add(new List<double>());
+            bins.Add(new List<string>());
+            texts.Add(new List<string>());
             if (str == "guitar")
             {
                 if (isDistGuitar)
                 {
-                    serial.Write("1,");
+                    //serial.Write("1,");
                     Invoke(new LogTextDelegate(WriteLogText), "IsDistGuitar");
                 }
                 else
                 {
-                    serial.Write("0,");
+                    //serial.Write("0,");
                 }
             }
             foreach (NoteData data in notes)
@@ -395,18 +399,16 @@ namespace DEO
                 {
                     dataLen += 13;
                     text += parts[data.laneIndex].ToString() + ",ON," + period.ToString() + ",";
-                    binTxt = Convert.ToString(parts[data.laneIndex] - 1, 2).PadLeft(4, '0');
+                    binTxt += Convert.ToString(parts[data.laneIndex] - 1, 2).PadLeft(4, '0');
                     binTxt += "1";
                     binTxt += Convert.ToString(data.laneIndex, 2).PadLeft(8,'0');
                 }
                 else if (data.type == NoteType.Off)
                 {
-                    int bin = 0;
                     dataLen += 5;
                     text += parts[data.laneIndex].ToString() + ",OFF,";
-                    bin |= parts[data.laneIndex] << 4;
-                    bin |= 0;
-                    binTxt += Convert.ToString(bin, 2);
+                    binTxt += Convert.ToString(parts[data.laneIndex] - 1, 2).PadLeft(4, '0');
+                    binTxt += "0";
                     parts[data.laneIndex] = 0;
                 }
                 if (tempoidx < temp_delay.Count)
@@ -463,9 +465,9 @@ namespace DEO
                     {/*
                         Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
                         serial.Write(text);*/
-                        delays.Add(delay);
-                        texts.Add(text);
-                        bins.Add(binTxt);
+                        delays[idx].Add(delay);
+                        texts[idx].Add(text);
+                        bins[idx].Add(binTxt);
                         text = "";
                         binTxt = "";
                     }
@@ -474,8 +476,8 @@ namespace DEO
                 {
                     /*Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
                     serial.Write(text);*/
-                    texts.Add(text);
-                    bins.Add(binTxt);
+                    texts[idx].Add(text);
+                    bins[idx].Add(binTxt);
                     text = "";
                     binTxt = "";
                 }
@@ -1001,8 +1003,9 @@ namespace DEO
                 try
                 {
                     HeaderChunkAnalysis();
+                    StoreNoteData(serialPort1, PianoNoteList, "piano");
                     SendSerial();
-                    int musicLength = (int)delays.Sum();
+                    int musicLength = (int)delays[0].Sum();
                     trackBar.Maximum = musicLength;
                     maxTime = TimeSpan.FromMilliseconds(musicLength);
                     changeTime = new TimeSpan(0, 0, 0);
