@@ -77,6 +77,7 @@ namespace DEO
         private List<string> texts = new List<string>();
         private List<double> delays = new List<double>();
         private List<double> temp_delay = new List<double>();
+        private List<string> bins = new List<string>();
         private HeaderChunkData headerChunk = new HeaderChunkData();
         private TimeSpan maxTime;
         private TimeSpan changeTime;
@@ -359,12 +360,14 @@ namespace DEO
         private void SendNoteData(SerialPort serial, List<NoteData> notes, string str)
         {
             string text = "";
+            string binTxt = "";
             int i = 0, j = 1;
             double delay = 0;
             int[] parts = new int[128];
             int tempoidx = 0;
             int tmpd = tempoList[tempoidx + 1].eventTime;
             int delay_all = 0;
+            int dataLen = 0;
             if (str == "guitar")
             {
                 if (isDistGuitar)
@@ -390,11 +393,20 @@ namespace DEO
                 }
                 if (data.type == NoteType.On)
                 {
+                    dataLen += 13;
                     text += parts[data.laneIndex].ToString() + ",ON," + period.ToString() + ",";
+                    binTxt = Convert.ToString(parts[data.laneIndex] - 1, 2).PadLeft(4, '0');
+                    binTxt += "1";
+                    binTxt += Convert.ToString(data.laneIndex, 2).PadLeft(8,'0');
                 }
                 else if (data.type == NoteType.Off)
                 {
+                    int bin = 0;
+                    dataLen += 5;
                     text += parts[data.laneIndex].ToString() + ",OFF,";
+                    bin |= parts[data.laneIndex] << 4;
+                    bin |= 0;
+                    binTxt += Convert.ToString(bin, 2);
                     parts[data.laneIndex] = 0;
                 }
                 if (tempoidx < temp_delay.Count)
@@ -453,7 +465,9 @@ namespace DEO
                         serial.Write(text);*/
                         delays.Add(delay);
                         texts.Add(text);
+                        bins.Add(binTxt);
                         text = "";
+                        binTxt = "";
                     }
                 }
                 else
@@ -461,7 +475,9 @@ namespace DEO
                     /*Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
                     serial.Write(text);*/
                     texts.Add(text);
+                    bins.Add(binTxt);
                     text = "";
+                    binTxt = "";
                 }
                 i += 1;
             }
@@ -1004,6 +1020,9 @@ namespace DEO
                 trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 changeTime = new TimeSpan(0, 0, 0);
                 TaskCancel();
+                string text = "1,OFF,2,OFF,3,OFF,4,OFF,5,OFF,6,OFF,7,OFF,8,OFF,9,OFF,10,OFF,";
+                Invoke(new LogTextDelegate(WriteLogText), "piano send: " + text);
+                serialPort1.Write(text);
                 StartButton.Enabled = true;
                 StopButton.Enabled = false;
                 trackBar.Enabled = false;
