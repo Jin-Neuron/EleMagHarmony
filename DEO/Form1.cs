@@ -259,7 +259,7 @@ namespace DEO
                         if((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)temp_delay[i])
                         {
                             tim1.Stop();
-                            lastTime += (Int64)delays[0][i];
+                            lastTime += (Int64)temp_delay[i];
                             i++;
                             Invoke(new LogTextDelegate(WriteLogText), "tempo = " + ((int)tempoList[i].bpm).ToString() + ",");
                             if (i < temp_delay.Count)
@@ -273,6 +273,7 @@ namespace DEO
                 if (serialPort1.IsOpen)
                 {
                     int i = 0;
+                    StoreNoteData(serialPort1, PianoNoteList, "piano");
                     tim2 = new System.Timers.Timer();
                     tim2.Interval = 1;
                     Int64 lastTime = DateTime.Now.Ticks / 10000;
@@ -281,11 +282,11 @@ namespace DEO
                         if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)delays[0][i])
                         {
                             tim2.Stop();
-                            Invoke(new LogTextDelegate(WriteLogText), "piano send: " + texts[i]);
+                            Invoke(new LogTextDelegate(WriteLogText), "piano send: " + texts[0][i]);
                             serialPort1.Write(bins[0][i]);
                             lastTime += (Int64)delays[0][i];
                             i++;
-                            if (i < delays.Count)
+                            if (i < delays[0].Count)
                             {
                                 tim2.Start();
                             }
@@ -1003,7 +1004,6 @@ namespace DEO
                 try
                 {
                     HeaderChunkAnalysis();
-                    StoreNoteData(serialPort1, PianoNoteList, "piano");
                     SendSerial();
                     int musicLength = (int)delays[0].Sum();
                     trackBar.Maximum = musicLength;
