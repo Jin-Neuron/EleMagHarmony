@@ -468,9 +468,12 @@ namespace DEO
                         serial.Write(text);*/
                         delays[idx].Add(delay);
                         texts[idx].Add(text);
+                        String dataLenStr = Convert.ToString(dataLen, 2).PadLeft(8, '0');
+                        binTxt = dataLenStr + binTxt;
                         bins[idx].Add(binTxt);
                         text = "";
                         binTxt = "";
+                        dataLen = 0;
                     }
                 }
                 else
@@ -478,6 +481,8 @@ namespace DEO
                     /*Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
                     serial.Write(text);*/
                     texts[idx].Add(text);
+                    String dataLenStr = Convert.ToString(dataLen, 2).PadLeft(8, '0');
+                    binTxt = dataLenStr + binTxt;
                     bins[idx].Add(binTxt);
                     text = "";
                     binTxt = "";
