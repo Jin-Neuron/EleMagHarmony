@@ -16,7 +16,7 @@ namespace DEO
     public partial class Form1 : Form
     {
         //変数宣言部
-        //プレイリストかテストか
+        //プレイリストかテストかこんにちは
         private enum Status
         {
             PlaylistMode,
