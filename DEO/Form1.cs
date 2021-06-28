@@ -446,6 +446,7 @@ namespace DEO
                                     if (partsNum[k] + 1 != partsNum[k + 1])
                                     {
                                         j = k + 1;
+
                                         break;
                                     }
                                 }
