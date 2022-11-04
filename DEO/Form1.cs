@@ -65,6 +65,7 @@ namespace DEO
         private int tempo = 1;
         private int timePos = 0;
         private delegate void LogTextDelegate(string text);
+        private delegate void StartButtonDelegate();
         private delegate void StopButtonDelegate();
         private delegate void TrackBarDelegate();
         private delegate void LabelTimeDelegate();
@@ -239,65 +240,82 @@ namespace DEO
         //非同期処理によるギターとリレーの同時通信
         private void SendSerial()
         {
-            try
+            temp_delay.Clear();
+            delays.Clear();
+            texts.Clear();
+            bins.Clear();
+            TempoControll();
+            tempo = (int)tempoList[0].bpm;
+            if (temp_delay.Count > 0)
             {
-                temp_delay.Clear();
-                delays.Clear();
-                texts.Clear();
-                bins.Clear();
-                TempoControll();
-                tempo = (int)tempoList[0].bpm;
-                Invoke(new LogTextDelegate(WriteLogText), "tempo = " + tempo.ToString() + ",");
-                if (temp_delay.Count > 0)
+                int i = 0;
+                tim1 = new System.Timers.Timer();
+                tim1.Interval = 1;
+                Int64 lastTime = DateTime.Now.Ticks / 10000;
+                tim1.Elapsed += (s, e) =>
                 {
-                    int i = 0;
-                    tim1 = new System.Timers.Timer();
-                    tim1.Interval = 1;
-                    Int64 lastTime = DateTime.Now.Ticks / 10000;
-                    tim1.Elapsed += (s, e) =>
+                    if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)tempoList[i].eventTime)
                     {
-                        if((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)temp_delay[i])
+                        tim1.Stop();
+                        lastTime += (Int64)tempoList[i].bpm;
+                        tempo = (int)tempoList[i].bpm;
+                        Invoke(new LogTextDelegate(WriteLogText), "tempo = " + ((int)tempoList[i].bpm).ToString() + ",");
+                        i++;
+                        if (i < tempoList.Count)
                         {
-                            tim1.Stop();
-                            lastTime += (Int64)temp_delay[i];
-                            i++;
-                            Invoke(new LogTextDelegate(WriteLogText), "tempo = " + ((int)tempoList[i].bpm).ToString() + ",");
-                            if (i < temp_delay.Count)
-                            {
-                                tim1.Start();
-                            }
+                            tim1.Start();
                         }
-                    };
-                    tim1.Start();
-                }
-                if (serialPort1.IsOpen)
+                    }
+                };
+                tim1.Start();
+            }
+            if (serialPort1.IsOpen)
+            {
+                int i = 0;
+                tim2 = new System.Timers.Timer();
+                tim2.Interval = 1;
+                StoreNoteData(serialPort1, PianoNoteList, "piano");
+                Int64 lastTime = DateTime.Now.Ticks / 10000;
+                tim2.Elapsed += (s, e) =>
                 {
-                    int i = 0;
-                    StoreNoteData(serialPort1, PianoNoteList, "piano");
-                    tim2 = new System.Timers.Timer();
-                    tim2.Interval = 1;
-                    Int64 lastTime = DateTime.Now.Ticks / 10000;
-                    tim2.Elapsed += (s, e) =>
+                    if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)delays[0][i])
                     {
-                        if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)delays[0][i])
+                        tim2.Stop();
+                        Invoke(new LogTextDelegate(WriteLogText), "piano send: " + texts[0][i]);
+                        serialPort1.Write(bins[0][i]);
+                        lastTime += (Int64)delays[0][i];
+                        i++;
+                        if (i < delays[0].Count)
                         {
-                            tim2.Stop();
-                            Invoke(new LogTextDelegate(WriteLogText), "piano send: " + texts[0][i]);
-                            serialPort1.Write(bins[0][i]);
-                            lastTime += (Int64)delays[0][i];
-                            i++;
-                            if (i < delays[0].Count)
+                            try
                             {
                                 tim2.Start();
                             }
-                            else
+                            catch { }
+                        }
+                        else
+                        {
+                            if (status == Status.PlaylistMode)
                             {
+                                if (counter < files.Count)
+                                {
+                                    Invoke(new StartButtonDelegate(Stt));
+                                }
+                                else
+                                {
+                                    counter = 0;
+                                    Invoke(new StopButtonDelegate(Stp));
+                                }
+                            }
+                            else if (status == Status.TestMode)
+                            {
+                                counter = 0;
                                 Invoke(new StopButtonDelegate(Stp));
                             }
                         }
-                    };
-                    tim2.Start();
-                }
+                    }
+                };
+                tim2.Start();
                 //ギターパート、現段階では動かない
                 /*if (serialPort2.IsOpen)
                 {
@@ -322,27 +340,6 @@ namespace DEO
                     tim3.Interval = delays[0];
                     tim3.Start();
                 }*/
-            }
-            catch{//例外を無視
-            }
-            if(status == Status.PlaylistMode)
-            {
-                if (counter < files.Count)
-                {
-                    Task.Delay(1000);
-                    StartButton.Enabled = true;
-                    StopButton.Enabled = false;
-                    StartButton.PerformClick();
-                }
-                else
-                {
-                    counter = 0;
-                    Invoke(new StopButtonDelegate(Stp));
-                }
-            }
-            else if (status == Status.TestMode)
-            {
-                counter = 0;
             }
         }
         //テンポ制御用メソッド
@@ -387,10 +384,6 @@ namespace DEO
             }
             foreach (NoteData data in notes)
             {
-                //インデックスから周期を計算
-                double freq = 440.0 * (Math.Pow(2.0, ((data.laneIndex - 69) / 12.0)));
-                //マイコンが制御しやすいようにマイクロ秒単位周期に変換
-                int period = (int)(1000000 / freq);
                 //鳴らすパートを指定し、マイコンに送信
                 if (parts[data.laneIndex] == 0)
                 {
@@ -399,7 +392,7 @@ namespace DEO
                 if (data.type == NoteType.On)
                 {
                     dataLen += 13;
-                    text += parts[data.laneIndex].ToString() + ",ON," + period.ToString() + ",";
+                    text += parts[data.laneIndex].ToString() + ",ON," + data.laneIndex.ToString() + ",";
                     binTxt += Convert.ToString(parts[data.laneIndex] - 1, 2).PadLeft(4, '0');
                     binTxt += "1";
                     binTxt += Convert.ToString(data.laneIndex, 2).PadLeft(8,'0');
@@ -480,6 +473,7 @@ namespace DEO
                 {
                     /*Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
                     serial.Write(text);*/
+                    delays[idx].Add(delay);
                     texts[idx].Add(text);
                     String dataLenStr = Convert.ToString(dataLen, 2).PadLeft(8, '0');
                     binTxt = dataLenStr + binTxt;
@@ -493,10 +487,13 @@ namespace DEO
         //以下別スレッドからのUI操作用メソッド(Invokeに呼び出される)
         private void WriteLogText(string text)
         {
-            LogTextBox.Text += text + "\r\n";
-            LogTextBox.SelectionStart = LogTextBox.Text.Length;
-            LogTextBox.Focus();
-            LogTextBox.ScrollToCaret();
+            if (status == Status.TestMode)
+            {
+                LogTextBox.Text += text + "\r\n";
+                LogTextBox.SelectionStart = LogTextBox.Text.Length;
+                LogTextBox.Focus();
+                LogTextBox.ScrollToCaret();
+            }
         }
         private void UpDateTrackBar()
         {
@@ -522,6 +519,16 @@ namespace DEO
                 LabelTime.Text = maxTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
             }
         }
+        private void Stt()
+        {
+            Task.Delay(1000);
+            trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
+            TaskCancel();
+            counter++;
+            title = "";
+            StartButton.Enabled = true;
+            StartButton.PerformClick();
+        }
         private void Stp()
         {
             StopButton.PerformClick();
@@ -534,7 +541,7 @@ namespace DEO
             tim2.Stop();
             tim2.Dispose();
             tim3.Stop();
-            tim3.Dispose(); 
+            tim3.Dispose();
             trackBar.Enabled = false;
         }
         //UIのリセット用メソッド
@@ -1015,7 +1022,7 @@ namespace DEO
                     maxTime = TimeSpan.FromMilliseconds(musicLength);
                     changeTime = new TimeSpan(0, 0, 0);
                     LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
-                    trackbar_tim.Change(0, 250);
+                    trackbar_tim.Change(0, 245);
                 }
                 catch {//例外を無視
                 }
@@ -1029,8 +1036,9 @@ namespace DEO
                 changeTime = new TimeSpan(0, 0, 0);
                 TaskCancel();
                 string text = "1,OFF,2,OFF,3,OFF,4,OFF,5,OFF,6,OFF,7,OFF,8,OFF,9,OFF,10,OFF,";
+                string binTxt = "000110010000000010001000011001000";
                 Invoke(new LogTextDelegate(WriteLogText), "piano send: " + text);
-                serialPort1.Write(text);
+                serialPort1.Write(binTxt);
                 StartButton.Enabled = true;
                 StopButton.Enabled = false;
                 trackBar.Enabled = false;
@@ -1065,12 +1073,12 @@ namespace DEO
         {
             if (NextButton.Enabled)
             {
+                Thread.Sleep(500);
                 trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 TaskCancel();
                 StartButton.Enabled = true;
                 counter++;
                 title = "";
-                Thread.Sleep(500);
                 StartButton.PerformClick();
             }
         }
