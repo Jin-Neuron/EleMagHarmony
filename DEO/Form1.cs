@@ -316,30 +316,6 @@ namespace DEO
                     }
                 };
                 tim2.Start();
-                //ギターパート、現段階では動かない
-                /*if (serialPort2.IsOpen)
-                {
-                    int i = 0;
-                    SendNoteData(serialPort2, GuitarNoteList, "guitar");
-                    tim3.Elapsed += (s, e) =>
-                    {
-                        tim3.Stop();
-                        Invoke(new LogTextDelegate(WriteLogText), "guitar send: " + texts[i]);
-                        serialPort2.Write(texts[i]);
-                        i++;
-                        if (i < delays.Count)
-                        {
-                            tim3.Interval = delays[i];
-                            tim3.Start();
-                        }
-                        else
-                        {
-                            Invoke(new StopButtonDelegate(Stp));
-                        }
-                    };
-                    tim3.Interval = delays[0];
-                    tim3.Start();
-                }*/
             }
         }
         //テンポ制御用メソッド
@@ -521,7 +497,7 @@ namespace DEO
         }
         private void Stt()
         {
-            Task.Delay(1000);
+            Thread.Sleep(1000);
             trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
             TaskCancel();
             counter++;
@@ -1003,6 +979,8 @@ namespace DEO
                 LogTextBox.Text = "";
                 if(status == Status.PlaylistMode)
                 {
+                    NextButton.Enabled = true;
+                    ReturnButton.Enabled = true;
                     if(counter >= files.Count)
                     {
                         counter = 0;
