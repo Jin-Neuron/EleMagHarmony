@@ -384,7 +384,9 @@ namespace DEO
                 if (tempoidx < temp_delay.Count)
                 {
                     if (delay_all >= tmpd)
+                    {
                         tempoidx++;
+                    }
                 }
                 if (data.eventTime != 0)
                 {
@@ -1051,6 +1053,11 @@ namespace DEO
         {
             if (NextButton.Enabled)
             {
+                if (serialPort1.IsOpen)
+                {
+                    string binTxt = "000110010000000010001000011001000";
+                    serialPort1.Write(binTxt);
+                }
                 Thread.Sleep(500);
                 trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 TaskCancel();
@@ -1064,6 +1071,8 @@ namespace DEO
         {
             if (ReturnButton.Enabled)
             {
+                string binTxt = "000110010000000010001000011001000";
+                serialPort1.Write(binTxt);
                 trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 TaskCancel();
                 StartButton.Enabled = true;
