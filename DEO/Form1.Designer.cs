@@ -77,7 +77,7 @@
             this.checkBoxPlaylist.AutoSize = true;
             this.checkBoxPlaylist.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.checkBoxPlaylist.Location = new System.Drawing.Point(95, 158);
-            this.checkBoxPlaylist.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBoxPlaylist.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxPlaylist.Name = "checkBoxPlaylist";
             this.checkBoxPlaylist.Size = new System.Drawing.Size(189, 28);
             this.checkBoxPlaylist.TabIndex = 1;
@@ -90,7 +90,7 @@
             this.checkBoxTest.AutoSize = true;
             this.checkBoxTest.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.checkBoxTest.Location = new System.Drawing.Point(95, 255);
-            this.checkBoxTest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBoxTest.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxTest.Name = "checkBoxTest";
             this.checkBoxTest.Size = new System.Drawing.Size(140, 28);
             this.checkBoxTest.TabIndex = 2;
@@ -111,7 +111,7 @@
             this.tableLayoutPanel1.Controls.Add(this.RelayPortSelectButton, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(95, 32);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
@@ -126,7 +126,7 @@
             this.GuitarPortSelectButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GuitarPortSelectButton.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.GuitarPortSelectButton.Location = new System.Drawing.Point(456, 74);
-            this.GuitarPortSelectButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.GuitarPortSelectButton.Margin = new System.Windows.Forms.Padding(4);
             this.GuitarPortSelectButton.Name = "GuitarPortSelectButton";
             this.GuitarPortSelectButton.Size = new System.Drawing.Size(445, 40);
             this.GuitarPortSelectButton.TabIndex = 7;
@@ -141,7 +141,7 @@
             this.PortSelectGuitar.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.PortSelectGuitar.FormattingEnabled = true;
             this.PortSelectGuitar.Location = new System.Drawing.Point(4, 74);
-            this.PortSelectGuitar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PortSelectGuitar.Margin = new System.Windows.Forms.Padding(4);
             this.PortSelectGuitar.Name = "PortSelectGuitar";
             this.PortSelectGuitar.Size = new System.Drawing.Size(444, 32);
             this.PortSelectGuitar.TabIndex = 4;
@@ -153,7 +153,7 @@
             this.PortSelectRelay.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.PortSelectRelay.FormattingEnabled = true;
             this.PortSelectRelay.Location = new System.Drawing.Point(4, 27);
-            this.PortSelectRelay.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PortSelectRelay.Margin = new System.Windows.Forms.Padding(4);
             this.PortSelectRelay.Name = "PortSelectRelay";
             this.PortSelectRelay.Size = new System.Drawing.Size(444, 32);
             this.PortSelectRelay.TabIndex = 0;
@@ -164,7 +164,7 @@
             this.RelayPortSelectButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.RelayPortSelectButton.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.RelayPortSelectButton.Location = new System.Drawing.Point(456, 27);
-            this.RelayPortSelectButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.RelayPortSelectButton.Margin = new System.Windows.Forms.Padding(4);
             this.RelayPortSelectButton.Name = "RelayPortSelectButton";
             this.RelayPortSelectButton.Size = new System.Drawing.Size(445, 39);
             this.RelayPortSelectButton.TabIndex = 6;
@@ -194,7 +194,7 @@
             this.tableLayoutPanel2.Controls.Add(this.OpenPlaylistButton, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.Playlist1, 0, 0);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(95, 194);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -207,7 +207,7 @@
             this.OpenPlaylistButton.Font = new System.Drawing.Font("MS UI Gothic", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.OpenPlaylistButton.ForeColor = System.Drawing.Color.Blue;
             this.OpenPlaylistButton.Location = new System.Drawing.Point(454, 4);
-            this.OpenPlaylistButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.OpenPlaylistButton.Margin = new System.Windows.Forms.Padding(4);
             this.OpenPlaylistButton.Name = "OpenPlaylistButton";
             this.OpenPlaylistButton.Size = new System.Drawing.Size(443, 46);
             this.OpenPlaylistButton.TabIndex = 0;
@@ -239,7 +239,7 @@
             this.tableLayoutPanel3.Controls.Add(this.OpenFileButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.File1, 0, 0);
             this.tableLayoutPanel3.Location = new System.Drawing.Point(95, 291);
-            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -252,7 +252,7 @@
             this.OpenFileButton.Font = new System.Drawing.Font("MS UI Gothic", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.OpenFileButton.ForeColor = System.Drawing.Color.Blue;
             this.OpenFileButton.Location = new System.Drawing.Point(454, 4);
-            this.OpenFileButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.OpenFileButton.Margin = new System.Windows.Forms.Padding(4);
             this.OpenFileButton.Name = "OpenFileButton";
             this.OpenFileButton.Size = new System.Drawing.Size(443, 46);
             this.OpenFileButton.TabIndex = 0;
@@ -288,7 +288,7 @@
             this.tableLayoutPanel4.Controls.Add(this.StopButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.ReturnButton, 0, 0);
             this.tableLayoutPanel4.Location = new System.Drawing.Point(87, 571);
-            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -301,7 +301,7 @@
             this.NextButton.Font = new System.Drawing.Font("MS UI Gothic", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.NextButton.ForeColor = System.Drawing.Color.Blue;
             this.NextButton.Location = new System.Drawing.Point(682, 4);
-            this.NextButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.NextButton.Margin = new System.Windows.Forms.Padding(4);
             this.NextButton.Name = "NextButton";
             this.NextButton.Size = new System.Drawing.Size(219, 53);
             this.NextButton.TabIndex = 3;
@@ -315,7 +315,7 @@
             this.StartButton.Font = new System.Drawing.Font("MS UI Gothic", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.StartButton.ForeColor = System.Drawing.Color.Green;
             this.StartButton.Location = new System.Drawing.Point(456, 4);
-            this.StartButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.StartButton.Margin = new System.Windows.Forms.Padding(4);
             this.StartButton.Name = "StartButton";
             this.StartButton.Size = new System.Drawing.Size(218, 53);
             this.StartButton.TabIndex = 2;
@@ -329,7 +329,7 @@
             this.StopButton.Font = new System.Drawing.Font("MS UI Gothic", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.StopButton.ForeColor = System.Drawing.Color.Red;
             this.StopButton.Location = new System.Drawing.Point(230, 4);
-            this.StopButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.StopButton.Margin = new System.Windows.Forms.Padding(4);
             this.StopButton.Name = "StopButton";
             this.StopButton.Size = new System.Drawing.Size(218, 53);
             this.StopButton.TabIndex = 1;
@@ -343,7 +343,7 @@
             this.ReturnButton.Font = new System.Drawing.Font("MS UI Gothic", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.ReturnButton.ForeColor = System.Drawing.Color.Blue;
             this.ReturnButton.Location = new System.Drawing.Point(4, 4);
-            this.ReturnButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ReturnButton.Margin = new System.Windows.Forms.Padding(4);
             this.ReturnButton.Name = "ReturnButton";
             this.ReturnButton.Size = new System.Drawing.Size(218, 53);
             this.ReturnButton.TabIndex = 0;
@@ -359,7 +359,7 @@
             this.NowPlaying.Font = new System.Drawing.Font("MS UI Gothic", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.NowPlaying.ForeColor = System.Drawing.Color.SteelBlue;
             this.NowPlaying.Location = new System.Drawing.Point(95, 375);
-            this.NowPlaying.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.NowPlaying.Margin = new System.Windows.Forms.Padding(4);
             this.NowPlaying.Name = "NowPlaying";
             this.NowPlaying.ReadOnly = true;
             this.NowPlaying.Size = new System.Drawing.Size(904, 47);
@@ -374,7 +374,7 @@
             this.RepeatCheck.Font = new System.Drawing.Font("MS UI Gothic", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.RepeatCheck.ForeColor = System.Drawing.Color.Fuchsia;
             this.RepeatCheck.Location = new System.Drawing.Point(38, 4);
-            this.RepeatCheck.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.RepeatCheck.Margin = new System.Windows.Forms.Padding(4);
             this.RepeatCheck.Name = "RepeatCheck";
             this.RepeatCheck.Size = new System.Drawing.Size(80, 53);
             this.RepeatCheck.TabIndex = 8;
@@ -388,7 +388,7 @@
             this.RandomCheck.Font = new System.Drawing.Font("MS UI Gothic", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.RandomCheck.ForeColor = System.Drawing.Color.RoyalBlue;
             this.RandomCheck.Location = new System.Drawing.Point(126, 4);
-            this.RandomCheck.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.RandomCheck.Margin = new System.Windows.Forms.Padding(4);
             this.RandomCheck.Name = "RandomCheck";
             this.RandomCheck.Size = new System.Drawing.Size(80, 53);
             this.RandomCheck.TabIndex = 9;
@@ -406,7 +406,7 @@
             this.tableLayoutPanel5.Controls.Add(this.RepeatCheck, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.RandomCheck, 1, 0);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(417, 506);
-            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -424,7 +424,7 @@
             this.LogTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.LogTextBox.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.LogTextBox.Location = new System.Drawing.Point(87, 654);
-            this.LogTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.LogTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.LogTextBox.Multiline = true;
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
@@ -434,7 +434,7 @@
             // trackBar
             // 
             this.trackBar.Location = new System.Drawing.Point(99, 446);
-            this.trackBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.trackBar.Margin = new System.Windows.Forms.Padding(4);
             this.trackBar.Name = "trackBar";
             this.trackBar.Size = new System.Drawing.Size(905, 56);
             this.trackBar.TabIndex = 13;
@@ -470,7 +470,7 @@
             this.Controls.Add(this.checkBoxTest);
             this.Controls.Add(this.checkBoxPlaylist);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(1114, 733);
             this.Name = "Form1";
             this.Text = "ElectricOrchestra Player";

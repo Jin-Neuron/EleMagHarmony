@@ -240,6 +240,7 @@ namespace DEO
         //非同期処理によるギターとリレーの同時通信
         private void SendSerial()
         {
+            //配列を初期化
             temp_delay.Clear();
             delays.Clear();
             texts.Clear();
