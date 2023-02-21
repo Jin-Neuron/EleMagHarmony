@@ -525,6 +525,7 @@ namespace DEO
         }
         //UIのリセット用メソッド
         private void UiReset() {
+            //全てのUIをfalseに設定
             StartButton.Enabled = false;
             StopButton.Enabled = false;
             NextButton.Enabled = false;
