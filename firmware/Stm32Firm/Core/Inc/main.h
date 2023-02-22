@@ -29,6 +29,15 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "stm32f4xx_ll_system.h"
+#include "stm32f4xx_ll_gpio.h"
+#include "stm32f4xx_ll_exti.h"
+#include "stm32f4xx_ll_bus.h"
+#include "stm32f4xx_ll_cortex.h"
+#include "stm32f4xx_ll_rcc.h"
+#include "stm32f4xx_ll_utils.h"
+#include "stm32f4xx_ll_pwr.h"
+#include "stm32f4xx_ll_dma.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -58,24 +67,23 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define B1_Pin GPIO_PIN_13
+#define B1_Pin LL_GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
-#define B1_EXTI_IRQn EXTI15_10_IRQn
-#define USART_TX_Pin GPIO_PIN_2
+#define USART_TX_Pin LL_GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
-#define USART_RX_Pin GPIO_PIN_3
+#define USART_RX_Pin LL_GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
-#define LD2_Pin GPIO_PIN_5
+#define LD2_Pin LL_GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
-#define StepPin_Pin GPIO_PIN_8
+#define StepPin_Pin LL_GPIO_PIN_8
 #define StepPin_GPIO_Port GPIOA
-#define DirectionPin_Pin GPIO_PIN_9
+#define DirectionPin_Pin LL_GPIO_PIN_9
 #define DirectionPin_GPIO_Port GPIOA
-#define TMS_Pin GPIO_PIN_13
+#define TMS_Pin LL_GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
-#define TCK_Pin GPIO_PIN_14
+#define TCK_Pin LL_GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define SWO_Pin GPIO_PIN_3
+#define SWO_Pin LL_GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 

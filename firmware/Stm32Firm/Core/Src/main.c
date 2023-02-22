@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <math.h>
+#include <stdlib.h>
+#define Num 256
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +51,28 @@ GPIO_PinState currentState = GPIO_PIN_RESET;
 uint8_t currentPosition = 0;
 uint8_t isTimer1Counting = 0;
 
+char dataLength[8];
+char data[255];
+char length[10];
+uint8_t uartCnt = 0;
+uint64_t dataLen;
+uint16_t notes[10] = {0};
+uint16_t freqs[10] = {0};
+double buffer[10] = {0};
+double tmp[10] = {0};
+
+const double timer_clock = 84e6;
+const uint16_t timer_PSC = 10 - 1;
+const uint16_t timer_ARR = 160 - 1;
+uint8_t arrayLen = 0;
+
+double sampling_rate = timer_clock / (timer_PSC+1)/ (timer_ARR+1);
+
+const double sin_offset = 2048;
+const double sin_mag = 1800;
+
+const double pi = 3.1415926535897932384626433832795;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,57 +82,54 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
+float NoteConvert(uint16_t noteNum);
+void SortArray(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void resetStep(){
-	HAL_GPIO_WritePin(DirectionPin_GPIO_Port, DirectionPin_Pin, GPIO_PIN_SET);
-	for(uint8_t i = 0; i < 80; i++){
-		HAL_GPIO_WritePin(StepPin_GPIO_Port, StepPin_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(StepPin_GPIO_Port, StepPin_Pin, GPIO_PIN_RESET);
+	LL_GPIO_SetOutputPin(DirectionPin_GPIO_Port, DirectionPin_Pin);
+	for(uint8_t i = 0; i < 79; i++){
+		LL_GPIO_SetOutputPin(StepPin_GPIO_Port, StepPin_Pin);
+		LL_GPIO_ResetOutputPin(StepPin_GPIO_Port, StepPin_Pin);
 	}
 	currentPosition = 0;
-	HAL_GPIO_WritePin(DirectionPin_GPIO_Port, DirectionPin_Pin, GPIO_PIN_RESET);
-}
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	if (GPIO_Pin == GPIO_PIN_13)
-	{
-		if(isTimer1Counting){
-			HAL_TIM_Base_Stop_IT(&htim1);
-			resetStep();
-			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-			isTimer1Counting = 0;
-		}else{
-			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-			HAL_TIM_Base_Start_IT(&htim1);
-			isTimer1Counting = 1;
-		}
-	}
+	LL_GPIO_ResetOutputPin(DirectionPin_GPIO_Port, DirectionPin_Pin);
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 
     if (htim == &htim1){
-		//Switch direction
-		if(currentPosition >= 160){
-		  currentState = GPIO_PIN_SET;
-		  HAL_GPIO_WritePin(DirectionPin_GPIO_Port, DirectionPin_Pin, GPIO_PIN_SET);
-		}
-		if(currentPosition <= 0){
-		  currentState = GPIO_PIN_RESET;
-		  HAL_GPIO_WritePin(DirectionPin_GPIO_Port, DirectionPin_Pin, GPIO_PIN_RESET);
-		}
-
 		//Update position
 		if(currentState == GPIO_PIN_SET){
-		  currentPosition--;
-		}else{
-		  currentPosition++;
+		  if(--currentPosition <= 0){
+			  currentState = GPIO_PIN_RESET;
+			  LL_GPIO_ResetOutputPin(DirectionPin_GPIO_Port, DirectionPin_Pin);
+		  }
+		}else if(++currentPosition >= 158){
+			  currentState = GPIO_PIN_SET;
+			  LL_GPIO_SetOutputPin(DirectionPin_GPIO_Port, DirectionPin_Pin);
 		}
-		HAL_GPIO_TogglePin(StepPin_GPIO_Port, StepPin_Pin);
+		LL_GPIO_TogglePin(StepPin_GPIO_Port, StepPin_Pin);
     }
+}
+void buzzer_pwmout(TIM_HandleTypeDef htim, uint32_t prescaler, uint32_t pwm){
+
+  if(pwm > 99) pwm = 99;
+  if(prescaler < 0) prescaler = 799;
+
+  htim.Instance = htim.Instance;
+  htim.Init.Prescaler = prescaler;
+  htim.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim.Init.Period = 99;
+  htim.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  HAL_TIM_Base_Init(&htim);
+
+  // start
+  HAL_TIM_Base_Start_IT(&htim);
+
 }
 /* USER CODE END 0 */
 
@@ -144,6 +165,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   resetStep();
+  HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -220,9 +242,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 159;
+  htim1.Init.Prescaler = 799;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 596;
+  htim1.Init.Period = 99;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -287,37 +309,143 @@ static void MX_USART2_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOH);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LD2_Pin|StepPin_Pin|DirectionPin_Pin, GPIO_PIN_RESET);
+  /**/
+  LL_GPIO_ResetOutputPin(GPIOA, LD2_Pin|StepPin_Pin|DirectionPin_Pin);
 
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+  /**/
+  LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE13);
 
-  /*Configure GPIO pins : LD2_Pin StepPin_Pin DirectionPin_Pin */
+  /**/
+  EXTI_InitStruct.Line_0_31 = LL_EXTI_LINE_13;
+  EXTI_InitStruct.LineCommand = ENABLE;
+  EXTI_InitStruct.Mode = LL_EXTI_MODE_IT;
+  EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_FALLING;
+  LL_EXTI_Init(&EXTI_InitStruct);
+
+  /**/
+  LL_GPIO_SetPinPull(B1_GPIO_Port, B1_Pin, LL_GPIO_PULL_NO);
+
+  /**/
+  LL_GPIO_SetPinMode(B1_GPIO_Port, B1_Pin, LL_GPIO_MODE_INPUT);
+
+  /**/
   GPIO_InitStruct.Pin = LD2_Pin|StepPin_Pin|DirectionPin_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(uartCnt){
+		uint8_t part = 0;
+		uint64_t lastIdx = 0;
+		for(uint64_t i = 0; i < dataLen; i++){
+			uint8_t Idx = i - lastIdx;
+			data[i] &= 0x0f;
+			if(Idx < 4){
+				part |= data[i] << (3 - Idx);
+			}else if(Idx < 5){
+				if(data[i] == 0){
+					lastIdx = i + 1;
+					freqs[part] = 0;
+					notes[part] = 0;
+					buffer[part] = 0;
+					part = 0;
+				}
+			}else if(Idx < 13){
+				notes[part] |= data[i] << (12 - Idx);
+			}else{
+				freqs[part] = (uint16_t)NoteConvert(notes[part]);
+				buffer[part] = (double)freqs[part] * Num / sampling_rate;
+				lastIdx = i;
+				part = 0;
+			}
+			if(i == dataLen - 1){
+				freqs[part] = (uint16_t)NoteConvert(notes[part]);
+				buffer[part] = (double)freqs[part] * Num / sampling_rate;
+				if(Idx < 5){
+					lastIdx = i + 1;
+					freqs[part] = 0;
+					notes[part] = 0;
+					buffer[part] = 0;
+					part = 0;
+				}
+			}
+		}
+		SortArray();
+		for(uint8_t i = 0; i < 5; i++){
+		}
+		if(notes[1] != 0){
+			uint16_t duty = 65;
+			/*if(notes[i] < 30){
+				duty = 20;
+			}else if(notes[i] < 40){
+				duty = 30;
+			}else if(notes[i] < 50){
+				duty = 35;
+			}else if(notes[i] < 60){
+				duty = 40;
+			}else if(notes[i] < 70){
+				duty = 45;
+			}else if(notes[i] < 75){
+				duty = 50;
+			}else if(notes[i] < 80){
+				duty = 55;
+			}else{
+				duty = 60;
+			}*/
+			buzzer_pwmout(htim1, (timer_clock / (freqs[1] * 200) - 1), 65);
+		}else{
+			HAL_TIM_Base_Stop_IT(&htim1);
+		}
+		uartCnt = 0;
+		HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
+		return;
+	}
+	dataLen = 0;
+	for(uint8_t i = 0; i < 8; i++){
+		dataLength[i] &= 0x0f;
+		dataLen |= dataLength[i] << (7 - i);
+	}
+	HAL_UART_Receive_IT(&huart2, (uint8_t *)data, dataLen);
+	uartCnt++;
+}
+
+float NoteConvert(uint16_t noteNum){
+	int64_t tmp = noteNum - 69;
+	double exp = (double)tmp / 12.0;
+	double freq = 440 * pow(2.0, exp);
+	return (float)freq;
+}
+void SortArray(){
+	for(uint8_t i = 0; i < 10; i++){
+		if(buffer[i] == 0){
+			arrayLen = (i == 0) ? 1 : i;
+			uint8_t l = 1;
+			for(uint8_t j = i; j < 10; j++){
+				if(j > arrayLen * (l + 1))	l++;
+				freqs[j] = freqs[j-arrayLen*l];
+				notes[j] = notes[j-arrayLen*l];
+			}
+			return;
+		}
+	}
+}
 
 /* USER CODE END 4 */
 
