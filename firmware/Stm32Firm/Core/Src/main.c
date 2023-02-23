@@ -110,6 +110,7 @@ void resetStep(){
 	}
 }
 
+
 //Timer interrupt (floppy control only)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -144,15 +145,16 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler){
   htim.Instance = htim.Instance;
   htim.Init.Prescaler = prescaler;
   htim.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim.Init.Period = timerPeriod - 1;								//because of start with 0
+  htim.Init.Period = timerPeriod - 1;	//because of start with 0
   htim.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 
 	if(part < 5){
-		TIM_OC_InitTypeDef sConfigOC = {0};								//pwm setting only
+		TIM_OC_InitTypeDef sConfigOC = {0};	//pwm setting only
 	  HAL_TIM_PWM_Init(&htim);
 
 	  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	  sConfigOC.Pulse = 50;															//set duty
+	  sConfigOC.Pulse = 50;
+	  //set duty
 	  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
@@ -162,7 +164,7 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler){
 
 	  //start
 	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_1);
-	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_2);					//stp_motor only
+	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_2);	//stp_motor only
 
 	}else{
 	  HAL_TIM_Base_Init(&htim);
@@ -201,7 +203,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 							HAL_TIM_Base_Stop_IT(&times[part]);
 						else{
 							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);					//stp_motor only
+							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
 						}
 					}
 					part = 0;
@@ -236,7 +238,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 							HAL_TIM_Base_Stop_IT(&times[part]);
 						else{
 							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);					//stp_motor only
+							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
 						}
 					}
 					part = 0;
