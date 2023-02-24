@@ -13,7 +13,7 @@ using System.IO.Ports;
 
 namespace DEO
 {
-    public partial class Form1 : Form
+    public partial class PlayerForm : Form
     {
         //変数宣言部
         //プレイリストかテストか
@@ -86,7 +86,7 @@ namespace DEO
         private System.Timers.Timer tim1 = new System.Timers.Timer();
         private System.Timers.Timer tim2 = new System.Timers.Timer();
         private System.Timers.Timer tim3 = new System.Timers.Timer();
-        public Form1()
+        public PlayerForm()
         {
             InitializeComponent();
             trackbar_tim = new System.Threading.Timer(TimerCallBack, null, Timeout.Infinite, Timeout.Infinite);
@@ -99,27 +99,14 @@ namespace DEO
         //フォーム１の初期設定
         private void Form1_Load(object sender, EventArgs e)
         {
-            string[] PortList = SerialPort.GetPortNames();
-
-            PortSelectRelay.Items.Clear();
-            PortSelectGuitar.Items.Clear();
-            this.Height = 600;
+            this.Height = 430;
             LogTextBox.Visible = false;
             LogTextBox.ScrollBars = ScrollBars.Vertical;
             LogTextBox.HideSelection = false;
-            foreach (string PortName in PortList)
-            {
-                PortSelectRelay.Items.Add(PortName);
-                PortSelectGuitar.Items.Add(PortName);
-            }
-            if (PortSelectRelay.Items.Count > 0)
-            {
-                PortSelectRelay.SelectedIndex = 0;
-            }
-            if(PortSelectGuitar.Items.Count > 0)
-            {
-                PortSelectGuitar.SelectedIndex = 0;
-            }
+            ElectricDevicePort.Enabled = false;
+            ElectricDevicePortLabel.Enabled = false;
+            GuitarDevicePortLabel.Enabled = false;
+            GuitarDevicePort.Enabled = false;
             UiReset();
         }
         //スレッドタイマーのコールバックメソッド
@@ -129,113 +116,44 @@ namespace DEO
             Invoke(new LabelTimeDelegate(UpDateLabelTime));
         }
         //各種シリアルポートの設定
-        private void RelayPortSelectButton_Click(object sender, EventArgs e)
+        public void startSerial(string portName, int baundRate, string device)
         {
-            if (serialPort1.IsOpen)
+            SerialPort port = (device == "ElectricDevice") ? serialPort1 : serialPort2;
+            if(portName == serialPort1.PortName)
             {
-                StopSerial(serialPort1, PortSelectRelay.SelectedItem.ToString());
-                RelayPortSelectButton.Text = "RelayConnect";
-                RelayPortSelectButton.BackColor = Color.FromArgb(255, 192, 192);
-                PortSelectRelay.Enabled = true;
-                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
-            }
-            else
+                serialPort1.Close();
+                ElectricDevicePort.Text = "portNumber";
+                ElectricDevicePort.Enabled = false;
+                ElectricDevicePortLabel.Enabled = false;
+            }else if(portName == serialPort2.PortName)
             {
-                try
-                {
-                    StartSerial(serialPort1, PortSelectRelay.SelectedItem.ToString());
-                    RelayPortSelectButton.Text = "RelayDisConnect";
-                    RelayPortSelectButton.BackColor = Color.FromArgb(192, 192, 255);
-                    PortSelectRelay.Enabled = false;
-                    if (checkBoxPlaylist.Checked)
-                    {
-                        status = Status.PlaylistMode;
-                        checkBoxPlaylist.Enabled = true;
-                        Playlist1.Enabled = true;
-                        OpenPlaylistButton.Enabled = true;
-                    }else if (checkBoxTest.Checked)
-                    {
-                        status = Status.TestMode;
-                        checkBoxTest.Enabled = true;
-                        File1.Enabled = true;
-                        OpenFileButton.Enabled = true;
-                    }
-                    else
-                    {
-                        checkBoxPlaylist.Enabled = true;
-                        checkBoxTest.Enabled = true;
-                    }
-                    if(filePath != "" || files.Count > 0)
-                    {
-                        StartButton.Enabled = true;
-                        NowPlaying.Enabled = true;
-                    }
-                }catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                serialPort2.Close();
+                GuitarDevicePort.Text = "portNumber";
+                GuitarDevicePort.Enabled=false;
+                GuitarDevicePortLabel.Enabled = false;
             }
-        }
-        private void GuitarPortSelectButton_Click(object sender, EventArgs e)
-        {
-            if (serialPort2.IsOpen)
+            if (port.IsOpen)
             {
-                StopSerial(serialPort2, PortSelectGuitar.SelectedItem.ToString());
-                GuitarPortSelectButton.Text = "GuitarConnect";
-                GuitarPortSelectButton.BackColor = Color.FromArgb(255, 192, 192);
-                PortSelectGuitar.Enabled = true;
-                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
+                port.Close();
             }
-            else
-            {
-                try
-                {
-                    StartSerial(serialPort2, PortSelectGuitar.SelectedItem.ToString());
-                    GuitarPortSelectButton.Text = "GuitarDisConnect";
-                    GuitarPortSelectButton.BackColor = Color.FromArgb(192, 192, 255);
-                    PortSelectGuitar.Enabled = false;
-                    if (checkBoxPlaylist.Checked)
-                    {
-                        status = Status.PlaylistMode;
-                        checkBoxPlaylist.Enabled = true;
-                        Playlist1.Enabled = true;
-                        OpenPlaylistButton.Enabled = true;
-                    }
-                    else if (checkBoxTest.Checked)
-                    {
-                        status = Status.TestMode;
-                        checkBoxTest.Enabled = true;
-                        File1.Enabled = true;
-                        OpenFileButton.Enabled = true;
-                    }
-                    else
-                    {
-                        checkBoxPlaylist.Enabled = true;
-                        checkBoxTest.Enabled = true;
-                    }
-                    if (filePath != "" || files.Count > 0)
-                    {
-                        StartButton.Enabled = true;
-                        NowPlaying.Enabled = true;
-                    }
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-            }
-        }
-        //シリアル関連のメソッド
-        private void StartSerial(SerialPort port,string portName)
-        {
-            port.BaudRate = 115200;
+            port.BaudRate = baundRate;
             port.PortName = portName;
             port.Open();
-        }
-        private void StopSerial(SerialPort port,string portName)
-        {
-            port.Close();
-            UiReset();
+
+            Label label = (device == "ElectricDevice") ? ElectricDevicePortLabel : GuitarDevicePortLabel;
+            label.Enabled = true;
+            label = (device == "ElectricDevice") ? ElectricDevicePort : GuitarDevicePort;
+            label.Enabled = true;
+            label.Text = portName;
+            TestGuitarMenuItem.Enabled = true;
+            trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
+            SetPlaylistModeMenuItem.Enabled = true;
+            SetTestModeMenuItem.Enabled = true;
+            if (filePath != "" || files.Count > 0)
+            {
+                StartButton.Enabled = true;
+                NowPlaying.Enabled = true;
+            }
         }
         //非同期処理によるギターとリレーの同時通信
         private void SendSerial()
@@ -530,24 +448,32 @@ namespace DEO
             StopButton.Enabled = false;
             NextButton.Enabled = false;
             ReturnButton.Enabled = false;
-            OpenPlaylistButton.Enabled = false;
-            OpenFileButton.Enabled = false;
-            checkBoxPlaylist.Enabled = false;
-            checkBoxTest.Enabled = false;
+            OpenPlaylistMenuItem.Enabled = false;
+            OpenMidiFileMenuItem.Enabled = false;
+            SetPlaylistModeMenuItem.Enabled = false;
+            SetTestModeMenuItem.Enabled = false;
             RepeatCheck.Enabled = false;
             RandomCheck.Enabled = false;
-            Playlist1.Enabled = false;
-            File1.Enabled = false;
+            PlaylistLabel.Enabled = false;
+            Playlist.Enabled = false;
+            FileLabel.Enabled = false;
+            File.Enabled = false;
             NowPlaying.Enabled = false;
+            TestMelodyMenuItem.Enabled = false;
+            TestGuitarMenuItem.Enabled = false;
+            TestBaseMenuItem.Enabled = false;
+            TestDrumMenuItem.Enabled = false;
         }
         //チェックボックスのイベント
         private void checkBoxPlaylist_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxPlaylist.Checked)
+            if (!SetPlaylistModeMenuItem.Checked)
             {
-                checkBoxTest.Enabled = false;
-                Playlist1.Enabled = true;
-                OpenPlaylistButton.Enabled = true;
+                SetPlaylistModeMenuItem.Checked = true;
+                SetTestModeMenuItem.Enabled = false;
+                PlaylistLabel.Enabled = true;
+                Playlist.Enabled = true;
+                OpenPlaylistMenuItem.Enabled = true;
                 if(files.Count > 0)
                 {
                     status = Status.PlaylistMode;
@@ -557,9 +483,11 @@ namespace DEO
             }
             else
             {
-                checkBoxTest.Enabled = true;
-                Playlist1.Enabled = false;
-                OpenPlaylistButton.Enabled = false;
+                SetPlaylistModeMenuItem.Checked = false;
+                SetTestModeMenuItem.Enabled = true;
+                PlaylistLabel.Enabled = false;
+                Playlist.Enabled = false;
+                OpenPlaylistMenuItem.Enabled = false;
                 StartButton.Enabled = false;
                 NextButton.Enabled = false;
                 ReturnButton.Enabled = false;
@@ -570,37 +498,41 @@ namespace DEO
         }
         private void checkBoxTest_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxTest.Checked)
+            if (!SetTestModeMenuItem.Checked)
             {
-                checkBoxPlaylist.Enabled = false;
-                File1.Enabled = true;
-                OpenFileButton.Enabled = true;
+                SetTestModeMenuItem.Checked = true;
+                SetPlaylistModeMenuItem.Enabled = false;
+                FileLabel.Enabled = true;
+                File.Enabled = true;
+                OpenMidiFileMenuItem.Enabled = true;
                 if (filePath != "")
                 {
                     status = Status.TestMode;
                     StartButton.Enabled = true;
                     NowPlaying.Enabled = true;
                 }
-                if (this.Height < 750)
+                if (this.Height < 580)
                 {
-                    this.Height = 750;
+                    this.Height = 580;
                 }
-                this.MinimumSize = new Size(840, 750);
+                this.MinimumSize = new Size(600, 580);
                 LogTextBox.Visible = true;
             }
             else
             {
-                checkBoxPlaylist.Enabled = true;
-                File1.Enabled = false;
-                OpenFileButton.Enabled = false;
+                SetTestModeMenuItem.Checked = false;
+                SetPlaylistModeMenuItem.Enabled = true;
+                FileLabel.Enabled = false;
+                File.Enabled = false;
+                OpenMidiFileMenuItem.Enabled = false;
                 StartButton.Enabled = false;
                 NextButton.Enabled = false;
                 ReturnButton.Enabled = false;
                 NowPlaying.Enabled = false;
-                this.MinimumSize = new Size(840, 600);
-                if(this.Height > 600)
+                this.MinimumSize = new Size(600, 430);
+                if(this.Height > 430)
                 {
-                    this.Height = 600;
+                    this.Height = 430;
                 }
                 LogTextBox.Visible = false;
             }
@@ -611,9 +543,10 @@ namespace DEO
             string playlistPath = "";
             if (this.Enabled)
             {
-                if(openPlaylistDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK){
-                    playlistPath = openPlaylistDialog.FileName;
-                    Playlist1.Text = Path.GetFileNameWithoutExtension(playlistPath);
+                openFileDialog.Filter = "プレイリストファイル(*.m3u) | *.m3u";
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK){
+                    playlistPath = openFileDialog.FileName;
+                    Playlist.Text = Path.GetFileNameWithoutExtension(playlistPath);
                     status = Status.PlaylistMode;
                     StartButton.Enabled = true;
                     NextButton.Enabled = true;
@@ -633,10 +566,11 @@ namespace DEO
         {
             if (this.Enabled)
             {
-                if(openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                openFileDialog.Filter = "midiファイル(*.mid)|*.mid";
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     filePath = openFileDialog.FileName;
-                    File1.Text = Path.GetFileNameWithoutExtension(filePath);
+                    File.Text = Path.GetFileNameWithoutExtension(filePath);
                     status = Status.TestMode;
                     StartButton.Enabled = true;
                     NowPlaying.Enabled = true;
@@ -971,12 +905,14 @@ namespace DEO
                 isDistGuitar = false;
                 StartButton.Enabled = false;
                 StopButton.Enabled = true;
-                OpenPlaylistButton.Enabled = false;
-                OpenFileButton.Enabled = false;
-                checkBoxPlaylist.Enabled = false;
-                checkBoxTest.Enabled = false;
-                File1.Enabled = false;
-                Playlist1.Enabled = false;
+                OpenPlaylistMenuItem.Enabled = false;
+                OpenMidiFileMenuItem.Enabled = false;
+                SetPlaylistModeMenuItem.Enabled = false;
+                SetTestModeMenuItem.Enabled = false;
+                FileLabel.Enabled = false;
+                File.Enabled = false;
+                PlaylistLabel.Enabled = false;
+                Playlist.Enabled = false;
                 RepeatCheck.Enabled = false;
                 RandomCheck.Enabled = false; 
                 trackBar.Enabled = true;
@@ -1027,19 +963,21 @@ namespace DEO
                 timePos = 0;
                 trackBar.Value = 0;
 
-                if (checkBoxPlaylist.Checked)
+                if (SetPlaylistModeMenuItem.Checked)
                 {
-                    OpenPlaylistButton.Enabled = true;
-                    Playlist1.Enabled = true;
-                    checkBoxPlaylist.Enabled = true;
+                    OpenPlaylistMenuItem.Enabled = true;
+                    PlaylistLabel.Enabled = true;
+                    Playlist.Enabled = true;
+                    SetPlaylistModeMenuItem.Enabled = true;
                     RepeatCheck.Enabled = true;
                     RandomCheck.Enabled = true;
                 }
-                if (checkBoxTest.Checked)
+                if (SetTestModeMenuItem.Checked)
                 { 
-                    OpenFileButton.Enabled = true;
-                    File1.Enabled = true;
-                    checkBoxTest.Enabled = true;
+                    OpenMidiFileMenuItem.Enabled = true;
+                    FileLabel.Enabled = true;
+                    File.Enabled = true;
+                    SetTestModeMenuItem.Enabled = true;
                 }
                 counter = 0;
                 title = "";
@@ -1108,6 +1046,29 @@ namespace DEO
             else
             {
                 trackBar.Value = timePos;
+            }
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SettingSerialportMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingSerialportForm form = new SettingSerialportForm();
+            form.ShowDialog();
+            try
+            {
+                if (!form.IsDisposed)
+                {
+                    startSerial(form.GetPortName(), form.GetBaundRate(), form.GetDevice());
+                    form.Close();
+                }
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                SettingSerialportMenuItem.PerformClick();
             }
         }
     }

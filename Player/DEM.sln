@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DEO", "DEO\DEO.csproj", "{BCE21265-8BAE-42EB-BF9F-773966FFB02B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DEM", "DEO\DEM.csproj", "{BCE21265-8BAE-42EB-BF9F-773966FFB02B}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "setup", "setup\setup.vdproj", "{CD880C55-CB78-482E-AD4B-CA2104936ED5}"
 EndProject

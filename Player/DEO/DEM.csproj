@@ -38,6 +38,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,16 +50,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="PlayerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="PlayerForm.Designer.cs">
+      <DependentUpon>PlayerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="SettingDevicecs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingDevicecs.Designer.cs">
+      <DependentUpon>SettingDevicecs.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingSerialportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingSerialportForm.Designer.cs">
+      <DependentUpon>SettingSerialportForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PlayerForm.resx">
+      <DependentUpon>PlayerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -70,6 +83,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SettingDevicecs.resx">
+      <DependentUpon>SettingDevicecs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingSerialportForm.resx">
+      <DependentUpon>SettingSerialportForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
