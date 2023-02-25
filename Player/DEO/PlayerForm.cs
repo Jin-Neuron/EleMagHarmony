@@ -99,14 +99,12 @@ namespace DEO
         //フォーム１の初期設定
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.Height = 430;
+            this.Height = 310;
             LogTextBox.Visible = false;
             LogTextBox.ScrollBars = ScrollBars.Vertical;
             LogTextBox.HideSelection = false;
-            ElectricDevicePort.Enabled = false;
             ElectricDevicePortLabel.Enabled = false;
             GuitarDevicePortLabel.Enabled = false;
-            GuitarDevicePort.Enabled = false;
             UiReset();
         }
         //スレッドタイマーのコールバックメソッド
@@ -119,32 +117,29 @@ namespace DEO
         public void startSerial(string portName, int baundRate, string device)
         {
             SerialPort port = (device == "ElectricDevice") ? serialPort1 : serialPort2;
-            if(portName == serialPort1.PortName)
+            ToolStripStatusLabel label = (device == "ElectricDevice") ? ElectricDevicePortLabel : GuitarDevicePortLabel;
+
+            if (portName == serialPort1.PortName)
             {
                 serialPort1.Close();
-                ElectricDevicePort.Text = "portNumber";
-                ElectricDevicePort.Enabled = false;
+                ElectricDevicePortLabel.Text = "ElectricDevicePort : ";
                 ElectricDevicePortLabel.Enabled = false;
             }else if(portName == serialPort2.PortName)
             {
                 serialPort2.Close();
-                GuitarDevicePort.Text = "portNumber";
-                GuitarDevicePort.Enabled=false;
-                GuitarDevicePortLabel.Enabled = false;
+                GuitarDevicePortLabel.Text = "GuitarDevicePort : ";
+                GuitarDevicePortLabel.Enabled=false;
             }
             if (port.IsOpen)
             {
                 port.Close();
+                label.Text = device + "Port : ";
             }
             port.BaudRate = baundRate;
             port.PortName = portName;
             port.Open();
-
-            Label label = (device == "ElectricDevice") ? ElectricDevicePortLabel : GuitarDevicePortLabel;
             label.Enabled = true;
-            label = (device == "ElectricDevice") ? ElectricDevicePort : GuitarDevicePort;
-            label.Enabled = true;
-            label.Text = portName;
+            label.Text += portName;
             TestGuitarMenuItem.Enabled = true;
             trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
             SetPlaylistModeMenuItem.Enabled = true;
@@ -439,6 +434,7 @@ namespace DEO
             tim2.Dispose();
             tim3.Stop();
             tim3.Dispose();
+            LabelTime.Enabled = false;
             trackBar.Enabled = false;
         }
         //UIのリセット用メソッド
@@ -455,14 +451,13 @@ namespace DEO
             RepeatCheck.Enabled = false;
             RandomCheck.Enabled = false;
             PlaylistLabel.Enabled = false;
-            Playlist.Enabled = false;
             FileLabel.Enabled = false;
-            File.Enabled = false;
             NowPlaying.Enabled = false;
             TestMelodyMenuItem.Enabled = false;
             TestGuitarMenuItem.Enabled = false;
             TestBaseMenuItem.Enabled = false;
             TestDrumMenuItem.Enabled = false;
+            LabelTime.Enabled = false;
         }
         //チェックボックスのイベント
         private void checkBoxPlaylist_CheckedChanged(object sender, EventArgs e)
@@ -472,7 +467,6 @@ namespace DEO
                 SetPlaylistModeMenuItem.Checked = true;
                 SetTestModeMenuItem.Enabled = false;
                 PlaylistLabel.Enabled = true;
-                Playlist.Enabled = true;
                 OpenPlaylistMenuItem.Enabled = true;
                 if(files.Count > 0)
                 {
@@ -486,7 +480,6 @@ namespace DEO
                 SetPlaylistModeMenuItem.Checked = false;
                 SetTestModeMenuItem.Enabled = true;
                 PlaylistLabel.Enabled = false;
-                Playlist.Enabled = false;
                 OpenPlaylistMenuItem.Enabled = false;
                 StartButton.Enabled = false;
                 NextButton.Enabled = false;
@@ -503,7 +496,6 @@ namespace DEO
                 SetTestModeMenuItem.Checked = true;
                 SetPlaylistModeMenuItem.Enabled = false;
                 FileLabel.Enabled = true;
-                File.Enabled = true;
                 OpenMidiFileMenuItem.Enabled = true;
                 if (filePath != "")
                 {
@@ -511,11 +503,12 @@ namespace DEO
                     StartButton.Enabled = true;
                     NowPlaying.Enabled = true;
                 }
-                if (this.Height < 580)
+                if (this.Height < 450)
                 {
-                    this.Height = 580;
+                    this.Height = 450;
                 }
-                this.MinimumSize = new Size(600, 580);
+                this.MinimumSize = new Size(630, 450);
+                this.MaximumSize = new Size(800, 450);
                 LogTextBox.Visible = true;
             }
             else
@@ -523,16 +516,16 @@ namespace DEO
                 SetTestModeMenuItem.Checked = false;
                 SetPlaylistModeMenuItem.Enabled = true;
                 FileLabel.Enabled = false;
-                File.Enabled = false;
                 OpenMidiFileMenuItem.Enabled = false;
                 StartButton.Enabled = false;
                 NextButton.Enabled = false;
                 ReturnButton.Enabled = false;
                 NowPlaying.Enabled = false;
-                this.MinimumSize = new Size(600, 430);
-                if(this.Height > 430)
+                this.MinimumSize = new Size(630, 310);
+                this.MaximumSize = new Size(800, 310);
+                if (this.Height > 310)
                 {
-                    this.Height = 430;
+                    this.Height = 310;
                 }
                 LogTextBox.Visible = false;
             }
@@ -546,7 +539,7 @@ namespace DEO
                 openFileDialog.Filter = "プレイリストファイル(*.m3u) | *.m3u";
                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK){
                     playlistPath = openFileDialog.FileName;
-                    Playlist.Text = Path.GetFileNameWithoutExtension(playlistPath);
+                    PlaylistLabel.Text = "MidiPlaylist : " + Path.GetFileNameWithoutExtension(playlistPath);
                     status = Status.PlaylistMode;
                     StartButton.Enabled = true;
                     NextButton.Enabled = true;
@@ -570,7 +563,7 @@ namespace DEO
                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     filePath = openFileDialog.FileName;
-                    File.Text = Path.GetFileNameWithoutExtension(filePath);
+                    FileLabel.Text = "MidiFile : " + Path.GetFileNameWithoutExtension(filePath);
                     status = Status.TestMode;
                     StartButton.Enabled = true;
                     NowPlaying.Enabled = true;
@@ -904,17 +897,19 @@ namespace DEO
                 timePos = 0;
                 isDistGuitar = false;
                 StartButton.Enabled = false;
+                FileMenuItem.Enabled = false;
+                SettingMenuItem.Enabled = false;
+                PlayerMenuItem.Enabled = false;
                 StopButton.Enabled = true;
                 OpenPlaylistMenuItem.Enabled = false;
                 OpenMidiFileMenuItem.Enabled = false;
                 SetPlaylistModeMenuItem.Enabled = false;
                 SetTestModeMenuItem.Enabled = false;
                 FileLabel.Enabled = false;
-                File.Enabled = false;
                 PlaylistLabel.Enabled = false;
-                Playlist.Enabled = false;
                 RepeatCheck.Enabled = false;
-                RandomCheck.Enabled = false; 
+                RandomCheck.Enabled = false;
+                LabelTime.Enabled = true;
                 trackBar.Enabled = true;
                 LogTextBox.Text = "";
                 if(status == Status.PlaylistMode)
@@ -958,7 +953,11 @@ namespace DEO
                 Invoke(new LogTextDelegate(WriteLogText), "piano send: " + text);
                 serialPort1.Write(binTxt);
                 StartButton.Enabled = true;
+                FileMenuItem.Enabled = true;
+                SettingMenuItem.Enabled = true;
+                PlayerMenuItem.Enabled = true;
                 StopButton.Enabled = false;
+                LabelTime.Enabled = false;
                 trackBar.Enabled = false;
                 timePos = 0;
                 trackBar.Value = 0;
@@ -967,7 +966,6 @@ namespace DEO
                 {
                     OpenPlaylistMenuItem.Enabled = true;
                     PlaylistLabel.Enabled = true;
-                    Playlist.Enabled = true;
                     SetPlaylistModeMenuItem.Enabled = true;
                     RepeatCheck.Enabled = true;
                     RandomCheck.Enabled = true;
@@ -976,7 +974,6 @@ namespace DEO
                 { 
                     OpenMidiFileMenuItem.Enabled = true;
                     FileLabel.Enabled = true;
-                    File.Enabled = true;
                     SetTestModeMenuItem.Enabled = true;
                 }
                 counter = 0;
@@ -1070,6 +1067,12 @@ namespace DEO
                 MessageBox.Show(ex.Message);
                 SettingSerialportMenuItem.PerformClick();
             }
+        }
+
+        private void SettingDeviceMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingDevicecsForm form = new SettingDevicecsForm();
+            form.ShowDialog();
         }
     }
 }

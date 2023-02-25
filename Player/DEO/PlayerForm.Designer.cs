@@ -32,7 +32,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlayerForm));
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
-            this.File = new System.Windows.Forms.Label();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.NextButton = new System.Windows.Forms.Button();
             this.StartButton = new System.Windows.Forms.Button();
@@ -46,7 +45,7 @@
             this.LogTextBox = new System.Windows.Forms.TextBox();
             this.trackBar = new System.Windows.Forms.TrackBar();
             this.LabelTime = new System.Windows.Forms.Label();
-            this.OpenFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenMidiFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenPlaylistMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,33 +61,24 @@
             this.TestBaseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.TestDrumMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.ElectricDevicePortLabel = new System.Windows.Forms.Label();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.GuitarDevicePortLabel = new System.Windows.Forms.Label();
-            this.FileLabel = new System.Windows.Forms.Label();
-            this.PlaylistLabel = new System.Windows.Forms.Label();
-            this.Playlist = new System.Windows.Forms.Label();
-            this.ElectricDevicePort = new System.Windows.Forms.Label();
-            this.GuitarDevicePort = new System.Windows.Forms.Label();
+            this.HelpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.PartStatus = new System.Windows.Forms.StatusStrip();
+            this.MelodyDeviceLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.BaseDeviceLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.DrumDeviceLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.PortFileStatus = new System.Windows.Forms.StatusStrip();
+            this.ElectricDevicePortLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.GuitarDevicePortLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.FileLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.PlaylistLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
             this.menuStrip1.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
+            this.PartStatus.SuspendLayout();
+            this.PortFileStatus.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // File
-            // 
-            this.File.AutoSize = true;
-            this.File.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.File.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.File.ForeColor = System.Drawing.Color.Green;
-            this.File.Location = new System.Drawing.Point(283, 72);
-            this.File.Name = "File";
-            this.File.Size = new System.Drawing.Size(274, 36);
-            this.File.TabIndex = 1;
-            this.File.Text = "fileName";
-            this.File.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tableLayoutPanel4
             // 
@@ -103,7 +93,7 @@
             this.tableLayoutPanel4.Controls.Add(this.StartButton, 2, 0);
             this.tableLayoutPanel4.Controls.Add(this.StopButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.ReturnButton, 0, 0);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(6, 333);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(6, 169);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -169,7 +159,7 @@
             this.NowPlaying.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.NowPlaying.Font = new System.Drawing.Font("MS UI Gothic", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.NowPlaying.ForeColor = System.Drawing.Color.SteelBlue;
-            this.NowPlaying.Location = new System.Drawing.Point(12, 204);
+            this.NowPlaying.Location = new System.Drawing.Point(12, 40);
             this.NowPlaying.Name = "NowPlaying";
             this.NowPlaying.ReadOnly = true;
             this.NowPlaying.Size = new System.Drawing.Size(560, 39);
@@ -212,7 +202,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel5.Controls.Add(this.RepeatCheck, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.RandomCheck, 1, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(170, 278);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(176, 114);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -229,18 +219,18 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LogTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.LogTextBox.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.LogTextBox.Location = new System.Drawing.Point(62, 388);
+            this.LogTextBox.Location = new System.Drawing.Point(69, 221);
             this.LogTextBox.Multiline = true;
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
-            this.LogTextBox.Size = new System.Drawing.Size(436, 137);
+            this.LogTextBox.Size = new System.Drawing.Size(464, 137);
             this.LogTextBox.TabIndex = 12;
             // 
             // trackBar
             // 
             this.trackBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBar.Location = new System.Drawing.Point(12, 249);
+            this.trackBar.Location = new System.Drawing.Point(12, 85);
             this.trackBar.Name = "trackBar";
             this.trackBar.Size = new System.Drawing.Size(560, 45);
             this.trackBar.TabIndex = 13;
@@ -252,21 +242,21 @@
             this.LabelTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.LabelTime.AutoSize = true;
             this.LabelTime.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.LabelTime.Location = new System.Drawing.Point(444, 281);
+            this.LabelTime.Location = new System.Drawing.Point(444, 117);
             this.LabelTime.Name = "LabelTime";
             this.LabelTime.Size = new System.Drawing.Size(128, 24);
             this.LabelTime.TabIndex = 15;
             this.LabelTime.Text = "00:00/00:00";
             // 
-            // OpenFileMenuItem
+            // FileMenuItem
             // 
-            this.OpenFileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.OpenMidiFileMenuItem,
             this.OpenPlaylistMenuItem});
-            this.OpenFileMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.OpenFileMenuItem.Name = "OpenFileMenuItem";
-            this.OpenFileMenuItem.Size = new System.Drawing.Size(84, 20);
-            this.OpenFileMenuItem.Text = "ファイル（&F）";
+            this.FileMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.FileMenuItem.Name = "FileMenuItem";
+            this.FileMenuItem.Size = new System.Drawing.Size(84, 20);
+            this.FileMenuItem.Text = "ファイル（&F）";
             // 
             // OpenMidiFileMenuItem
             // 
@@ -304,6 +294,7 @@
             this.SettingDeviceMenuItem.Name = "SettingDeviceMenuItem";
             this.SettingDeviceMenuItem.Size = new System.Drawing.Size(180, 22);
             this.SettingDeviceMenuItem.Text = "デバイス(&D)...";
+            this.SettingDeviceMenuItem.Click += new System.EventHandler(this.SettingDeviceMenuItem_Click);
             // 
             // PlayerMenuItem
             // 
@@ -327,14 +318,14 @@
             // SetTestModeMenuItem
             // 
             this.SetTestModeMenuItem.Name = "SetTestModeMenuItem";
-            this.SetTestModeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SetTestModeMenuItem.Size = new System.Drawing.Size(141, 22);
             this.SetTestModeMenuItem.Text = "テスト(&D)";
             this.SetTestModeMenuItem.Click += new System.EventHandler(this.checkBoxTest_CheckedChanged);
             // 
             // SetPlaylistModeMenuItem
             // 
             this.SetPlaylistModeMenuItem.Name = "SetPlaylistModeMenuItem";
-            this.SetPlaylistModeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SetPlaylistModeMenuItem.Size = new System.Drawing.Size(141, 22);
             this.SetPlaylistModeMenuItem.Text = "プレイリスト(&L)";
             this.SetPlaylistModeMenuItem.Click += new System.EventHandler(this.checkBoxPlaylist_CheckedChanged);
             // 
@@ -352,170 +343,154 @@
             // TestMelodyMenuItem
             // 
             this.TestMelodyMenuItem.Name = "TestMelodyMenuItem";
-            this.TestMelodyMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TestMelodyMenuItem.Size = new System.Drawing.Size(133, 22);
             this.TestMelodyMenuItem.Text = "メロディー(&V)";
             // 
             // TestGuitarMenuItem
             // 
             this.TestGuitarMenuItem.Name = "TestGuitarMenuItem";
-            this.TestGuitarMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TestGuitarMenuItem.Size = new System.Drawing.Size(133, 22);
             this.TestGuitarMenuItem.Text = "ギター(&G)";
             // 
             // TestBaseMenuItem
             // 
             this.TestBaseMenuItem.Name = "TestBaseMenuItem";
-            this.TestBaseMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TestBaseMenuItem.Size = new System.Drawing.Size(133, 22);
             this.TestBaseMenuItem.Text = "ベース(&B)";
             // 
             // TestDrumMenuItem
             // 
             this.TestDrumMenuItem.Name = "TestDrumMenuItem";
-            this.TestDrumMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TestDrumMenuItem.Size = new System.Drawing.Size(133, 22);
             this.TestDrumMenuItem.Text = "ドラム(&D)";
             // 
             // menuStrip1
             // 
             this.menuStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.OpenFileMenuItem,
+            this.FileMenuItem,
             this.SettingMenuItem,
-            this.PlayerMenuItem});
+            this.PlayerMenuItem,
+            this.HelpMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(584, 24);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
             // 
+            // HelpMenuItem
+            // 
+            this.HelpMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.HelpMenuItem.Name = "HelpMenuItem";
+            this.HelpMenuItem.Size = new System.Drawing.Size(65, 20);
+            this.HelpMenuItem.Text = "ヘルプ(&H)";
+            // 
+            // PartStatus
+            // 
+            this.PartStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.PartStatus.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MelodyDeviceLabel,
+            this.toolStripStatusLabel2,
+            this.BaseDeviceLabel,
+            this.DrumDeviceLabel});
+            this.PartStatus.Location = new System.Drawing.Point(0, 249);
+            this.PartStatus.Name = "PartStatus";
+            this.PartStatus.Size = new System.Drawing.Size(584, 22);
+            this.PartStatus.TabIndex = 17;
+            this.PartStatus.Text = "statusStrip1";
+            // 
+            // MelodyDeviceLabel
+            // 
+            this.MelodyDeviceLabel.Name = "MelodyDeviceLabel";
+            this.MelodyDeviceLabel.Size = new System.Drawing.Size(189, 17);
+            this.MelodyDeviceLabel.Spring = true;
+            this.MelodyDeviceLabel.Text = "Melody : Motor & Solenoid [1]";
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(0, 17);
+            // 
+            // BaseDeviceLabel
+            // 
+            this.BaseDeviceLabel.Name = "BaseDeviceLabel";
+            this.BaseDeviceLabel.Size = new System.Drawing.Size(189, 17);
+            this.BaseDeviceLabel.Spring = true;
+            this.BaseDeviceLabel.Text = "Base : FloppyDrive[2..4]";
+            // 
+            // DrumDeviceLabel
+            // 
+            this.DrumDeviceLabel.Name = "DrumDeviceLabel";
+            this.DrumDeviceLabel.Size = new System.Drawing.Size(189, 17);
+            this.DrumDeviceLabel.Spring = true;
+            this.DrumDeviceLabel.Text = "Drum : Relay[5..8]";
+            // 
+            // PortFileStatus
+            // 
+            this.PortFileStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.PortFileStatus.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ElectricDevicePortLabel,
+            this.GuitarDevicePortLabel,
+            this.FileLabel,
+            this.PlaylistLabel});
+            this.PortFileStatus.Location = new System.Drawing.Point(0, 225);
+            this.PortFileStatus.Name = "PortFileStatus";
+            this.PortFileStatus.Size = new System.Drawing.Size(584, 24);
+            this.PortFileStatus.SizingGrip = false;
+            this.PortFileStatus.TabIndex = 18;
+            this.PortFileStatus.Text = "statusStrip2";
+            // 
             // ElectricDevicePortLabel
             // 
-            this.ElectricDevicePortLabel.AutoSize = true;
-            this.ElectricDevicePortLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ElectricDevicePortLabel.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.ElectricDevicePortLabel.Location = new System.Drawing.Point(3, 0);
+            this.ElectricDevicePortLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
             this.ElectricDevicePortLabel.Name = "ElectricDevicePortLabel";
-            this.ElectricDevicePortLabel.Size = new System.Drawing.Size(274, 36);
-            this.ElectricDevicePortLabel.TabIndex = 5;
-            this.ElectricDevicePortLabel.Text = "ElectricDevicePort";
-            this.ElectricDevicePortLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // tableLayoutPanel1
-            // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.GuitarDevicePort, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.ElectricDevicePort, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.File, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.Playlist, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.PlaylistLabel, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.FileLabel, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.GuitarDevicePortLabel, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.ElectricDevicePortLabel, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 38);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(560, 145);
-            this.tableLayoutPanel1.TabIndex = 3;
+            this.ElectricDevicePortLabel.Size = new System.Drawing.Size(142, 19);
+            this.ElectricDevicePortLabel.Spring = true;
+            this.ElectricDevicePortLabel.Text = "ElectricDevicePort : ";
             // 
             // GuitarDevicePortLabel
             // 
-            this.GuitarDevicePortLabel.AutoSize = true;
-            this.GuitarDevicePortLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GuitarDevicePortLabel.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.GuitarDevicePortLabel.Location = new System.Drawing.Point(3, 36);
+            this.GuitarDevicePortLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
             this.GuitarDevicePortLabel.Name = "GuitarDevicePortLabel";
-            this.GuitarDevicePortLabel.Size = new System.Drawing.Size(274, 36);
-            this.GuitarDevicePortLabel.TabIndex = 6;
-            this.GuitarDevicePortLabel.Text = "GuitarDevicePort";
-            this.GuitarDevicePortLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.GuitarDevicePortLabel.Size = new System.Drawing.Size(142, 19);
+            this.GuitarDevicePortLabel.Spring = true;
+            this.GuitarDevicePortLabel.Text = "GuitarDevicePort : ";
             // 
             // FileLabel
             // 
-            this.FileLabel.AutoSize = true;
-            this.FileLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.FileLabel.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.FileLabel.Location = new System.Drawing.Point(3, 72);
+            this.FileLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
             this.FileLabel.Name = "FileLabel";
-            this.FileLabel.Size = new System.Drawing.Size(274, 36);
-            this.FileLabel.TabIndex = 7;
-            this.FileLabel.Text = "MidiFile";
-            this.FileLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.FileLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.FileLabel.Size = new System.Drawing.Size(142, 19);
+            this.FileLabel.Spring = true;
+            this.FileLabel.Text = "MidiFile : ";
             // 
             // PlaylistLabel
             // 
-            this.PlaylistLabel.AutoSize = true;
-            this.PlaylistLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PlaylistLabel.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.PlaylistLabel.Location = new System.Drawing.Point(3, 108);
             this.PlaylistLabel.Name = "PlaylistLabel";
-            this.PlaylistLabel.Size = new System.Drawing.Size(274, 37);
-            this.PlaylistLabel.TabIndex = 8;
-            this.PlaylistLabel.Text = "MidiPlaylist";
-            this.PlaylistLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // Playlist
-            // 
-            this.Playlist.AutoSize = true;
-            this.Playlist.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Playlist.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.Playlist.ForeColor = System.Drawing.Color.Green;
-            this.Playlist.Location = new System.Drawing.Point(283, 108);
-            this.Playlist.Name = "Playlist";
-            this.Playlist.Size = new System.Drawing.Size(274, 37);
-            this.Playlist.TabIndex = 1;
-            this.Playlist.Text = "fileName";
-            this.Playlist.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // ElectricDevicePort
-            // 
-            this.ElectricDevicePort.AutoSize = true;
-            this.ElectricDevicePort.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ElectricDevicePort.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.ElectricDevicePort.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.ElectricDevicePort.Location = new System.Drawing.Point(283, 0);
-            this.ElectricDevicePort.Name = "ElectricDevicePort";
-            this.ElectricDevicePort.Size = new System.Drawing.Size(274, 36);
-            this.ElectricDevicePort.TabIndex = 9;
-            this.ElectricDevicePort.Text = "portNumber";
-            this.ElectricDevicePort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // GuitarDevicePort
-            // 
-            this.GuitarDevicePort.AutoSize = true;
-            this.GuitarDevicePort.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GuitarDevicePort.Font = new System.Drawing.Font("MS UI Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.GuitarDevicePort.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.GuitarDevicePort.Location = new System.Drawing.Point(283, 36);
-            this.GuitarDevicePort.Name = "GuitarDevicePort";
-            this.GuitarDevicePort.Size = new System.Drawing.Size(274, 36);
-            this.GuitarDevicePort.TabIndex = 10;
-            this.GuitarDevicePort.Text = "portNumber";
-            this.GuitarDevicePort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.PlaylistLabel.Size = new System.Drawing.Size(142, 19);
+            this.PlaylistLabel.Spring = true;
+            this.PlaylistLabel.Text = "MidiPlaylist : ";
             // 
             // PlayerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.ClientSize = new System.Drawing.Size(584, 391);
+            this.ClientSize = new System.Drawing.Size(584, 271);
+            this.Controls.Add(this.PortFileStatus);
+            this.Controls.Add(this.PartStatus);
             this.Controls.Add(this.tableLayoutPanel5);
             this.Controls.Add(this.LabelTime);
             this.Controls.Add(this.trackBar);
             this.Controls.Add(this.LogTextBox);
             this.Controls.Add(this.NowPlaying);
             this.Controls.Add(this.tableLayoutPanel4);
-            this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MinimumSize = new System.Drawing.Size(600, 430);
+            this.MaximumSize = new System.Drawing.Size(800, 310);
+            this.MinimumSize = new System.Drawing.Size(600, 310);
             this.Name = "PlayerForm";
             this.Text = "ElectricMusicPlayer";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -525,8 +500,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
+            this.PartStatus.ResumeLayout(false);
+            this.PartStatus.PerformLayout();
+            this.PortFileStatus.ResumeLayout(false);
+            this.PortFileStatus.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -535,7 +512,6 @@
         #endregion
         private System.IO.Ports.SerialPort serialPort1;
         private System.IO.Ports.SerialPort serialPort2;
-        private System.Windows.Forms.Label File;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.Button NextButton;
         private System.Windows.Forms.Button StartButton;
@@ -549,7 +525,7 @@
         private System.Windows.Forms.TextBox LogTextBox;
         private System.Windows.Forms.TrackBar trackBar;
         private System.Windows.Forms.Label LabelTime;
-        private System.Windows.Forms.ToolStripMenuItem OpenFileMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem FileMenuItem;
         private System.Windows.Forms.ToolStripMenuItem OpenMidiFileMenuItem;
         private System.Windows.Forms.ToolStripMenuItem OpenPlaylistMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SettingMenuItem;
@@ -565,14 +541,17 @@
         private System.Windows.Forms.ToolStripMenuItem TestBaseMenuItem;
         private System.Windows.Forms.ToolStripMenuItem TestDrumMenuItem;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.Label ElectricDevicePortLabel;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Label GuitarDevicePort;
-        private System.Windows.Forms.Label ElectricDevicePort;
-        private System.Windows.Forms.Label Playlist;
-        private System.Windows.Forms.Label PlaylistLabel;
-        private System.Windows.Forms.Label FileLabel;
-        private System.Windows.Forms.Label GuitarDevicePortLabel;
+        private System.Windows.Forms.StatusStrip PartStatus;
+        private System.Windows.Forms.ToolStripStatusLabel MelodyDeviceLabel;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel BaseDeviceLabel;
+        private System.Windows.Forms.ToolStripStatusLabel DrumDeviceLabel;
+        private System.Windows.Forms.StatusStrip PortFileStatus;
+        private System.Windows.Forms.ToolStripStatusLabel ElectricDevicePortLabel;
+        private System.Windows.Forms.ToolStripStatusLabel GuitarDevicePortLabel;
+        private System.Windows.Forms.ToolStripStatusLabel FileLabel;
+        private System.Windows.Forms.ToolStripStatusLabel PlaylistLabel;
+        private System.Windows.Forms.ToolStripMenuItem HelpMenuItem;
     }
 }
 

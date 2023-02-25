@@ -58,11 +58,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingDevicecs.cs">
+    <Compile Include="SettingDevicecsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingDevicecs.Designer.cs">
-      <DependentUpon>SettingDevicecs.cs</DependentUpon>
+    <Compile Include="SettingDevicecsForm.Designer.cs">
+      <DependentUpon>SettingDevicecsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SettingSerialportForm.cs">
       <SubType>Form</SubType>
@@ -83,8 +83,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SettingDevicecs.resx">
-      <DependentUpon>SettingDevicecs.cs</DependentUpon>
+    <EmbeddedResource Include="SettingDevicecsForm.resx">
+      <DependentUpon>SettingDevicecsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingSerialportForm.resx">
       <DependentUpon>SettingSerialportForm.cs</DependentUpon>

@@ -10,11 +10,16 @@ using System.Windows.Forms;
 
 namespace DEO
 {
-    public partial class SettingDevicecs : Form
+    public partial class SettingDevicecsForm : Form
     {
-        public SettingDevicecs()
+        public SettingDevicecsForm()
         {
             InitializeComponent();
+        }
+
+        private void SettingDevicecs_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
