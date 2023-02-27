@@ -30,14 +30,14 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingDevicecsForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.DeviceComboBox = new System.Windows.Forms.ComboBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.SpeedComboBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.ConnectButton = new System.Windows.Forms.Button();
             this.PortComboBox = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -50,36 +50,32 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.Controls.Add(this.button1, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.DeviceComboBox, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.SpeedComboBox, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.ConnectButton, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.PortComboBox, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.checkedListBox1, 1, 2);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(360, 137);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(360, 227);
             this.tableLayoutPanel1.TabIndex = 5;
             // 
-            // DeviceComboBox
+            // button1
             // 
-            this.DeviceComboBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DeviceComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.DeviceComboBox.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.DeviceComboBox.FormattingEnabled = true;
-            this.DeviceComboBox.Items.AddRange(new object[] {
-            "エレクトリックデバイス",
-            "ギター"});
-            this.DeviceComboBox.Location = new System.Drawing.Point(183, 71);
-            this.DeviceComboBox.Name = "DeviceComboBox";
-            this.DeviceComboBox.Size = new System.Drawing.Size(174, 27);
-            this.DeviceComboBox.TabIndex = 11;
+            this.button1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.button1.Location = new System.Drawing.Point(3, 195);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(174, 29);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "設定";
+            this.button1.UseVisualStyleBackColor = true;
             // 
             // label3
             // 
@@ -88,7 +84,7 @@
             this.label3.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.label3.Location = new System.Drawing.Point(3, 68);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(174, 34);
+            this.label3.Size = new System.Drawing.Size(174, 124);
             this.label3.TabIndex = 10;
             this.label3.Text = "インデックス";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -136,7 +132,7 @@
             // ConnectButton
             // 
             this.ConnectButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ConnectButton.Location = new System.Drawing.Point(183, 105);
+            this.ConnectButton.Location = new System.Drawing.Point(183, 195);
             this.ConnectButton.Name = "ConnectButton";
             this.ConnectButton.Size = new System.Drawing.Size(174, 29);
             this.ConnectButton.TabIndex = 6;
@@ -158,23 +154,33 @@
             this.PortComboBox.Size = new System.Drawing.Size(174, 27);
             this.PortComboBox.TabIndex = 7;
             // 
-            // button1
+            // checkedListBox1
             // 
-            this.button1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.button1.Location = new System.Drawing.Point(3, 105);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(174, 29);
-            this.button1.TabIndex = 12;
-            this.button1.Text = "設定";
-            this.button1.UseVisualStyleBackColor = true;
+            this.checkedListBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkedListBox1.FormattingEnabled = true;
+            this.checkedListBox1.Items.AddRange(new object[] {
+            "index1[Melody]",
+            "index2[Drum]",
+            "index3[Drum]",
+            "index4[Drum]",
+            "index5[Drum]",
+            "index6[Base]",
+            "index7[Base]",
+            "index8[Base]"});
+            this.checkedListBox1.Location = new System.Drawing.Point(183, 71);
+            this.checkedListBox1.Name = "checkedListBox1";
+            this.checkedListBox1.Size = new System.Drawing.Size(174, 118);
+            this.checkedListBox1.TabIndex = 13;
             // 
             // SettingDevicecsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(384, 161);
+            this.ClientSize = new System.Drawing.Size(384, 251);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximumSize = new System.Drawing.Size(400, 290);
+            this.MinimumSize = new System.Drawing.Size(400, 290);
             this.Name = "SettingDevicecsForm";
             this.Text = "SettingDevicecs";
             this.Load += new System.EventHandler(this.SettingDevicecs_Load);
@@ -187,7 +193,6 @@
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.ComboBox DeviceComboBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox SpeedComboBox;
         private System.Windows.Forms.Label label2;
@@ -195,5 +200,6 @@
         private System.Windows.Forms.Button ConnectButton;
         private System.Windows.Forms.ComboBox PortComboBox;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckedListBox checkedListBox1;
     }
 }

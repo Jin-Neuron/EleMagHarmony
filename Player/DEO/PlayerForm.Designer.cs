@@ -72,12 +72,15 @@
             this.GuitarDevicePortLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.FileLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.PlaylistLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.FileterBox = new System.Windows.Forms.GroupBox();
+            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.PartStatus.SuspendLayout();
             this.PortFileStatus.SuspendLayout();
+            this.FileterBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel4
@@ -219,11 +222,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LogTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.LogTextBox.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.LogTextBox.Location = new System.Drawing.Point(69, 221);
+            this.LogTextBox.Location = new System.Drawing.Point(89, 221);
             this.LogTextBox.Multiline = true;
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
-            this.LogTextBox.Size = new System.Drawing.Size(464, 137);
+            this.LogTextBox.Size = new System.Drawing.Size(404, 137);
             this.LogTextBox.TabIndex = 12;
             // 
             // trackBar
@@ -285,14 +288,14 @@
             // SettingSerialportMenuItem
             // 
             this.SettingSerialportMenuItem.Name = "SettingSerialportMenuItem";
-            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(162, 22);
             this.SettingSerialportMenuItem.Text = "シリアルポート(&E)...";
             this.SettingSerialportMenuItem.Click += new System.EventHandler(this.SettingSerialportMenuItem_Click);
             // 
             // SettingDeviceMenuItem
             // 
             this.SettingDeviceMenuItem.Name = "SettingDeviceMenuItem";
-            this.SettingDeviceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SettingDeviceMenuItem.Size = new System.Drawing.Size(162, 22);
             this.SettingDeviceMenuItem.Text = "デバイス(&D)...";
             this.SettingDeviceMenuItem.Click += new System.EventHandler(this.SettingDeviceMenuItem_Click);
             // 
@@ -312,7 +315,7 @@
             this.SetTestModeMenuItem,
             this.SetPlaylistModeMenuItem});
             this.PlayModeMenuItem.Name = "PlayModeMenuItem";
-            this.PlayModeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.PlayModeMenuItem.Size = new System.Drawing.Size(146, 22);
             this.PlayModeMenuItem.Text = "プレイモード(&M)";
             // 
             // SetTestModeMenuItem
@@ -337,7 +340,7 @@
             this.TestBaseMenuItem,
             this.TestDrumMenuItem});
             this.TestPlayMenuItem.Name = "TestPlayMenuItem";
-            this.TestPlayMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.TestPlayMenuItem.Size = new System.Drawing.Size(146, 22);
             this.TestPlayMenuItem.Text = "テストプレイ(&T)";
             // 
             // TestMelodyMenuItem
@@ -393,7 +396,7 @@
             this.toolStripStatusLabel2,
             this.BaseDeviceLabel,
             this.DrumDeviceLabel});
-            this.PartStatus.Location = new System.Drawing.Point(0, 249);
+            this.PartStatus.Location = new System.Drawing.Point(0, 389);
             this.PartStatus.Name = "PartStatus";
             this.PartStatus.Size = new System.Drawing.Size(584, 22);
             this.PartStatus.TabIndex = 17;
@@ -433,7 +436,7 @@
             this.GuitarDevicePortLabel,
             this.FileLabel,
             this.PlaylistLabel});
-            this.PortFileStatus.Location = new System.Drawing.Point(0, 225);
+            this.PortFileStatus.Location = new System.Drawing.Point(0, 365);
             this.PortFileStatus.Name = "PortFileStatus";
             this.PortFileStatus.Size = new System.Drawing.Size(584, 24);
             this.PortFileStatus.SizingGrip = false;
@@ -472,12 +475,36 @@
             this.PlaylistLabel.Spring = true;
             this.PlaylistLabel.Text = "MidiPlaylist : ";
             // 
+            // FileterBox
+            // 
+            this.FileterBox.Controls.Add(this.checkedListBox1);
+            this.FileterBox.Location = new System.Drawing.Point(6, 241);
+            this.FileterBox.Name = "FileterBox";
+            this.FileterBox.Size = new System.Drawing.Size(77, 88);
+            this.FileterBox.TabIndex = 19;
+            this.FileterBox.TabStop = false;
+            this.FileterBox.Text = "LogFileter";
+            // 
+            // checkedListBox1
+            // 
+            this.checkedListBox1.FormattingEnabled = true;
+            this.checkedListBox1.Items.AddRange(new object[] {
+            "Melody",
+            "Guitar",
+            "Base",
+            "Drum"});
+            this.checkedListBox1.Location = new System.Drawing.Point(3, 19);
+            this.checkedListBox1.Name = "checkedListBox1";
+            this.checkedListBox1.Size = new System.Drawing.Size(68, 60);
+            this.checkedListBox1.TabIndex = 0;
+            // 
             // PlayerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.ClientSize = new System.Drawing.Size(584, 271);
+            this.ClientSize = new System.Drawing.Size(584, 411);
+            this.Controls.Add(this.FileterBox);
             this.Controls.Add(this.PortFileStatus);
             this.Controls.Add(this.PartStatus);
             this.Controls.Add(this.tableLayoutPanel5);
@@ -489,7 +516,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MaximumSize = new System.Drawing.Size(800, 310);
+            this.MaximumSize = new System.Drawing.Size(800, 510);
             this.MinimumSize = new System.Drawing.Size(600, 310);
             this.Name = "PlayerForm";
             this.Text = "ElectricMusicPlayer";
@@ -504,6 +531,7 @@
             this.PartStatus.PerformLayout();
             this.PortFileStatus.ResumeLayout(false);
             this.PortFileStatus.PerformLayout();
+            this.FileterBox.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -552,6 +580,8 @@
         private System.Windows.Forms.ToolStripStatusLabel FileLabel;
         private System.Windows.Forms.ToolStripStatusLabel PlaylistLabel;
         private System.Windows.Forms.ToolStripMenuItem HelpMenuItem;
+        private System.Windows.Forms.GroupBox FileterBox;
+        private System.Windows.Forms.CheckedListBox checkedListBox1;
     }
 }
 

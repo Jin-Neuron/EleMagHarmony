@@ -10,12 +10,22 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using System.IO.Ports;
+using System.Security.Cryptography.X509Certificates;
+using System.Security;
+using System.Runtime.Remoting.Channels;
 
 namespace DEO
 {
     public partial class PlayerForm : Form
     {
         //変数宣言部
+        private enum part
+        {
+            Melody,
+            Guitar,
+            Base,
+            Drum
+        };
         //プレイリストかテストか
         private enum Status
         {
@@ -28,19 +38,21 @@ namespace DEO
             On,
             Off,
         }
-        //ノート情報を格納する構造体
-        private struct NoteData
-        {
-            public int eventTime;
-            public int laneIndex;
-            public NoteType type;
-        };
         //テンポを格納する構造体
         private struct TempoData
         {
             public int eventTime;
             public float bpm;
         };
+        //データ
+        private struct midiData
+        {
+            public double delay;
+            public part playPart;
+            public string logTxt;
+            public int txtLen;
+            public string serialTxt;
+        }
         //ヘッダーチャンク解析用
         private struct HeaderChunkData
         {
@@ -57,13 +69,10 @@ namespace DEO
             public int dataLength;
             public byte[] data;
         };
-        private int harmony = 0;
-        private int counter = 0;
         private Status status;
-        private string filePath = "";
-        private string title = "";
-        private int tempo = 1;
-        private int timePos = 0;
+        private string filePath = "", title = "";
+        private int tempo = 1, timePos = 0, counter = 0, allTime = 0;
+        private int[] chCount = new int[20];
         private delegate void LogTextDelegate(string text);
         private delegate void StartButtonDelegate();
         private delegate void StopButtonDelegate();
@@ -72,20 +81,12 @@ namespace DEO
         private bool isDistGuitar = false;
         private List<int> indexes = new List<int>();
         private List<string> files = new List<string>();
-        private List<NoteData> PianoNoteList = new List<NoteData>();
-        private List<NoteData> GuitarNoteList = new List<NoteData>();
         private List<TempoData> tempoList = new List<TempoData>();
-        private List<List<string>> texts = new List<List<string>>();
-        private List<List<double>> delays = new List<List<double>>();
-        private List<double> temp_delay = new List<double>();
-        private List<List<string>> bins = new List<List<string>>();
+        private List<midiData> noteList = new List<midiData>();
         private HeaderChunkData headerChunk = new HeaderChunkData();
-        private TimeSpan maxTime;
-        private TimeSpan changeTime;
+        private TimeSpan maxTime, changeTime;
         private System.Threading.Timer trackbar_tim;
         private System.Timers.Timer tim1 = new System.Timers.Timer();
-        private System.Timers.Timer tim2 = new System.Timers.Timer();
-        private System.Timers.Timer tim3 = new System.Timers.Timer();
         public PlayerForm()
         {
             InitializeComponent();
@@ -100,7 +101,10 @@ namespace DEO
         private void Form1_Load(object sender, EventArgs e)
         {
             this.Height = 310;
+            FileterBox.Visible = false;
             LogTextBox.Visible = false;
+            this.MinimumSize = new Size(630, 310);
+            this.MaximumSize = new Size(800, 310);
             LogTextBox.ScrollBars = ScrollBars.Vertical;
             LogTextBox.HideSelection = false;
             ElectricDevicePortLabel.Enabled = false;
@@ -153,14 +157,7 @@ namespace DEO
         //非同期処理によるギターとリレーの同時通信
         private void SendSerial()
         {
-            //配列を初期化
-            temp_delay.Clear();
-            delays.Clear();
-            texts.Clear();
-            bins.Clear();
-            TempoControll();
-            tempo = (int)tempoList[0].bpm;
-            if (temp_delay.Count > 0)
+            if (serialPort1.IsOpen)
             {
                 int i = 0;
                 tim1 = new System.Timers.Timer();
@@ -168,42 +165,18 @@ namespace DEO
                 Int64 lastTime = DateTime.Now.Ticks / 10000;
                 tim1.Elapsed += (s, e) =>
                 {
-                    if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)tempoList[i].eventTime)
+                    if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)noteList[i].delay)
                     {
                         tim1.Stop();
-                        lastTime += (Int64)tempoList[i].bpm;
-                        tempo = (int)tempoList[i].bpm;
-                        Invoke(new LogTextDelegate(WriteLogText), "tempo = " + ((int)tempoList[i].bpm).ToString() + ",");
+                        Invoke(new LogTextDelegate(WriteLogText), noteList[i].playPart.ToString() +  " : " + noteList[i].logTxt);
+                        serialPort1.Write(Convert.ToString(noteList[i].txtLen, 2).PadLeft(8, '0') + noteList[i].serialTxt);
+                        lastTime += (Int64)noteList[i].delay;
                         i++;
-                        if (i < tempoList.Count)
-                        {
-                            tim1.Start();
-                        }
-                    }
-                };
-                tim1.Start();
-            }
-            if (serialPort1.IsOpen)
-            {
-                int i = 0;
-                tim2 = new System.Timers.Timer();
-                tim2.Interval = 1;
-                StoreNoteData(serialPort1, PianoNoteList, "piano");
-                Int64 lastTime = DateTime.Now.Ticks / 10000;
-                tim2.Elapsed += (s, e) =>
-                {
-                    if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)delays[0][i])
-                    {
-                        tim2.Stop();
-                        Invoke(new LogTextDelegate(WriteLogText), "piano send: " + texts[0][i]);
-                        serialPort1.Write(bins[0][i]);
-                        lastTime += (Int64)delays[0][i];
-                        i++;
-                        if (i < delays[0].Count)
+                        if (i < chCount[0])
                         {
                             try
                             {
-                                tim2.Start();
+                                tim1.Start();
                             }
                             catch { }
                         }
@@ -229,151 +202,7 @@ namespace DEO
                         }
                     }
                 };
-                tim2.Start();
-            }
-        }
-        //テンポ制御用メソッド
-        private void TempoControll()
-        {
-            foreach(TempoData data in tempoList)
-            {
-                if (data.eventTime != 0)
-                {
-                    double delay = Math.Round(60000.0 / data.bpm * (double)data.eventTime / (double)headerChunk.division);
-                    temp_delay.Add(delay);
-                }
-            }
-        }
-        //ノート情報制御用メソッド
-        private void StoreNoteData(SerialPort serial, List<NoteData> notes, string str)
-        {
-            string text = "";
-            string binTxt = "";
-            int i = 0, j = 1;
-            double delay = 0;
-            int[] parts = new int[128];
-            int tempoidx = 0;
-            int tmpd = tempoList[tempoidx + 1].eventTime;
-            int delay_all = 0;
-            int dataLen = 0;
-            int idx = (str == "guitar") ? 1 : 0;
-            delays.Add(new List<double>());
-            bins.Add(new List<string>());
-            texts.Add(new List<string>());
-            if (str == "guitar")
-            {
-                if (isDistGuitar)
-                {
-                    //serial.Write("1,");
-                    Invoke(new LogTextDelegate(WriteLogText), "IsDistGuitar");
-                }
-                else
-                {
-                    //serial.Write("0,");
-                }
-            }
-            foreach (NoteData data in notes)
-            {
-                //鳴らすパートを指定し、マイコンに送信
-                if (parts[data.laneIndex] == 0)
-                {
-                    parts[data.laneIndex] = j;
-                }
-                if (data.type == NoteType.On)
-                {
-                    dataLen += 13;
-                    text += parts[data.laneIndex].ToString() + ",ON," + data.laneIndex.ToString() + ",";
-                    binTxt += Convert.ToString(parts[data.laneIndex] - 1, 2).PadLeft(4, '0');
-                    binTxt += "1";
-                    binTxt += Convert.ToString(data.laneIndex, 2).PadLeft(8,'0');
-                }
-                else if (data.type == NoteType.Off)
-                {
-                    dataLen += 5;
-                    text += parts[data.laneIndex].ToString() + ",OFF,";
-                    binTxt += Convert.ToString(parts[data.laneIndex] - 1, 2).PadLeft(4, '0');
-                    binTxt += "0";
-                    parts[data.laneIndex] = 0;
-                }
-                if (tempoidx < temp_delay.Count)
-                {
-                    if (delay_all >= tmpd)
-                    {
-                        tempoidx++;
-                    }
-                }
-                if (data.eventTime != 0)
-                {
-                    delay = Math.Round(60000.0 * (double)data.eventTime / (double)tempoList[tempoidx].bpm / (double)headerChunk.division);
-                }
-                if (i < notes.Count - 1)
-                {
-                    NoteData nextData = notes[i + 1];
-                    delay_all += nextData.eventTime;
-
-                    if (nextData.type == NoteType.On)
-                    {
-                        List<int> partsNum = new List<int>();
-                        for(int k = 0; k < 128; k++)
-                        {
-                            if(parts[k] > 0)
-                            {
-                                partsNum.Add(parts[k]);
-                            }
-                        }
-                        partsNum.Sort();
-                        if(partsNum.Count > 0)
-                        {
-                            if(partsNum.Count < partsNum.Max())
-                            {
-                                for(int k = 0; k < partsNum.Count - 1; k++)
-                                {
-                                    if (partsNum[k] + 1 != partsNum[k + 1])
-                                    {
-                                        j = k + 1;
-                                        break;
-                                    }
-                                }
-                            }else
-                            {
-                                j = partsNum.Max() + 1;
-                            }
-                        }
-                        else
-                        {
-                            j = 1;
-                        }
-                    }else if(nextData.type == NoteType.Off)
-                    {
-                        j = parts[nextData.laneIndex];
-                    }
-                    if(nextData.eventTime != 0)
-                    {/*
-                        Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
-                        serial.Write(text);*/
-                        delays[idx].Add(delay);
-                        texts[idx].Add(text);
-                        String dataLenStr = Convert.ToString(dataLen, 2).PadLeft(8, '0');
-                        binTxt = dataLenStr + binTxt;
-                        bins[idx].Add(binTxt);
-                        text = "";
-                        binTxt = "";
-                        dataLen = 0;
-                    }
-                }
-                else
-                {
-                    /*Invoke(new LogTextDelegate(WriteLogText), str + " send: " + text);
-                    serial.Write(text);*/
-                    delays[idx].Add(delay);
-                    texts[idx].Add(text);
-                    String dataLenStr = Convert.ToString(dataLen, 2).PadLeft(8, '0');
-                    binTxt = dataLenStr + binTxt;
-                    bins[idx].Add(binTxt);
-                    text = "";
-                    binTxt = "";
-                }
-                i += 1;
+                tim1.Start();
             }
         }
         //以下別スレッドからのUI操作用メソッド(Invokeに呼び出される)
@@ -430,10 +259,6 @@ namespace DEO
         {
             tim1.Stop();
             tim1.Dispose();
-            tim2.Stop();
-            tim2.Dispose();
-            tim3.Stop();
-            tim3.Dispose();
             LabelTime.Enabled = false;
             trackBar.Enabled = false;
         }
@@ -509,6 +334,7 @@ namespace DEO
                 }
                 this.MinimumSize = new Size(630, 450);
                 this.MaximumSize = new Size(800, 450);
+                FileterBox.Visible = true;
                 LogTextBox.Visible = true;
             }
             else
@@ -527,6 +353,7 @@ namespace DEO
                 {
                     this.Height = 310;
                 }
+                FileterBox.Visible = false;
                 LogTextBox.Visible = false;
             }
         }
@@ -593,8 +420,6 @@ namespace DEO
         {
             string path = "";
             tempoList.Clear();
-            PianoNoteList.Clear();
-            GuitarNoteList.Clear();
             //パスの取得
             if(status == Status.PlaylistMode)
             {
@@ -676,13 +501,16 @@ namespace DEO
         //トラックチャンク解析イベント
         private void TrackDataAnalaysis(byte[] data)
         {
-            uint currentTime = 0;
-            byte statusByte = 0;
+            uint currentTime = 0, preTime = 0, eventTime = 0;
+            double delay = 0;
+            byte statusByte = 0, channel = 0;
             bool[] longFlags = new bool[128];
-
-            for (int i = 0; i < data.Length;)
+            int laneIndex = 0;
+            int i = 0;
+            while(true)
             {
                 uint deltaTime = 0;
+                NoteType type = new NoteType { };
                 while (true)
                 {
                     //デルタタイムの抽出
@@ -691,7 +519,7 @@ namespace DEO
                     if ((tmp & 0x80) == 0) break;
                     deltaTime = deltaTime << 7;
                 }
-                currentTime = deltaTime;
+                currentTime += deltaTime;
                 if (data[i] < 0x80)
                 {
                     //ランニングステータス
@@ -705,57 +533,40 @@ namespace DEO
 
                 if (statusByte >= 0x80 && statusByte <= 0xef)
                 {
+                    channel = (byte)(statusByte & 0x0f);
                     switch (statusByte & 0xf0)
                     {
                         //ノートオフ
                         case 0x80:
+                            //ノート番号
                             dataByte0 = data[i++];
+                            //ヴェロシティ
                             dataByte1 = data[i++];
+                            eventTime = currentTime - preTime;
+                            preTime = currentTime;
                             if (longFlags[dataByte0])
                             {
-                                NoteData note = new NoteData();
-                                note.eventTime = (int)currentTime;
-                                note.laneIndex = (int)dataByte0;
-                                note.type = NoteType.Off;
-
-                                if (harmony == 0x00)
-                                {
-                                    PianoNoteList.Add(note);
-                                }else if(harmony == 0x1D || harmony == 0x1E){
-                                    GuitarNoteList.Add(note);
-                                }
-                                longFlags[note.laneIndex] = false;
+                                laneIndex = dataByte0;
+                                type = NoteType.Off;
+                                longFlags[dataByte0] = false;
                             }
                             break;
                         //ノートオン
                         case 0x90:
                             dataByte0 = data[i++];
                             dataByte1 = data[i++];
+                            laneIndex = dataByte0;
+                            type = NoteType.On;
+                            eventTime = currentTime - preTime;
+                            preTime = currentTime;
+                            longFlags[dataByte0] = true;
+                            //ヴェロシティ:0はノーツオフ
+                            if (dataByte1 == 0)
                             {
-                                NoteData note = new NoteData();
-                                note.eventTime = (int)currentTime;
-                                note.laneIndex = (int)dataByte0;
-                                note.type = NoteType.On;
-                                longFlags[note.laneIndex] = true;
-                                if (dataByte1 == 0)
+                                if (longFlags[dataByte0])
                                 {
-                                    if (longFlags[note.laneIndex])
-                                    {
-                                        note.type = NoteType.Off;
-                                        longFlags[note.laneIndex] = false;
-                                    }
-                                }
-                                switch (harmony)
-                                {
-                                    case 0x00:
-                                        PianoNoteList.Add(note);
-                                        break;
-                                    case 0x1E:
-                                        isDistGuitar = true;
-                                        goto case 0x1D;
-                                    case 0x1D:
-                                        GuitarNoteList.Add(note);
-                                        break;
+                                    type = NoteType.Off;
+                                    longFlags[dataByte0] = false;
                                 }
                             }
                             break;
@@ -764,31 +575,11 @@ namespace DEO
                             i += 2;
                             break;
                         case 0xb0:
-                            dataByte0 = data[i++];
-                            dataByte1 = data[i++];
-                            if (dataByte0 < 0x78)
-                            {
-
-                            }
-                            else
-                            {
-                                switch (dataByte0)
-                                {
-                                    case 0x78:
-                                    case 0x7a:
-                                    case 0x7b:
-                                    case 0x7c:
-                                    case 0x7d:
-                                    case 0x7e:
-                                    case 0x7f:
-                                        break;
-                                }
-                            }
+                            i += 2;
                             break;
                         //音色設定
                         case 0xc0:
-                            dataByte0 = data[i++];
-                            harmony = dataByte0;
+                            i += 1;
                             break;
                         case 0xd0:
                             i += 1;
@@ -796,6 +587,11 @@ namespace DEO
                         case 0xe0:
                             i += 2;
                             break;
+                    }
+                    if(laneIndex != 0)
+                    {
+                        //midiデータ格納処理
+                        delay += storeNoteData(channel, eventTime, currentTime, laneIndex, type);
                     }
                 }
                 //SysExイベント用、インクリメントオンリー
@@ -868,6 +664,80 @@ namespace DEO
                             break;
                     }
                 }
+                //ループ最後に残っているデータを格納
+                if(i >= data.Length)
+                {
+                    if (laneIndex != 0)
+                    {
+                        //midiデータ格納処理
+                        delay += storeNoteData(channel, eventTime, currentTime, laneIndex, type);
+                    }
+                    break;
+                }
+            }
+            allTime = (allTime < delay) ? (int)delay : allTime;
+        }
+        private double storeNoteData(byte channel, uint eventTime, uint currentTime, int laneIndex, NoteType type)
+        {
+            float bpm = 0;
+            int idx = 1, dataLen = 0;
+            string text = "", binTxt = "";
+            midiData data = new midiData();
+            switch (channel)
+            {
+                case 1:
+                    data.playPart = part.Melody; break;
+                case 2:
+                    data.playPart = part.Guitar; break;
+                case 3:
+                    data.playPart = part.Base; break;
+                case 9:
+                    data.playPart = part.Drum; break;
+            }
+            if (type == NoteType.On)
+            {
+                dataLen += 13;
+                text += idx + ",ON," + laneIndex.ToString() + ",";
+                binTxt += Convert.ToString(idx - 1, 2).PadLeft(4, '0');
+                binTxt += "1";
+                binTxt += Convert.ToString(laneIndex, 2).PadLeft(8, '0');
+                idx++;
+            }
+            else if (type == NoteType.Off)
+            {
+                dataLen += 5;
+                text += idx.ToString() + ",OFF,";
+                binTxt += Convert.ToString(idx - 1, 2).PadLeft(4, '0');
+                binTxt += "0";
+                idx = 1;
+            }
+            data.logTxt = text;
+            data.txtLen = dataLen;
+            data.serialTxt = binTxt;
+            if (eventTime != 0)
+            {
+                //bpmの抽出
+                for (int j = tempoList.Count - 1; j >= 0; j--)
+                {
+                    if (currentTime >= tempoList[j].eventTime)
+                    {
+                        bpm = tempoList[j].bpm;
+                        break;
+                    }
+                }
+                data.delay = Math.Round(60000.0 * (double)eventTime / (double)bpm / (double)headerChunk.division);
+                chCount[channel]++;
+                noteList.Add(data);
+                return data.delay;
+            }
+            else
+            {
+                data.delay = noteList[chCount[channel]-1].delay;
+                data.txtLen += noteList[chCount[channel]-1].txtLen;
+                data.logTxt = noteList[chCount[channel]-1].logTxt + data.logTxt;
+                data.serialTxt = noteList[chCount[channel]-1].serialTxt + data.serialTxt;
+                noteList[chCount[channel]-1] = data;
+                return 0;
             }
         }
         //ランダムなインデックス作成（シャッフル時）
@@ -930,9 +800,8 @@ namespace DEO
                 {
                     HeaderChunkAnalysis();
                     SendSerial();
-                    int musicLength = (int)delays[0].Sum();
-                    trackBar.Maximum = musicLength;
-                    maxTime = TimeSpan.FromMilliseconds(musicLength);
+                    trackBar.Maximum = (int)allTime;
+                    maxTime = TimeSpan.FromMilliseconds((int)allTime);
                     changeTime = new TimeSpan(0, 0, 0);
                     LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
                     trackbar_tim.Change(0, 245);
@@ -978,8 +847,8 @@ namespace DEO
                 }
                 counter = 0;
                 title = "";
-                PianoNoteList.Clear();
                 tempoList.Clear();
+                noteList.Clear();
             }
             catch(Exception ex)
             {

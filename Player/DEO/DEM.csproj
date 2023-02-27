@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MidiData.cs" />
     <Compile Include="PlayerForm.cs">
       <SubType>Form</SubType>
     </Compile>
