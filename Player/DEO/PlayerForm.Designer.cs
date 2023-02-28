@@ -50,10 +50,11 @@
             this.OpenPlaylistMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingSerialportMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.midiチャネルCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingDeviceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PlayerMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PlayModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SetTestModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SetFileModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SetPlaylistModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.TestPlayMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.TestMelodyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,7 +74,8 @@
             this.FileLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.PlaylistLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.FileterBox = new System.Windows.Forms.GroupBox();
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
+            this.filterCheckBox = new System.Windows.Forms.CheckedListBox();
+            this.ShowLogCheckBox1 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
@@ -245,7 +247,7 @@
             this.LabelTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.LabelTime.AutoSize = true;
             this.LabelTime.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.LabelTime.Location = new System.Drawing.Point(444, 117);
+            this.LabelTime.Location = new System.Drawing.Point(444, 114);
             this.LabelTime.Name = "LabelTime";
             this.LabelTime.Size = new System.Drawing.Size(128, 24);
             this.LabelTime.TabIndex = 15;
@@ -279,6 +281,7 @@
             // 
             this.SettingMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.SettingSerialportMenuItem,
+            this.midiチャネルCToolStripMenuItem,
             this.SettingDeviceMenuItem});
             this.SettingMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.SettingMenuItem.Name = "SettingMenuItem";
@@ -291,6 +294,12 @@
             this.SettingSerialportMenuItem.Size = new System.Drawing.Size(162, 22);
             this.SettingSerialportMenuItem.Text = "シリアルポート(&E)...";
             this.SettingSerialportMenuItem.Click += new System.EventHandler(this.SettingSerialportMenuItem_Click);
+            // 
+            // midiチャネルCToolStripMenuItem
+            // 
+            this.midiチャネルCToolStripMenuItem.Name = "midiチャネルCToolStripMenuItem";
+            this.midiチャネルCToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.midiチャネルCToolStripMenuItem.Text = "チャネル(&C)...";
             // 
             // SettingDeviceMenuItem
             // 
@@ -312,23 +321,23 @@
             // PlayModeMenuItem
             // 
             this.PlayModeMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.SetTestModeMenuItem,
+            this.SetFileModeMenuItem,
             this.SetPlaylistModeMenuItem});
             this.PlayModeMenuItem.Name = "PlayModeMenuItem";
-            this.PlayModeMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.PlayModeMenuItem.Size = new System.Drawing.Size(180, 22);
             this.PlayModeMenuItem.Text = "プレイモード(&M)";
             // 
-            // SetTestModeMenuItem
+            // SetFileModeMenuItem
             // 
-            this.SetTestModeMenuItem.Name = "SetTestModeMenuItem";
-            this.SetTestModeMenuItem.Size = new System.Drawing.Size(141, 22);
-            this.SetTestModeMenuItem.Text = "テスト(&D)";
-            this.SetTestModeMenuItem.Click += new System.EventHandler(this.checkBoxTest_CheckedChanged);
+            this.SetFileModeMenuItem.Name = "SetFileModeMenuItem";
+            this.SetFileModeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SetFileModeMenuItem.Text = "ファイル(&F)";
+            this.SetFileModeMenuItem.Click += new System.EventHandler(this.checkBoxTest_CheckedChanged);
             // 
             // SetPlaylistModeMenuItem
             // 
             this.SetPlaylistModeMenuItem.Name = "SetPlaylistModeMenuItem";
-            this.SetPlaylistModeMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.SetPlaylistModeMenuItem.Size = new System.Drawing.Size(180, 22);
             this.SetPlaylistModeMenuItem.Text = "プレイリスト(&L)";
             this.SetPlaylistModeMenuItem.Click += new System.EventHandler(this.checkBoxPlaylist_CheckedChanged);
             // 
@@ -340,31 +349,31 @@
             this.TestBaseMenuItem,
             this.TestDrumMenuItem});
             this.TestPlayMenuItem.Name = "TestPlayMenuItem";
-            this.TestPlayMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.TestPlayMenuItem.Size = new System.Drawing.Size(180, 22);
             this.TestPlayMenuItem.Text = "テストプレイ(&T)";
             // 
             // TestMelodyMenuItem
             // 
             this.TestMelodyMenuItem.Name = "TestMelodyMenuItem";
-            this.TestMelodyMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.TestMelodyMenuItem.Size = new System.Drawing.Size(180, 22);
             this.TestMelodyMenuItem.Text = "メロディー(&V)";
             // 
             // TestGuitarMenuItem
             // 
             this.TestGuitarMenuItem.Name = "TestGuitarMenuItem";
-            this.TestGuitarMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.TestGuitarMenuItem.Size = new System.Drawing.Size(180, 22);
             this.TestGuitarMenuItem.Text = "ギター(&G)";
             // 
             // TestBaseMenuItem
             // 
             this.TestBaseMenuItem.Name = "TestBaseMenuItem";
-            this.TestBaseMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.TestBaseMenuItem.Size = new System.Drawing.Size(180, 22);
             this.TestBaseMenuItem.Text = "ベース(&B)";
             // 
             // TestDrumMenuItem
             // 
             this.TestDrumMenuItem.Name = "TestDrumMenuItem";
-            this.TestDrumMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.TestDrumMenuItem.Size = new System.Drawing.Size(180, 22);
             this.TestDrumMenuItem.Text = "ドラム(&D)";
             // 
             // menuStrip1
@@ -477,7 +486,7 @@
             // 
             // FileterBox
             // 
-            this.FileterBox.Controls.Add(this.checkedListBox1);
+            this.FileterBox.Controls.Add(this.filterCheckBox);
             this.FileterBox.Location = new System.Drawing.Point(6, 241);
             this.FileterBox.Name = "FileterBox";
             this.FileterBox.Size = new System.Drawing.Size(77, 88);
@@ -485,18 +494,29 @@
             this.FileterBox.TabStop = false;
             this.FileterBox.Text = "LogFileter";
             // 
-            // checkedListBox1
+            // filterCheckBox
             // 
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Items.AddRange(new object[] {
+            this.filterCheckBox.FormattingEnabled = true;
+            this.filterCheckBox.Items.AddRange(new object[] {
             "Melody",
             "Guitar",
             "Base",
             "Drum"});
-            this.checkedListBox1.Location = new System.Drawing.Point(3, 19);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(68, 60);
-            this.checkedListBox1.TabIndex = 0;
+            this.filterCheckBox.Location = new System.Drawing.Point(3, 19);
+            this.filterCheckBox.Name = "filterCheckBox";
+            this.filterCheckBox.Size = new System.Drawing.Size(68, 60);
+            this.filterCheckBox.TabIndex = 0;
+            // 
+            // ShowLogCheckBox1
+            // 
+            this.ShowLogCheckBox1.AutoSize = true;
+            this.ShowLogCheckBox1.Location = new System.Drawing.Point(46, 144);
+            this.ShowLogCheckBox1.Name = "ShowLogCheckBox1";
+            this.ShowLogCheckBox1.Size = new System.Drawing.Size(75, 16);
+            this.ShowLogCheckBox1.TabIndex = 20;
+            this.ShowLogCheckBox1.Text = "ログを表示";
+            this.ShowLogCheckBox1.UseVisualStyleBackColor = true;
+            this.ShowLogCheckBox1.CheckedChanged += new System.EventHandler(this.ShowLogCheckBox1_CheckedChanged);
             // 
             // PlayerForm
             // 
@@ -504,6 +524,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.ClientSize = new System.Drawing.Size(584, 411);
+            this.Controls.Add(this.ShowLogCheckBox1);
             this.Controls.Add(this.FileterBox);
             this.Controls.Add(this.PortFileStatus);
             this.Controls.Add(this.PartStatus);
@@ -561,7 +582,7 @@
         private System.Windows.Forms.ToolStripMenuItem SettingDeviceMenuItem;
         private System.Windows.Forms.ToolStripMenuItem PlayerMenuItem;
         private System.Windows.Forms.ToolStripMenuItem PlayModeMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SetTestModeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SetFileModeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SetPlaylistModeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem TestPlayMenuItem;
         private System.Windows.Forms.ToolStripMenuItem TestMelodyMenuItem;
@@ -581,7 +602,9 @@
         private System.Windows.Forms.ToolStripStatusLabel PlaylistLabel;
         private System.Windows.Forms.ToolStripMenuItem HelpMenuItem;
         private System.Windows.Forms.GroupBox FileterBox;
-        private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private System.Windows.Forms.CheckedListBox filterCheckBox;
+        private System.Windows.Forms.ToolStripMenuItem midiチャネルCToolStripMenuItem;
+        private System.Windows.Forms.CheckBox ShowLogCheckBox1;
     }
 }
 

@@ -13,6 +13,8 @@ using System.IO.Ports;
 using System.Security.Cryptography.X509Certificates;
 using System.Security;
 using System.Runtime.Remoting.Channels;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace DEO
 {
@@ -68,17 +70,25 @@ namespace DEO
             public byte[] chunkID;
             public int dataLength;
             public byte[] data;
-        };
+        }; 
+        [System.Runtime.InteropServices.DllImport("winmm.dll",
+            CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        private static extern int mciSendString(string command,
+            System.Text.StringBuilder buffer, int bufferSize, IntPtr hwndCallback);
+
+        private string cmd = "";
         private Status status;
         private string filePath = "", title = "";
-        private int tempo = 1, timePos = 0, counter = 0, allTime = 0;
-        private int[] chCount = new int[20];
+        private int timePos = 0, counter = 0, allTime = 0;
+        //チャネル関係 : チャネルは16個あり、その中で使用するのは4つのみ
+        const int channelNum = 20;
+        private int[] chCount = new int[channelNum], channels = new int[4];
+        private string aliasName = "MediaFile";
         private delegate void LogTextDelegate(string text);
         private delegate void StartButtonDelegate();
         private delegate void StopButtonDelegate();
         private delegate void TrackBarDelegate();
         private delegate void LabelTimeDelegate();
-        private bool isDistGuitar = false;
         private List<int> indexes = new List<int>();
         private List<string> files = new List<string>();
         private List<TempoData> tempoList = new List<TempoData>();
@@ -86,7 +96,7 @@ namespace DEO
         private HeaderChunkData headerChunk = new HeaderChunkData();
         private TimeSpan maxTime, changeTime;
         private System.Threading.Timer trackbar_tim;
-        private System.Timers.Timer tim1 = new System.Timers.Timer();
+        private System.Timers.Timer midiTimer = new System.Timers.Timer();
         public PlayerForm()
         {
             InitializeComponent();
@@ -109,6 +119,12 @@ namespace DEO
             LogTextBox.HideSelection = false;
             ElectricDevicePortLabel.Enabled = false;
             GuitarDevicePortLabel.Enabled = false;
+            for(int i = 0; i < 4; i++)
+            {
+                filterCheckBox.SetItemCheckState(i, CheckState.Checked);
+                //メロディ、ギター、ベース、ドラムの順。ドラムは9チャネルを使用
+                channels[i] = (i == 3) ? 9 : i;
+            }
             UiReset();
         }
         //スレッドタイマーのコールバックメソッド
@@ -147,7 +163,7 @@ namespace DEO
             TestGuitarMenuItem.Enabled = true;
             trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
             SetPlaylistModeMenuItem.Enabled = true;
-            SetTestModeMenuItem.Enabled = true;
+            SetFileModeMenuItem.Enabled = true;
             if (filePath != "" || files.Count > 0)
             {
                 StartButton.Enabled = true;
@@ -159,62 +175,78 @@ namespace DEO
         {
             if (serialPort1.IsOpen)
             {
-                int i = 0;
-                tim1 = new System.Timers.Timer();
-                tim1.Interval = 1;
-                Int64 lastTime = DateTime.Now.Ticks / 10000;
-                tim1.Elapsed += (s, e) =>
+                int cnt = channels.Count();
+                int[] partIndex = new int[cnt], chOffset = new int[cnt];
+                bool[] endFlags = new bool[cnt];
+                midiTimer = new System.Timers.Timer();
+                midiTimer.Interval = 1;
+                Int64 preTime = DateTime.Now.Ticks / 10000;
+                Int64[] lastTime = new Int64[cnt];
+                //配列初期化処理
+                //オフセットは順番に足していく
+                for (int i = 0; i < cnt; i++)
                 {
-                    if ((DateTime.Now.Ticks / 10000 - lastTime) >= (Int64)noteList[i].delay)
+                    if(i == 0)
                     {
-                        tim1.Stop();
-                        Invoke(new LogTextDelegate(WriteLogText), noteList[i].playPart.ToString() +  " : " + noteList[i].logTxt);
-                        serialPort1.Write(Convert.ToString(noteList[i].txtLen, 2).PadLeft(8, '0') + noteList[i].serialTxt);
-                        lastTime += (Int64)noteList[i].delay;
-                        i++;
-                        if (i < chCount[0])
+                        chOffset[i] = 0;
+                    }
+                    else
+                    {
+                        for (int j = channels[i] - 1; j >= 0; j--)
                         {
-                            try
-                            {
-                                tim1.Start();
-                            }
-                            catch { }
+                            chOffset[i] += chCount[j];
                         }
-                        else
+                    }
+                    lastTime[i] = DateTime.Now.Ticks / 10000;
+                }
+                midiTimer.Elapsed += (s, e) =>
+                {
+                    for(int i = 0; i < cnt; i++)
+                    {
+                        if (chCount[channels[i]] > 0)
                         {
-                            if (status == Status.PlaylistMode)
+                            int idx = chOffset[i] + partIndex[i];
+                            if ((DateTime.Now.Ticks / 10000 - lastTime[i]) >= (Int64)noteList[idx].delay)
                             {
-                                if (counter < files.Count)
+                                midiTimer.Stop();
+                                if (filterCheckBox.GetItemChecked(i))
                                 {
-                                    Invoke(new StartButtonDelegate(Stt));
+                                    Invoke(new LogTextDelegate(WriteLogText), noteList[idx].playPart.ToString()
+                                        + " : " + noteList[idx].logTxt);
                                 }
-                                else
+                                serialPort1.Write(Convert.ToString(noteList[idx].txtLen, 2).PadLeft(8, '0') 
+                                    + noteList[idx].serialTxt);
+                                lastTime[i] += (Int64)noteList[idx].delay;
+                                partIndex[i]++;
+                                if (partIndex[i] < chCount[channels[i]])
                                 {
-                                    counter = 0;
-                                    Invoke(new StopButtonDelegate(Stp));
+                                    midiTimer.Start();
                                 }
                             }
-                            else if (status == Status.TestMode)
+                        }
+                    }
+                    if ((DateTime.Now.Ticks / 10000 - preTime) >= (Int64)allTime)
+                    {
+                        Invoke(new StopButtonDelegate(Stp));
+                        if (status == Status.PlaylistMode)
+                        {
+                            if (++counter < files.Count)
                             {
-                                counter = 0;
-                                Invoke(new StopButtonDelegate(Stp));
+                                Invoke(new StartButtonDelegate(Stt));
                             }
                         }
                     }
                 };
-                tim1.Start();
+                midiTimer.Start();
             }
         }
         //以下別スレッドからのUI操作用メソッド(Invokeに呼び出される)
         private void WriteLogText(string text)
         {
-            if (status == Status.TestMode)
-            {
-                LogTextBox.Text += text + "\r\n";
-                LogTextBox.SelectionStart = LogTextBox.Text.Length;
-                LogTextBox.Focus();
-                LogTextBox.ScrollToCaret();
-            }
+            LogTextBox.Text += text + "\r\n";
+            LogTextBox.SelectionStart = LogTextBox.Text.Length;
+            LogTextBox.Focus();
+            LogTextBox.ScrollToCaret();
         }
         private void UpDateTrackBar()
         {
@@ -242,11 +274,8 @@ namespace DEO
         }
         private void Stt()
         {
-            Thread.Sleep(1000);
-            trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
-            TaskCancel();
-            counter++;
-            title = "";
+            NextButton.Enabled = false;
+            ReturnButton.Enabled = false;
             StartButton.Enabled = true;
             StartButton.PerformClick();
         }
@@ -257,8 +286,8 @@ namespace DEO
         //タスク取り消用メソッド
         private void TaskCancel()
         {
-            tim1.Stop();
-            tim1.Dispose();
+            midiTimer.Stop();
+            midiTimer.Dispose();
             LabelTime.Enabled = false;
             trackBar.Enabled = false;
         }
@@ -272,7 +301,7 @@ namespace DEO
             OpenPlaylistMenuItem.Enabled = false;
             OpenMidiFileMenuItem.Enabled = false;
             SetPlaylistModeMenuItem.Enabled = false;
-            SetTestModeMenuItem.Enabled = false;
+            SetFileModeMenuItem.Enabled = false;
             RepeatCheck.Enabled = false;
             RandomCheck.Enabled = false;
             PlaylistLabel.Enabled = false;
@@ -290,7 +319,7 @@ namespace DEO
             if (!SetPlaylistModeMenuItem.Checked)
             {
                 SetPlaylistModeMenuItem.Checked = true;
-                SetTestModeMenuItem.Enabled = false;
+                SetFileModeMenuItem.Enabled = false;
                 PlaylistLabel.Enabled = true;
                 OpenPlaylistMenuItem.Enabled = true;
                 if(files.Count > 0)
@@ -303,7 +332,7 @@ namespace DEO
             else
             {
                 SetPlaylistModeMenuItem.Checked = false;
-                SetTestModeMenuItem.Enabled = true;
+                SetFileModeMenuItem.Enabled = true;
                 PlaylistLabel.Enabled = false;
                 OpenPlaylistMenuItem.Enabled = false;
                 StartButton.Enabled = false;
@@ -316,9 +345,9 @@ namespace DEO
         }
         private void checkBoxTest_CheckedChanged(object sender, EventArgs e)
         {
-            if (!SetTestModeMenuItem.Checked)
+            if (!SetFileModeMenuItem.Checked)
             {
-                SetTestModeMenuItem.Checked = true;
+                SetFileModeMenuItem.Checked = true;
                 SetPlaylistModeMenuItem.Enabled = false;
                 FileLabel.Enabled = true;
                 OpenMidiFileMenuItem.Enabled = true;
@@ -328,18 +357,10 @@ namespace DEO
                     StartButton.Enabled = true;
                     NowPlaying.Enabled = true;
                 }
-                if (this.Height < 450)
-                {
-                    this.Height = 450;
-                }
-                this.MinimumSize = new Size(630, 450);
-                this.MaximumSize = new Size(800, 450);
-                FileterBox.Visible = true;
-                LogTextBox.Visible = true;
             }
             else
             {
-                SetTestModeMenuItem.Checked = false;
+                SetFileModeMenuItem.Checked = false;
                 SetPlaylistModeMenuItem.Enabled = true;
                 FileLabel.Enabled = false;
                 OpenMidiFileMenuItem.Enabled = false;
@@ -347,14 +368,6 @@ namespace DEO
                 NextButton.Enabled = false;
                 ReturnButton.Enabled = false;
                 NowPlaying.Enabled = false;
-                this.MinimumSize = new Size(630, 310);
-                this.MaximumSize = new Size(800, 310);
-                if (this.Height > 310)
-                {
-                    this.Height = 310;
-                }
-                FileterBox.Visible = false;
-                LogTextBox.Visible = false;
             }
         }
         //ファイルを開くボタンのクリックイベント
@@ -418,26 +431,10 @@ namespace DEO
         //ヘッダーチャンク解析イベント
         private void HeaderChunkAnalysis()
         {
-            string path = "";
+            int dataOffset = 0;
             tempoList.Clear();
-            //パスの取得
-            if(status == Status.PlaylistMode)
-            {
-                if (RandomCheck.Checked)
-                {
-                    path = files[indexes[counter]];
-                }
-                else
-                {
-                    path = files[counter];
-                }
-            }
-            else
-            {
-                path = filePath;
-            }
             //ヘッダチャンクの解析
-            using(FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using(FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             using(BinaryReader reader = new BinaryReader(stream))
             {
                 headerChunk.chunkID = reader.ReadBytes(4);
@@ -469,7 +466,7 @@ namespace DEO
                 }
                 if(headerChunk.format != 1)
                 {
-                    MessageBox.Show(Path.GetFileNameWithoutExtension(path) + "は対応していないフォーマットです。");
+                    MessageBox.Show(Path.GetFileNameWithoutExtension(filePath) + "は対応していないフォーマットです。");
                     counter++;
                     if(status == Status.TestMode)
                     {
@@ -494,12 +491,12 @@ namespace DEO
                     }
                     trackChunks[i].data = reader.ReadBytes(trackChunks[i].dataLength);
                     //各トラックデータについてイベントとデルタタイムの抽出
-                    TrackDataAnalaysis(trackChunks[i].data);                    
+                    dataOffset = TrackDataAnalysis(trackChunks[i].data, dataOffset);                    
                 }
             }
         }
         //トラックチャンク解析イベント
-        private void TrackDataAnalaysis(byte[] data)
+        private int TrackDataAnalysis(byte[] data, int offset)
         {
             uint currentTime = 0, preTime = 0, eventTime = 0;
             double delay = 0;
@@ -591,7 +588,7 @@ namespace DEO
                     if(laneIndex != 0)
                     {
                         //midiデータ格納処理
-                        delay += storeNoteData(channel, eventTime, currentTime, laneIndex, type);
+                        delay += storeNoteData(channel, offset, eventTime, currentTime, laneIndex, type);
                     }
                 }
                 //SysExイベント用、インクリメントオンリー
@@ -667,17 +664,14 @@ namespace DEO
                 //ループ最後に残っているデータを格納
                 if(i >= data.Length)
                 {
-                    if (laneIndex != 0)
-                    {
-                        //midiデータ格納処理
-                        delay += storeNoteData(channel, eventTime, currentTime, laneIndex, type);
-                    }
                     break;
                 }
             }
+            offset += chCount[channel];
             allTime = (allTime < delay) ? (int)delay : allTime;
+            return offset;
         }
-        private double storeNoteData(byte channel, uint eventTime, uint currentTime, int laneIndex, NoteType type)
+        private double storeNoteData(byte channel, int offset, uint eventTime, uint currentTime, int laneIndex, NoteType type)
         {
             float bpm = 0;
             int idx = 1, dataLen = 0;
@@ -685,11 +679,11 @@ namespace DEO
             midiData data = new midiData();
             switch (channel)
             {
-                case 1:
+                case 0:
                     data.playPart = part.Melody; break;
-                case 2:
+                case 1:
                     data.playPart = part.Guitar; break;
-                case 3:
+                case 2:
                     data.playPart = part.Base; break;
                 case 9:
                     data.playPart = part.Drum; break;
@@ -719,24 +713,26 @@ namespace DEO
                 //bpmの抽出
                 for (int j = tempoList.Count - 1; j >= 0; j--)
                 {
-                    if (currentTime >= tempoList[j].eventTime)
+                    if (currentTime > tempoList[j].eventTime)
                     {
                         bpm = tempoList[j].bpm;
                         break;
                     }
                 }
                 data.delay = Math.Round(60000.0 * (double)eventTime / (double)bpm / (double)headerChunk.division);
+                //新しく要素を作成
                 chCount[channel]++;
                 noteList.Add(data);
                 return data.delay;
             }
             else
             {
-                data.delay = noteList[chCount[channel]-1].delay;
-                data.txtLen += noteList[chCount[channel]-1].txtLen;
-                data.logTxt = noteList[chCount[channel]-1].logTxt + data.logTxt;
-                data.serialTxt = noteList[chCount[channel]-1].serialTxt + data.serialTxt;
-                noteList[chCount[channel]-1] = data;
+                //イベントタイムが0の時はリストの前要素を編集
+                data.delay = noteList[offset + chCount[channel]-1].delay;
+                data.txtLen += noteList[offset + chCount[channel]-1].txtLen;
+                data.logTxt = noteList[offset + chCount[channel]-1].logTxt + data.logTxt;
+                data.serialTxt = noteList[offset + chCount[channel]-1].serialTxt + data.serialTxt;
+                noteList[offset + chCount[channel]-1] = data;
                 return 0;
             }
         }
@@ -764,19 +760,26 @@ namespace DEO
         {
             if (this.Enabled)
             {
-                timePos = 0;
-                isDistGuitar = false;
-                StartButton.Enabled = false;
+                //パスの取得
+                if (status == Status.PlaylistMode)
+                {
+                    if (RandomCheck.Checked)
+                    {
+                        filePath = files[indexes[counter]];
+                    }
+                    else
+                    {
+                        filePath = files[counter];
+                    }
+                }
                 FileMenuItem.Enabled = false;
-                SettingMenuItem.Enabled = false;
-                PlayerMenuItem.Enabled = false;
+                timePos = 0;
+                StartButton.Enabled = false;
+                menuStrip1.Enabled = false;
+                //ファイルを開く
+                cmd = "open \"" + filePath + "\" alias " + aliasName;
+                mciSendString(cmd, null, 0, IntPtr.Zero);
                 StopButton.Enabled = true;
-                OpenPlaylistMenuItem.Enabled = false;
-                OpenMidiFileMenuItem.Enabled = false;
-                SetPlaylistModeMenuItem.Enabled = false;
-                SetTestModeMenuItem.Enabled = false;
-                FileLabel.Enabled = false;
-                PlaylistLabel.Enabled = false;
                 RepeatCheck.Enabled = false;
                 RandomCheck.Enabled = false;
                 LabelTime.Enabled = true;
@@ -798,6 +801,9 @@ namespace DEO
                 }
                 try
                 {
+                    //再生する
+                    cmd = "play " + aliasName;
+                    mciSendString(cmd, null, 0, IntPtr.Zero);
                     HeaderChunkAnalysis();
                     SendSerial();
                     trackBar.Maximum = (int)allTime;
@@ -814,23 +820,29 @@ namespace DEO
         {
             try
             {
+                menuStrip1.Enabled = true;
+                allTime = 0;
                 trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 changeTime = new TimeSpan(0, 0, 0);
                 TaskCancel();
+                string cmd;
+                //再生しているWAVEを停止する
+                cmd = "stop " + aliasName;
+                mciSendString(cmd, null, 0, IntPtr.Zero);
+                //閉じる
+                cmd = "close " + aliasName;
+                mciSendString(cmd, null, 0, IntPtr.Zero);
                 string text = "1,OFF,2,OFF,3,OFF,4,OFF,5,OFF,6,OFF,7,OFF,8,OFF,9,OFF,10,OFF,";
                 string binTxt = "000110010000000010001000011001000";
-                Invoke(new LogTextDelegate(WriteLogText), "piano send: " + text);
+                Invoke(new LogTextDelegate(WriteLogText), "Reset : " + text);
                 serialPort1.Write(binTxt);
                 StartButton.Enabled = true;
-                FileMenuItem.Enabled = true;
                 SettingMenuItem.Enabled = true;
-                PlayerMenuItem.Enabled = true;
                 StopButton.Enabled = false;
                 LabelTime.Enabled = false;
                 trackBar.Enabled = false;
                 timePos = 0;
                 trackBar.Value = 0;
-
                 if (SetPlaylistModeMenuItem.Checked)
                 {
                     OpenPlaylistMenuItem.Enabled = true;
@@ -839,16 +851,21 @@ namespace DEO
                     RepeatCheck.Enabled = true;
                     RandomCheck.Enabled = true;
                 }
-                if (SetTestModeMenuItem.Checked)
+                if (SetFileModeMenuItem.Checked)
                 { 
                     OpenMidiFileMenuItem.Enabled = true;
                     FileLabel.Enabled = true;
-                    SetTestModeMenuItem.Enabled = true;
+                    SetFileModeMenuItem.Enabled = true;
                 }
-                counter = 0;
+                if(status == Status.TestMode)
+                {
+                    counter = 0;
+                }
                 title = "";
+                //データをリセット
                 tempoList.Clear();
                 noteList.Clear();
+                chCount = new int[chCount.Length];
             }
             catch(Exception ex)
             {
@@ -859,17 +876,10 @@ namespace DEO
         {
             if (NextButton.Enabled)
             {
-                if (serialPort1.IsOpen)
-                {
-                    string binTxt = "000110010000000010001000011001000";
-                    serialPort1.Write(binTxt);
-                }
-                Thread.Sleep(500);
-                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
-                TaskCancel();
-                StartButton.Enabled = true;
+                StopButton.PerformClick();
+                NextButton.Enabled = false;
+                ReturnButton.Enabled = false;
                 counter++;
-                title = "";
                 StartButton.PerformClick();
             }
         }
@@ -877,11 +887,9 @@ namespace DEO
         {
             if (ReturnButton.Enabled)
             {
-                string binTxt = "000110010000000010001000011001000";
-                serialPort1.Write(binTxt);
-                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
-                TaskCancel();
-                StartButton.Enabled = true;
+                StopButton.PerformClick();
+                NextButton.Enabled = false;
+                ReturnButton.Enabled = false;
                 if (counter <= 1)
                 {
                     counter = 0;
@@ -890,11 +898,36 @@ namespace DEO
                 {
                     counter--;
                 }
-                title = "";
-                Thread.Sleep(500);
                 StartButton.PerformClick();
             }
         }
+
+        private void ShowLogCheckBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ShowLogCheckBox1.Checked)
+            {
+                if (this.Height < 450)
+                {
+                    this.Height = 450;
+                }
+                this.MinimumSize = new Size(630, 450);
+                this.MaximumSize = new Size(800, 450);
+                FileterBox.Visible = true;
+                LogTextBox.Visible = true;
+            }
+            else
+            {
+                this.MinimumSize = new Size(630, 310);
+                this.MaximumSize = new Size(800, 310);
+                if (this.Height > 310)
+                {
+                    this.Height = 310;
+                }
+                FileterBox.Visible = false;
+                LogTextBox.Visible = false;
+            }
+        }
+
         private void RandomCheck_CheckedChanged(object sender, EventArgs e)
         {
             if (RandomCheck.Checked)
