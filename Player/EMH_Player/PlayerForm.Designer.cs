@@ -1,4 +1,4 @@
-﻿namespace DEO
+﻿namespace EMH_Player
 {
     partial class PlayerForm
     {
@@ -50,17 +50,12 @@
             this.OpenPlaylistMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingSerialportMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.midiチャネルCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingDeviceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SettingChannelMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PlayerMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PlayModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SetFileModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SetPlaylistModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.TestPlayMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.TestMelodyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.TestGuitarMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.TestBaseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.TestDrumMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.HelpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PartStatus = new System.Windows.Forms.StatusStrip();
@@ -164,7 +159,7 @@
             this.NowPlaying.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.NowPlaying.Font = new System.Drawing.Font("MS UI Gothic", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.NowPlaying.ForeColor = System.Drawing.Color.SteelBlue;
-            this.NowPlaying.Location = new System.Drawing.Point(12, 40);
+            this.NowPlaying.Location = new System.Drawing.Point(9, 40);
             this.NowPlaying.Name = "NowPlaying";
             this.NowPlaying.ReadOnly = true;
             this.NowPlaying.Size = new System.Drawing.Size(560, 39);
@@ -178,9 +173,9 @@
             this.RepeatCheck.Dock = System.Windows.Forms.DockStyle.Right;
             this.RepeatCheck.Font = new System.Drawing.Font("MS UI Gothic", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.RepeatCheck.ForeColor = System.Drawing.Color.Fuchsia;
-            this.RepeatCheck.Location = new System.Drawing.Point(48, 3);
+            this.RepeatCheck.Location = new System.Drawing.Point(8, 3);
             this.RepeatCheck.Name = "RepeatCheck";
-            this.RepeatCheck.Size = new System.Drawing.Size(67, 43);
+            this.RepeatCheck.Size = new System.Drawing.Size(67, 39);
             this.RepeatCheck.TabIndex = 8;
             this.RepeatCheck.Text = "🔁";
             this.RepeatCheck.UseVisualStyleBackColor = true;
@@ -191,9 +186,9 @@
             this.RandomCheck.Dock = System.Windows.Forms.DockStyle.Left;
             this.RandomCheck.Font = new System.Drawing.Font("MS UI Gothic", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.RandomCheck.ForeColor = System.Drawing.Color.RoyalBlue;
-            this.RandomCheck.Location = new System.Drawing.Point(121, 3);
+            this.RandomCheck.Location = new System.Drawing.Point(81, 3);
             this.RandomCheck.Name = "RandomCheck";
-            this.RandomCheck.Size = new System.Drawing.Size(67, 43);
+            this.RandomCheck.Size = new System.Drawing.Size(67, 39);
             this.RandomCheck.TabIndex = 9;
             this.RandomCheck.Text = "🔀";
             this.RandomCheck.UseVisualStyleBackColor = true;
@@ -207,11 +202,11 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel5.Controls.Add(this.RepeatCheck, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.RandomCheck, 1, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(176, 114);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(219, 118);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(237, 49);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(157, 45);
             this.tableLayoutPanel5.TabIndex = 10;
             // 
             // openFileDialog
@@ -228,7 +223,7 @@
             this.LogTextBox.Multiline = true;
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
-            this.LogTextBox.Size = new System.Drawing.Size(404, 137);
+            this.LogTextBox.Size = new System.Drawing.Size(401, 137);
             this.LogTextBox.TabIndex = 12;
             // 
             // trackBar
@@ -247,7 +242,7 @@
             this.LabelTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.LabelTime.AutoSize = true;
             this.LabelTime.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.LabelTime.Location = new System.Drawing.Point(444, 114);
+            this.LabelTime.Location = new System.Drawing.Point(441, 118);
             this.LabelTime.Name = "LabelTime";
             this.LabelTime.Size = new System.Drawing.Size(128, 24);
             this.LabelTime.TabIndex = 15;
@@ -268,21 +263,21 @@
             this.OpenMidiFileMenuItem.Name = "OpenMidiFileMenuItem";
             this.OpenMidiFileMenuItem.Size = new System.Drawing.Size(193, 22);
             this.OpenMidiFileMenuItem.Text = "midiファイルを開く(&M)";
-            this.OpenMidiFileMenuItem.Click += new System.EventHandler(this.OpenFileButton_Click);
+            this.OpenMidiFileMenuItem.Click += new System.EventHandler(this.OpenFileMenuItem_Click);
             // 
             // OpenPlaylistMenuItem
             // 
             this.OpenPlaylistMenuItem.Name = "OpenPlaylistMenuItem";
             this.OpenPlaylistMenuItem.Size = new System.Drawing.Size(193, 22);
             this.OpenPlaylistMenuItem.Text = "midiプレイリストを開く(&L)";
-            this.OpenPlaylistMenuItem.Click += new System.EventHandler(this.OpenPlaylistButton_Click);
+            this.OpenPlaylistMenuItem.Click += new System.EventHandler(this.OpenFileMenuItem_Click);
             // 
             // SettingMenuItem
             // 
             this.SettingMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.SettingSerialportMenuItem,
-            this.midiチャネルCToolStripMenuItem,
-            this.SettingDeviceMenuItem});
+            this.SettingDeviceMenuItem,
+            this.SettingChannelMenuItem});
             this.SettingMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.SettingMenuItem.Name = "SettingMenuItem";
             this.SettingMenuItem.Size = new System.Drawing.Size(74, 20);
@@ -291,28 +286,28 @@
             // SettingSerialportMenuItem
             // 
             this.SettingSerialportMenuItem.Name = "SettingSerialportMenuItem";
-            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(180, 22);
             this.SettingSerialportMenuItem.Text = "シリアルポート(&E)...";
             this.SettingSerialportMenuItem.Click += new System.EventHandler(this.SettingSerialportMenuItem_Click);
-            // 
-            // midiチャネルCToolStripMenuItem
-            // 
-            this.midiチャネルCToolStripMenuItem.Name = "midiチャネルCToolStripMenuItem";
-            this.midiチャネルCToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
-            this.midiチャネルCToolStripMenuItem.Text = "チャネル(&C)...";
             // 
             // SettingDeviceMenuItem
             // 
             this.SettingDeviceMenuItem.Name = "SettingDeviceMenuItem";
-            this.SettingDeviceMenuItem.Size = new System.Drawing.Size(162, 22);
-            this.SettingDeviceMenuItem.Text = "デバイス(&D)...";
+            this.SettingDeviceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SettingDeviceMenuItem.Text = "パートとデバイス(&P)...";
             this.SettingDeviceMenuItem.Click += new System.EventHandler(this.SettingDeviceMenuItem_Click);
+            // 
+            // SettingChannelMenuItem
+            // 
+            this.SettingChannelMenuItem.Name = "SettingChannelMenuItem";
+            this.SettingChannelMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SettingChannelMenuItem.Text = "Midiチャネル(&C)...";
+            this.SettingChannelMenuItem.Click += new System.EventHandler(this.SettingChannelMenuItem_Click);
             // 
             // PlayerMenuItem
             // 
             this.PlayerMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.PlayModeMenuItem,
-            this.TestPlayMenuItem});
+            this.PlayModeMenuItem});
             this.PlayerMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.PlayerMenuItem.Name = "PlayerMenuItem";
             this.PlayerMenuItem.Size = new System.Drawing.Size(79, 20);
@@ -324,57 +319,22 @@
             this.SetFileModeMenuItem,
             this.SetPlaylistModeMenuItem});
             this.PlayModeMenuItem.Name = "PlayModeMenuItem";
-            this.PlayModeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.PlayModeMenuItem.Size = new System.Drawing.Size(146, 22);
             this.PlayModeMenuItem.Text = "プレイモード(&M)";
             // 
             // SetFileModeMenuItem
             // 
             this.SetFileModeMenuItem.Name = "SetFileModeMenuItem";
-            this.SetFileModeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SetFileModeMenuItem.Size = new System.Drawing.Size(141, 22);
             this.SetFileModeMenuItem.Text = "ファイル(&F)";
             this.SetFileModeMenuItem.Click += new System.EventHandler(this.checkBoxTest_CheckedChanged);
             // 
             // SetPlaylistModeMenuItem
             // 
             this.SetPlaylistModeMenuItem.Name = "SetPlaylistModeMenuItem";
-            this.SetPlaylistModeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SetPlaylistModeMenuItem.Size = new System.Drawing.Size(141, 22);
             this.SetPlaylistModeMenuItem.Text = "プレイリスト(&L)";
             this.SetPlaylistModeMenuItem.Click += new System.EventHandler(this.checkBoxPlaylist_CheckedChanged);
-            // 
-            // TestPlayMenuItem
-            // 
-            this.TestPlayMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.TestMelodyMenuItem,
-            this.TestGuitarMenuItem,
-            this.TestBaseMenuItem,
-            this.TestDrumMenuItem});
-            this.TestPlayMenuItem.Name = "TestPlayMenuItem";
-            this.TestPlayMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.TestPlayMenuItem.Text = "テストプレイ(&T)";
-            // 
-            // TestMelodyMenuItem
-            // 
-            this.TestMelodyMenuItem.Name = "TestMelodyMenuItem";
-            this.TestMelodyMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.TestMelodyMenuItem.Text = "メロディー(&V)";
-            // 
-            // TestGuitarMenuItem
-            // 
-            this.TestGuitarMenuItem.Name = "TestGuitarMenuItem";
-            this.TestGuitarMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.TestGuitarMenuItem.Text = "ギター(&G)";
-            // 
-            // TestBaseMenuItem
-            // 
-            this.TestBaseMenuItem.Name = "TestBaseMenuItem";
-            this.TestBaseMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.TestBaseMenuItem.Text = "ベース(&B)";
-            // 
-            // TestDrumMenuItem
-            // 
-            this.TestDrumMenuItem.Name = "TestDrumMenuItem";
-            this.TestDrumMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.TestDrumMenuItem.Text = "ドラム(&D)";
             // 
             // menuStrip1
             // 
@@ -396,6 +356,7 @@
             this.HelpMenuItem.Name = "HelpMenuItem";
             this.HelpMenuItem.Size = new System.Drawing.Size(65, 20);
             this.HelpMenuItem.Text = "ヘルプ(&H)";
+            this.HelpMenuItem.Click += new System.EventHandler(this.HelpMenuItem_Click);
             // 
             // PartStatus
             // 
@@ -416,7 +377,7 @@
             this.MelodyDeviceLabel.Name = "MelodyDeviceLabel";
             this.MelodyDeviceLabel.Size = new System.Drawing.Size(189, 17);
             this.MelodyDeviceLabel.Spring = true;
-            this.MelodyDeviceLabel.Text = "Melody : Motor & Solenoid [1]";
+            this.MelodyDeviceLabel.Text = "Melody : Motor &&Solenoid [1]";
             // 
             // toolStripStatusLabel2
             // 
@@ -487,7 +448,7 @@
             // FileterBox
             // 
             this.FileterBox.Controls.Add(this.filterCheckBox);
-            this.FileterBox.Location = new System.Drawing.Point(6, 241);
+            this.FileterBox.Location = new System.Drawing.Point(6, 245);
             this.FileterBox.Name = "FileterBox";
             this.FileterBox.Size = new System.Drawing.Size(77, 88);
             this.FileterBox.TabIndex = 19;
@@ -510,7 +471,7 @@
             // ShowLogCheckBox1
             // 
             this.ShowLogCheckBox1.AutoSize = true;
-            this.ShowLogCheckBox1.Location = new System.Drawing.Point(46, 144);
+            this.ShowLogCheckBox1.Location = new System.Drawing.Point(6, 150);
             this.ShowLogCheckBox1.Name = "ShowLogCheckBox1";
             this.ShowLogCheckBox1.Size = new System.Drawing.Size(75, 16);
             this.ShowLogCheckBox1.TabIndex = 20;
@@ -537,7 +498,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MaximumSize = new System.Drawing.Size(800, 510);
+            this.MaximumSize = new System.Drawing.Size(800, 450);
             this.MinimumSize = new System.Drawing.Size(600, 310);
             this.Name = "PlayerForm";
             this.Text = "ElectricMusicPlayer";
@@ -584,11 +545,6 @@
         private System.Windows.Forms.ToolStripMenuItem PlayModeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SetFileModeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SetPlaylistModeMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem TestPlayMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem TestMelodyMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem TestGuitarMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem TestBaseMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem TestDrumMenuItem;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.StatusStrip PartStatus;
         private System.Windows.Forms.ToolStripStatusLabel MelodyDeviceLabel;
@@ -603,7 +559,7 @@
         private System.Windows.Forms.ToolStripMenuItem HelpMenuItem;
         private System.Windows.Forms.GroupBox FileterBox;
         private System.Windows.Forms.CheckedListBox filterCheckBox;
-        private System.Windows.Forms.ToolStripMenuItem midiチャネルCToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SettingChannelMenuItem;
         private System.Windows.Forms.CheckBox ShowLogCheckBox1;
     }
 }

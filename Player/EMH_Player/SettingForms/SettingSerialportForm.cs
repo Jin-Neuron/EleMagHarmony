@@ -12,7 +12,7 @@ using System.Management;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Reflection;
 
-namespace DEO
+namespace EMH_Player
 {
     public partial class SettingSerialportForm : Form
     {

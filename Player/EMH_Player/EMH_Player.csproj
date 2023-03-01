@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{BCE21265-8BAE-42EB-BF9F-773966FFB02B}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>DEO</RootNamespace>
-    <AssemblyName>DEO</AssemblyName>
+    <RootNamespace>EMH_Player</RootNamespace>
+    <AssemblyName>EMH_Player</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -50,7 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MidiData.cs" />
+    <Compile Include="DataClass.cs" />
     <Compile Include="PlayerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -59,16 +59,22 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingDevicecsForm.cs">
+    <Compile Include="SettingForms\SettingDevicecsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingDevicecsForm.Designer.cs">
+    <Compile Include="SettingForms\SettingDevicecsForm.Designer.cs">
       <DependentUpon>SettingDevicecsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SettingSerialportForm.cs">
+    <Compile Include="SettingForms\SettingMidiChannelForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingSerialportForm.Designer.cs">
+    <Compile Include="SettingForms\SettingMidiChannelForm.Designer.cs">
+      <DependentUpon>SettingMidiChannelForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingForms\SettingSerialportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingForms\SettingSerialportForm.Designer.cs">
       <DependentUpon>SettingSerialportForm.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="PlayerForm.resx">
@@ -84,10 +90,13 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SettingDevicecsForm.resx">
+    <EmbeddedResource Include="SettingForms\SettingDevicecsForm.resx">
       <DependentUpon>SettingDevicecsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingSerialportForm.resx">
+    <EmbeddedResource Include="SettingForms\SettingMidiChannelForm.resx">
+      <DependentUpon>SettingMidiChannelForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingForms\SettingSerialportForm.resx">
       <DependentUpon>SettingSerialportForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">

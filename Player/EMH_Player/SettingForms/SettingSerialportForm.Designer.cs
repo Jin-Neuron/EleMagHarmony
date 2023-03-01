@@ -1,4 +1,4 @@
-﻿namespace DEO
+﻿namespace EMH_Player
 {
     partial class SettingSerialportForm
     {
