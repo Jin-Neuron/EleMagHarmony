@@ -1,0 +1,115 @@
+[33mcommit 3b15834bf4724698ba697998400481998758d059[m[33m ([m[1;36mHEAD[m[33m)[m
+Author: MasaKamiya <86526794+MasaKamiya@users.noreply.github.com>
+Date:   Mon Jun 28 21:59:18 2021 +0900
+
+    Add files via upload
+
+[33mcommit 64aab9f6d59b167253f1b583084c97603ffb1506[m
+Author: Jin-314 <yuujinyuujin77@gmail.com>
+Date:   Mon Jun 28 21:37:26 2021 +0900
+
+    Add files via upload
+
+[33mcommit 1804bfded96397dd04af90231599c6cec07de7df[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sat Jun 26 23:04:33 2021 +0900
+
+    修正
+
+[33mcommit ca99122e4ee327849c9628d92ac8543cf779f1cb[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sat Apr 17 12:06:11 2021 +0900
+
+    不具合修正
+
+[33mcommit 03487d0bdd82fa97642bae3ea43024457b35d560[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sat Apr 17 11:39:34 2021 +0900
+
+    バイナリ送信完成版
+
+[33mcommit 958cdbeb1ae6dab4170182006a6a0b3b347b8cf0[m
+Author: Jin-314 <yuujinyuujin77@gmail.com>
+Date:   Sat Apr 17 10:31:59 2021 +0900
+
+    バイナリ送信
+
+[33mcommit f4770970a00073d6114b0d8c4d9f213f8d5bd46e[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Wed Apr 14 17:51:23 2021 +0900
+
+    TrackBarの追加
+
+[33mcommit f383c86db3a5cb9c03cdf4fd7b190d27f31322f5[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sun Apr 11 14:40:26 2021 +0900
+
+    タイマーの誤差修正
+
+[33mcommit eb268e44d1ebfec8df4f5fb2f6f58bfc078d3293[m
+Author: Jin-314 <yuujinyuujin77@gmail.com>
+Date:   Mon Oct 5 18:15:34 2020 +0900
+
+    ベータ版v3.1
+
+[33mcommit 0706cb2392af04e5af0980ddf8b7631bb627ec5a[m
+Merge: 9c437da ecd0f38
+Author: Jin-314 <yuujinyuujin77@gmail.com>
+Date:   Mon Oct 5 15:00:32 2020 +0900
+
+    ベータv3
+
+[33mcommit 9c437da4482e823f3d61f560d659aa3cbd90d915[m
+Author: Jin-314 <yuujinyuujin77@gmail.com>
+Date:   Mon Oct 5 14:59:11 2020 +0900
+
+    Beta
+
+[33mcommit ecd0f38cf9e5a1696f6aa2211dd7247d8ce1e6fb[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sun Oct 4 21:55:45 2020 +0900
+
+    ベータ版
+
+[33mcommit fd08eca85c4bca560afe2554745600d6886be96c[m
+Merge: 6953cd6 3302553
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sat Oct 3 09:13:36 2020 +0900
+
+    ベータ版v2
+
+[33mcommit 6953cd60259e95bdb7971f3b855efa1daad6adba[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sat Oct 3 09:06:10 2020 +0900
+
+    Test
+
+[33mcommit 330255330bd5785c2bdc86eb9e2e22cf987f1cbd[m
+Author: Jin-314 <yuujinyuujin77@gmail.com>
+Date:   Sat Oct 3 08:07:05 2020 +0900
+
+    ベータ版
+
+[33mcommit dbb6c0f78871d110a0ca6ff60a380d2d8437dd41[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sun Aug 2 21:07:57 2020 +0900
+
+    commit
+
+[33mcommit 94fe450b155070aa8a065bd889657b1b160a8fb7[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Fri Apr 17 00:25:52 2020 +0900
+
+    v1 Commit
+
+[33mcommit 521248ce55f477070ca4b9abade095b1cd22f4f0[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Wed Apr 8 07:19:00 2020 +0900
+
+    非同期処理等
+
+[33mcommit f64da792cb80c4eaa5743b1472af0625656d2b44[m
+Author: Jin <58265068+Jin-314@users.noreply.github.com>
+Date:   Sun Mar 29 02:43:55 2020 +0900
+
+    first commit

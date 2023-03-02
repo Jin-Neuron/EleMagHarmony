@@ -190,7 +190,11 @@ namespace EMH_Player
                             }
                             lastTime[i] += (Int64)noteList[idx].delay;
                             partIndex[i]++;
-                            midiTimer.Start();
+                            try
+                            {
+                                midiTimer.Start();
+                            }
+                            catch{}
                         }
                     }
                 }
@@ -660,8 +664,10 @@ namespace EMH_Player
                 }
                 if (idx == 0) return -1;
                 dataLen += 13;
-                text += idx + ",ON," + laneIndex.ToString() + ",";
-                binTxt += Convert.ToString(idx - 1, 2).PadLeft(4, '0');
+                int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
+                timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
+                text += (idx +  timerOffset).ToString() + ",ON," + laneIndex.ToString() + ",";
+                binTxt += Convert.ToString(idx + timerOffset - 1, 2).PadLeft(4, '0');
                 binTxt += "1";
                 binTxt += Convert.ToString(laneIndex, 2).PadLeft(8, '0');
             }
@@ -678,8 +684,10 @@ namespace EMH_Player
                 }
                 if (idx == 0) return -1;
                 dataLen += 5;
-                text += idx.ToString() + ",OFF,";
-                binTxt += Convert.ToString(idx - 1, 2).PadLeft(4, '0');
+                int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
+                timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
+                text += (idx + timerOffset).ToString() + ",OFF,";
+                binTxt += Convert.ToString(idx + timerOffset - 1, 2).PadLeft(4, '0');
                 binTxt += "0";
             }
             data.logTxt = text;
