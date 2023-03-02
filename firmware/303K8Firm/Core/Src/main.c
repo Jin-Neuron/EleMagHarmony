@@ -33,7 +33,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TimerNum 8
-#define FloppyNum 6
+#define FloppyNum 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -54,9 +54,8 @@ TIM_HandleTypeDef htim17;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-GPIO_PinState currentState = GPIO_PIN_RESET;
-uint8_t currentPosition = 0;
-uint8_t isTimer1Counting = 0;
+GPIO_PinState currentState[FloppyNum] ={ GPIO_PIN_RESET};
+uint8_t currentPosition[FloppyNum] = {0};
 
 char dataLength[8];
 char data[255];
@@ -71,8 +70,8 @@ const double timer_clock = 64e6;
 const uint8_t timerPeriod = 100;
 
 uint8_t arrayLen = 0;
-GPIO_TypeDef* floppyPort[FloppyNum] = {};
-uint32_t floppyPin[FloppyNum] = {};
+GPIO_TypeDef* floppyPort[FloppyNum * 2] = {};
+uint32_t floppyPin[FloppyNum * 2] = {};
 TIM_HandleTypeDef times[TimerNum] = {};
 /* USER CODE END PV */
 
@@ -96,7 +95,7 @@ static void MX_TIM17_Init(void);
 /* USER CODE BEGIN 0 */
 //reset position of floppy
 void resetStep(){
-	for(uint8_t i = 0; i < FloppyNum; i+=2){
+	for(uint8_t i = 0; i < FloppyNum * 2; i+=2){
 		//i : Direction, i+1 : Step
 		HAL_GPIO_WritePin(floppyPort[i], floppyPin[i], GPIO_PIN_SET);
 		//LL_GPIO_SetOutputPin(floppyPort[i], floppyPin[i]);
@@ -107,8 +106,8 @@ void resetStep(){
 			//LL_GPIO_SetOutputPin(floppyPort[i+1], floppyPin[i+1]);
 			//LL_GPIO_ResetOutputPin(floppyPort[i+1], floppyPin[i+1]);
 		}
-		currentPosition = 0;
-		currentState = GPIO_PIN_RESET;
+		currentPosition[i / 2] = 0;
+		currentState[i / 2] = GPIO_PIN_RESET;
 		HAL_GPIO_WritePin(floppyPort[i], floppyPin[i], GPIO_PIN_RESET);
 		//LL_GPIO_ResetOutputPin(floppyPort[i], floppyPin[i]);
 	}
@@ -123,24 +122,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(htim->Instance == times[timerIdx].Instance)
 			break;
 	}
-	if(timerIdx >= 5){
+	if(timerIdx >= 5 && timerIdx < TimerNum){
 		//Update position
 		//timer : 5 --> floppy : 0, 1
 		//timer : 6 --> floppy : 2, 3
 		//timer : 7 --> floppy : 4, 5
-		currentPosition = (currentState == GPIO_PIN_SET) ? currentPosition - 1 : currentPosition + 1;
-		if(currentPosition <= 0){
-			currentState = GPIO_PIN_RESET;
-			HAL_GPIO_WritePin(floppyPort[(timerIdx - 5) * 2], floppyPin[(timerIdx - 5) * 2], currentState);
+		uint8_t floppyIdx = timerIdx - 5;
+		currentPosition[floppyIdx] = (currentState[floppyIdx] == GPIO_PIN_SET) ? currentPosition[floppyIdx] - 1 : currentPosition[floppyIdx] + 1;
+		if(currentPosition[floppyIdx] <= 0){
+			currentState[floppyIdx] = GPIO_PIN_RESET;
+			HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
 			//LL_GPIO_ResetOutputPin(floppyPort[(timerIdx - 5) * 2], floppyPin[(timerIdx - 5) * 2]);
-		}else if(currentPosition >= 158){
-			currentState = GPIO_PIN_SET;
-			HAL_GPIO_WritePin(floppyPort[(timerIdx - 5) * 2], floppyPin[(timerIdx - 5) * 2], currentState);
+		}else if(currentPosition[floppyIdx] >= 158){
+			currentState[floppyIdx] = GPIO_PIN_SET;
+			HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
 			//LL_GPIO_SetOutputPin(floppyPort[(timerIdx - 5) * 2], floppyPin[(timerIdx - 5) * 2]);
-		}else{
-			currentState = currentState;
 		}
-		HAL_GPIO_TogglePin(floppyPort[(timerIdx - 5) * 2 + 1], floppyPin[(timerIdx - 5) * 2 + 1]);
+		HAL_GPIO_TogglePin(floppyPort[floppyIdx * 2 + 1], floppyPin[floppyIdx * 2 + 1]);
 		//LL_GPIO_TogglePin(floppyPort[(timerIdx - 5) * 2 + 1], floppyPin[(timerIdx - 5) * 2 + 1]);
 	}
 }
