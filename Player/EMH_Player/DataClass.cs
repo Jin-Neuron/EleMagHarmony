@@ -22,12 +22,6 @@ namespace EMH_Player
             FloppyDiscDrive,
             Relay
         }
-        //プレイリストかテストか
-        public enum Status
-        {
-            PlaylistMode,
-            TestMode,
-        }
         //ノートの種類
         public enum NoteType
         {
@@ -43,7 +37,6 @@ namespace EMH_Player
         public struct FileData
         {
             public string filePath, playlistPath, title;
-            public int[] chCnt;
         }
         public struct PartData
         {
@@ -72,7 +65,6 @@ namespace EMH_Player
             public double delay;
             public Part playPart;
             public string logTxt, serialTxt;
-            public int txtLen;
         }
         public struct DelegateData
         {

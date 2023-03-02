@@ -77,6 +77,7 @@
     <Compile Include="SettingForms\SettingSerialportForm.Designer.cs">
       <DependentUpon>SettingSerialportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="TickTimer.cs" />
     <EmbeddedResource Include="PlayerForm.resx">
       <DependentUpon>PlayerForm.cs</DependentUpon>
     </EmbeddedResource>
