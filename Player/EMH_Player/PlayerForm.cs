@@ -162,9 +162,10 @@ namespace EMH_Player
         private void MainTimerCB(object obj)
         {
             int cnt = partList.Length;
+            byte dataLen = 0;
             bool[] endFlags = new bool[cnt];
             string logStr = "";
-            string[] serialStr = new string[2] { "", "" };
+            int[] serialData = new int[2] {0, 0};
             SerialPort[] port = new SerialPort[2] { serialPort1, serialPort2 };
             for (int i = 0; i < cnt; i++)
             {
@@ -175,23 +176,29 @@ namespace EMH_Player
                         string log = noteList[partList[i].channel][partIndex[i]].playPart.ToString()
                             + " : " + noteList[partList[i].channel][partIndex[i]].logTxt;
                         logStr += (filterCheckBox.GetItemChecked(i)) ? log + "\r\n" : "";
-                        serialStr[(i > 1) ? 0 : i] += noteList[partList[i].channel][partIndex[i]].serialTxt;
+                        serialData[(i > 1) ? 0 : i] <<= noteList[partList[i].channel][partIndex[i]].dataLen;
+                        dataLen += noteList[partList[i].channel][partIndex[i]].dataLen;
+                        serialData[(i > 1) ? 0 : i] += noteList[partList[i].channel][partIndex[i]].serialBin;
                         partIndex[i]++;
                         lastTime[i] = DateTime.Now.Ticks / 10000;
                     }
                 }
             }
-            if (logStr != "")
+            if (serialData[0] != 0 && port[0].IsOpen)
             {
+                byte[] lenArray = BitConverter.GetBytes(dataLen);
+                port[0].Write(lenArray, 0, 1);
+                int lenByte = (dataLen + 7) / 8;
+                byte[] dataArray = BitConverter.GetBytes(serialData[0]);
+                port[0].Write(dataArray, 0, lenByte);
                 Invoke(new DataClass.DelegateData.LogTextDelegate(WriteLogText), logStr);
             }
-            if (serialStr[0] != "" && port[0].IsOpen)
+            if (serialData[1] != 0 && port[1].IsOpen)
             {
-                port[0].Write(Convert.ToString(serialStr[0].Length, 2).PadLeft(8, '0') + serialStr[0]);
-            }
-            if (serialStr[1] != "" && port[1].IsOpen)
-            {
-                port[1].Write(Convert.ToString(serialStr[1].Length, 2).PadLeft(8, '0') + serialStr[1]);
+                byte[] lenArray = BitConverter.GetBytes(dataLen);
+                port[1].Write(lenArray, 0, 1);
+                byte[] dataArray = BitConverter.GetBytes(serialData[1]);
+                port[1].Write(dataArray, 0, dataArray.Length);
             }
             if ((DateTime.Now.Ticks / 10000 - preTime) >= (Int64)allTime)
             {
@@ -637,10 +644,10 @@ namespace EMH_Player
             uint eventTime, uint currentTime, int laneIndex, DataClass.NoteType type)
         {
             float bpm = 0;
-            int idx = 0, partMax = 0;
-            string text = "", binTxt = "";
+            int idx = 0, listIdx = Array.FindIndex(partList, a => a.channel == channel), partMax = 0, bin = 0;
+            byte dataLen = 0;
+            string text = "";
             DataClass.MidiData data = new DataClass.MidiData();
-            int listIdx = Array.FindIndex(partList, a => a.channel == channel);
             if (listIdx < 0) return -1;
             data.playPart = partList[listIdx].playPart;
             partMax = partList[listIdx].timerIndex.Length;
@@ -659,9 +666,13 @@ namespace EMH_Player
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 text += (timerOffset + 1).ToString() + ",ON," + laneIndex.ToString() + ",";
-                binTxt += Convert.ToString(timerOffset, 2).PadLeft(4, '0');
-                binTxt += "1";
-                binTxt += Convert.ToString(laneIndex, 2).PadLeft(8, '0');
+                bin <<= 4;
+                bin += timerOffset;
+                bin <<= 1;
+                bin += 1;
+                bin <<= 8;
+                bin += laneIndex;
+                dataLen += 13;
             }
             else if (type == DataClass.NoteType.Off)
             {
@@ -678,11 +689,15 @@ namespace EMH_Player
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 text += (timerOffset + 1).ToString() + ",OFF,";
-                binTxt += Convert.ToString(timerOffset, 2).PadLeft(4, '0');
-                binTxt += "0";
+                bin <<= 4;
+                bin += timerOffset;
+                bin <<= 1;
+                bin += 0;
+                dataLen += 5;
             }
             data.logTxt = text;
-            data.serialTxt = binTxt;
+            data.dataLen = dataLen;
+            data.serialBin = bin;
             if (eventTime >= 8)
             {
                 //bpmの抽出
@@ -704,7 +719,8 @@ namespace EMH_Player
                 //イベントタイムが0の時はリストの前要素を編集
                 data.delay = noteList[channel][noteList[channel].Count-1].delay;
                 data.logTxt = noteList[channel][noteList[channel].Count - 1].logTxt + data.logTxt;
-                data.serialTxt = noteList[channel][noteList[channel].Count - 1].serialTxt + data.serialTxt;
+                data.dataLen = (byte)(noteList[channel][noteList[channel].Count - 1].dataLen + dataLen);
+                data.serialBin = (noteList[channel][noteList[channel].Count - 1].serialBin << dataLen) + data.serialBin;
                 noteList[channel][noteList[channel].Count - 1] = data;
                 return 0;
             }

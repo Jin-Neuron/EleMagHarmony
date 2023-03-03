@@ -61,7 +61,7 @@ char dataLength[8];
 char data[255];
 char length[10];
 uint8_t uartCnt = 0;
-uint64_t dataLen;
+uint8_t dataLen;
 uint16_t notes[10] = {0};
 uint16_t freqs[10] = {0};
 double tmp[10] = {0};
@@ -196,11 +196,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if(uartCnt){
 		uint8_t part = 0;
 		uint64_t lastIdx = 0;
-		for(uint64_t i = 0; i < dataLen; i++){
-			uint8_t Idx = i - lastIdx;
-			data[i] &= 0x0f;
+		int dataInt = 0;
+		for(i = 0; i < (dataLength[0] + 7) / 8; i++){
+			dataInt += data[i];
+		}
+		for(uint64_t i = 0; i < dataLength[0] - 1; i++){
 			if(Idx < 4){
-				part |= data[i] << (3 - Idx);
+				part |= dataInt >> (dataLength[0] - Idx);
+				dataInt &= 0 << (dataLength[0] - Idx);
 			}else if(Idx < 5){
 				if(data[i] == 0){
 					lastIdx = i + 1;
@@ -296,15 +299,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			}
 		}
 		uartCnt = 0;
-		HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
+		HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 1);
 		return;
 	}
-	dataLen = 0;
-	for(uint8_t i = 0; i < 8; i++){
-		dataLength[i] &= 0x0f;
-		dataLen |= dataLength[i] << (7 - i);
-	}
-	HAL_UART_Receive_IT(&huart2, (uint8_t *)data, dataLen);
+	HAL_UART_Receive_IT(&huart2, (uint8_t *)data, (dataLength[0] + 7) / 8);
 	uartCnt++;
 }
 
@@ -381,7 +379,7 @@ int main(void)
   //reset floppy
   resetStep();
   //start UART interrupt
-  HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
+  HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 1);
 
   /* USER CODE END 2 */
 
@@ -896,7 +894,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 230400;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

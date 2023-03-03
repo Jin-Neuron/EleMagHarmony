@@ -64,7 +64,9 @@ namespace EMH_Player
         {
             public double delay;
             public Part playPart;
-            public string logTxt, serialTxt;
+            public byte dataLen;
+            public string logTxt;
+            public int serialBin;
         }
         public struct DelegateData
         {
