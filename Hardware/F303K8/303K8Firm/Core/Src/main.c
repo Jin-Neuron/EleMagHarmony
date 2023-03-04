@@ -64,6 +64,7 @@ uint8_t uartCnt = 0;
 uint8_t dataLen;
 uint16_t notes[10] = {0};
 uint16_t freqs[10] = {0};
+uint16_t noteParFreq[127] = {0};
 double tmp[10] = {0};
 
 const double timer_clock = 64e6;
@@ -194,116 +195,76 @@ float NoteConvert(uint16_t noteNum){
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(uartCnt){
-		uint8_t part = 0;
-		uint64_t lastIdx = 0;
-		int dataInt = 0;
-		for(i = 0; i < (dataLength[0] + 7) / 8; i++){
-			dataInt += data[i];
-		}
-		for(uint64_t i = 0; i < dataLength[0] - 1; i++){
-			if(Idx < 4){
-				part |= dataInt >> (dataLength[0] - Idx);
-				dataInt &= 0 << (dataLength[0] - Idx);
-			}else if(Idx < 5){
-				if(data[i] == 0){
-					lastIdx = i + 1;
-					freqs[part] = 0;
-					notes[part] = 0;
-					if(part < TimerNum){
-						if(part < 5){
-
-							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
+			uint8_t part = 0;
+			uint64_t lastIdx = 0;
+			for(uint8_t i = 0; i < dataLen; i++){
+				uint8_t Idx = i - lastIdx;
+				data[i] &= 0x0f;
+				if(Idx < 4){
+					part |= data[i] << (3 - Idx);
+				}else if(Idx < 5){
+					if(data[i] == 0){
+						lastIdx = i + 1;
+						freqs[part] = 0;
+						notes[part] = 0;
+						if(part < TimerNum){
+							if(part < 5){
+								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
+								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
+							}else{
+								HAL_TIM_Base_Stop_IT(&times[part]);
+							}
 						}
-						else{
-							HAL_TIM_Base_Stop_IT(&times[part]);
-						}
+						part = 0;
 					}
+				}else if(Idx < 13){
+					notes[part] |= data[i] << (12 - Idx);
+				}else{
+					freqs[part] = noteParFreq[notes[part]];
+					if(part < TimerNum){
+						//double the frequency if it is floppy
+						if(part >= 5)
+							freqs[part] *= 2;
+						setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
+					}
+					lastIdx = i;
 					part = 0;
 				}
-			}else if(Idx < 13){
-				notes[part] |= data[i] << (12 - Idx);
-			}else{
-				freqs[part] = (uint16_t)NoteConvert(notes[part]);
-				if(part < TimerNum){
-					//double the frequency if it is floppy
-					uint32_t duty = 50;
-					if(part >= 5){
-						freqs[part] *= 2;
-					}else if(part > 0){
-						if(notes[i] < 30){
-							duty = 20;
-						}else if(notes[i] < 40){
-							duty = 30;
-						}else if(notes[i] < 50){
-							duty = 35;
-						}else if(notes[i] < 60){
-							duty = 40;
-						}else if(notes[i] < 70){
-							duty = 45;
-						}else if(notes[i] < 75){
-							duty = 50;
-						}else if(notes[i] < 80){
-							duty = 55;
-						}else{
-							duty = 60;
-						}
-					}
-					setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1), duty);
-				}
-				lastIdx = i;
-				part = 0;
-			}
-			if(i == dataLen - 1){
-				freqs[part] = (uint16_t)NoteConvert(notes[part]);
-				if(part < TimerNum){
-					//double the frequency if it is floppy
-					uint32_t duty = 50;
-					/*if(part >= 5){
-						freqs[part] *= 2;
-					}else if(part > 0){
-						if(notes[i] < 30){
-							duty = 20;
-						}else if(notes[i] < 40){
-							duty = 30;
-						}else if(notes[i] < 50){
-							duty = 35;
-						}else if(notes[i] < 60){
-							duty = 40;
-						}else if(notes[i] < 70){
-							duty = 45;
-						}else if(notes[i] < 75){
-							duty = 50;
-						}else if(notes[i] < 80){
-							duty = 55;
-						}else{
-							duty = 60;
-						}
-					}*/
-					setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1), duty);
-				}
-				if(Idx < 5){
-					lastIdx = i + 1;
-					freqs[part] = 0;
-					notes[part] = 0;
+				if(i == dataLen - 1){
+					freqs[part] = noteParFreq[notes[part]];
 					if(part < TimerNum){
-						if(part < 5){
-							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-							HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
-						}else{
-							HAL_TIM_Base_Stop_IT(&times[part]);
-						}
+						//double the frequency if it is floppy
+						if(part >= 5)
+							freqs[part] *= 2;
+						setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
 					}
-					part = 0;
+					if(Idx < 5){
+						lastIdx = i + 1;
+						freqs[part] = 0;
+						notes[part] = 0;
+						if(part < TimerNum){
+							if(part < 5){
+								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
+								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
+							}else{
+								HAL_TIM_Base_Stop_IT(&times[part]);
+							}
+						}
+						part = 0;
+					}
 				}
 			}
+			uartCnt = 0;
+			HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
+			return;
 		}
-		uartCnt = 0;
-		HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 1);
-		return;
-	}
-	HAL_UART_Receive_IT(&huart2, (uint8_t *)data, (dataLength[0] + 7) / 8);
-	uartCnt++;
+		dataLen = 0;
+		for(uint8_t i = 0; i < 8; i++){
+			dataLength[i] &= 0x0f;
+			dataLen |= dataLength[i] << (7 - i);
+		}
+		HAL_UART_Receive_IT(&huart2, (uint8_t *)data, dataLen);
+		uartCnt++;
 }
 
 
@@ -379,7 +340,10 @@ int main(void)
   //reset floppy
   resetStep();
   //start UART interrupt
-  HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 1);
+  HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
+  for(int i = 0; i < 127; i++){
+  	noteParFreq[i] =  (uint16_t)NoteConvert(i);
+  }
 
   /* USER CODE END 2 */
 
@@ -894,7 +858,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 230400;
+  huart2.Init.BaudRate = 422400;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

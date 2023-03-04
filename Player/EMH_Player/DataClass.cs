@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace EMH_Player
         //テンポを格納する構造体
         public struct TempoData
         {
-            public int eventTime;
+            public uint eventTime;
             public float bpm;
         };
         public struct FileData
@@ -42,8 +43,8 @@ namespace EMH_Player
         {
             public Part playPart;
             public Device playDevice;
+            public SerialPort port;
             public int channel;
-            public int harmony;
             public int[] timerIndex;
         }
         //ヘッダーチャンク解析用
@@ -65,8 +66,8 @@ namespace EMH_Player
         {
             public double delay;
             public Part playPart;
-            public string logTxt, serialTxt;
-            public List<uint> midiMsg;
+            public string logTxt, serialTxt, serialRstTxt;
+            public List<uint> midiMsg, midiRstMsg;
         }
         public struct DelegateData
         {
