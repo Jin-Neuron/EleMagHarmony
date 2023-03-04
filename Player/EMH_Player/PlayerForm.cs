@@ -387,24 +387,24 @@ namespace EMH_Player
                     }
                     headerChunk.trackData[i].data = reader.ReadBytes(headerChunk.trackData[i].dataLength);
                     //各トラックデータについてイベントとデルタタイムの抽出
-                    TrackDataAnalysis(headerChunk.trackData[i].data);                    
+                    TrackDataAnalysis(headerChunk.trackData[i].data);
                 }
             }
         }
         //トラックチャンク解析イベント
         private void TrackDataAnalysis(byte[] data)
         {
-            uint currentTime = 0;
-            double delay = 0, delayOffset = 0;
+            uint currentTime = 0, currentTempoDelay = 0, tempoEvent = 0;
+            double delayOffset = 0;
             bool[] longFlags = new bool[128];
             int[] partIndex = new int[10];
-            byte statusByte = 0;
-            int i = 0;
+            byte channel = 0, statusByte = 0;
+            int i = 0, currentTempoIndex = 0;
             while (true)
             {
                 uint deltaTime = 0;
                 byte laneIndex = 0;
-                byte channel = 0, velocity = 0;
+                byte velocity = 0;
                 DataClass.NoteType type = new DataClass.NoteType { };
                 while (true)
                 {
@@ -414,7 +414,6 @@ namespace EMH_Player
                     if ((temp & 0x80) == 0) break;
                     deltaTime = deltaTime << 7;
                 }
-                currentTime += deltaTime;
                 if (data[i] < 0x80)
                 {
                     //ランニングステータス
@@ -423,6 +422,45 @@ namespace EMH_Player
                 {
                     statusByte = data[i++];
                 }
+                double tmp = 0;
+                //bpmの抽出
+                for (int j = 0; j < tempoList.Count; j++)
+                {
+                    int cnt = 0;
+                    if (currentTime >= currentTempoDelay
+                        && currentTime + deltaTime <= tempoList.Sum(a => {
+                            if (cnt++ <= j) return a.eventTime;
+                            return 0;}))
+                    {
+                        for (int k = currentTempoIndex; ++k <= j;)
+                        {
+                            float bpm = tempoList[currentTempoIndex].bpm;
+                            if (currentTime + deltaTime >= currentTempoDelay + tempoList[k].eventTime)
+                            {
+                                tmp += 60000.0 * 
+                                    ((currentTime > currentTempoDelay) ? currentTempoDelay + tempoList[k].eventTime - currentTime
+                                    : tempoList[k].eventTime) / bpm / headerChunk.division;
+                                currentTempoDelay += (uint)tempoList[k].eventTime;
+                                currentTempoIndex = k;
+                            }
+                            else{
+                                tmp += 60000.0 * 
+                                    ((currentTime < currentTempoDelay) ? currentTime + deltaTime - currentTempoDelay : deltaTime) 
+                                    / bpm / headerChunk.division;
+                                j = tempoList.Count;
+                                break;
+                            }
+                        }
+                    }
+                    else if (currentTime + deltaTime > tempoList.Sum(a => a.eventTime))
+                    {
+                        tmp += 60000.0 * deltaTime / tempoList[tempoList.Count - 1].bpm / headerChunk.division;
+                        break;
+                    }
+                }
+                currentTime += deltaTime;
+                tempoEvent += deltaTime;
+                delayOffset += tmp;
 
                 if (statusByte >= 0x80 && statusByte <= 0xef)
                 {
@@ -527,18 +565,24 @@ namespace EMH_Player
                         case 0x07:
                         case 0x20:
                         case 0x21:
-                        case 0x2f:
                         case 0x54:
                         case 0x58:
                         case 0x59:
                         case 0x7f:
                             i += dataLength;
                             break;
+                        case 0x2f:
+                            double delay = 0;
+                            if (noteList[channel] != null)
+                                delay = noteList[channel].Sum(a => a.delay);
+                            allTime = (allTime < delay) ? (int)delay : allTime;
+                            return;
                         //テンポ情報を格納
                         case 0x51:
                             {
                                 DataClass.TempoData tempoData = new DataClass.TempoData();
-                                tempoData.eventTime = (int)currentTime;
+                                tempoData.eventTime = tempoEvent;
+                                tempoEvent = 0;
                                 uint tempo = 0;
                                 tempo |= data[i++];
                                 tempo <<= 8;
@@ -551,35 +595,13 @@ namespace EMH_Player
                             break;
                     }
                 }
-                float bpm = 0;
-                //bpmの抽出
-                for (int j = tempoList.Count - 1; j >= 0; j--)
-                {
-                    if (currentTime > tempoList[j].eventTime)
-                    {
-                        bpm = tempoList[j].bpm;
-                        break;
-                    }
-                }
-                if(bpm != 0)
-                {
-                    double tmp = 60000.0 * deltaTime / bpm / headerChunk.division;
-                    delayOffset += tmp;
-                    delay += tmp;
-                }
                 if (laneIndex != 0)
                 {
                     double pos = storeNoteData(partIndex, channel, delayOffset, laneIndex, velocity, type);
                     if(pos >= 0)
                         delayOffset = pos;
                 }
-                //ループ最後に残っているデータを格納
-                if (i >= data.Length)
-                {
-                    break;
-                }
             }
-            allTime = (allTime < delay) ? (int)delay : allTime;
         }
         private double storeNoteData(int[] partIdx, byte channel, double delay,
             byte laneIndex, byte velocity, DataClass.NoteType type)
@@ -643,7 +665,7 @@ namespace EMH_Player
             }
             data.logTxt = text;
             data.serialTxt = binTxt;
-            if (delay > 0)
+            if (delay > 0 || noteList[channel].Count < 1)
             {
                 data.delay = delay;
                 //新しく要素を作成
