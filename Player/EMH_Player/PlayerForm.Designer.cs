@@ -42,7 +42,6 @@
             this.RandomCheck = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.LogTextBox = new System.Windows.Forms.TextBox();
             this.trackBar = new System.Windows.Forms.TrackBar();
             this.LabelTime = new System.Windows.Forms.Label();
             this.FileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,10 +51,6 @@
             this.SettingSerialportMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingDeviceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingChannelMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.PlayerMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.PlayModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SetFileModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SetPlaylistModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.HelpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PartStatus = new System.Windows.Forms.StatusStrip();
@@ -70,7 +65,6 @@
             this.PlaylistLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.FileterBox = new System.Windows.Forms.GroupBox();
             this.filterCheckBox = new System.Windows.Forms.CheckedListBox();
-            this.ShowLogCheckBox1 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
@@ -202,7 +196,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel5.Controls.Add(this.RepeatCheck, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.RandomCheck, 1, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(219, 118);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(212, 118);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -213,26 +207,13 @@
             // 
             this.openFileDialog.Filter = "midiファイル(*.mid)|*.mid";
             // 
-            // LogTextBox
-            // 
-            this.LogTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.LogTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.LogTextBox.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.LogTextBox.Location = new System.Drawing.Point(89, 221);
-            this.LogTextBox.Multiline = true;
-            this.LogTextBox.Name = "LogTextBox";
-            this.LogTextBox.ReadOnly = true;
-            this.LogTextBox.Size = new System.Drawing.Size(401, 137);
-            this.LogTextBox.TabIndex = 12;
-            // 
             // trackBar
             // 
             this.trackBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBar.Location = new System.Drawing.Point(12, 85);
+            this.trackBar.Location = new System.Drawing.Point(86, 85);
             this.trackBar.Name = "trackBar";
-            this.trackBar.Size = new System.Drawing.Size(560, 45);
+            this.trackBar.Size = new System.Drawing.Size(486, 45);
             this.trackBar.TabIndex = 13;
             this.trackBar.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBar.Scroll += new System.EventHandler(this.trackBar_Scroll);
@@ -286,55 +267,23 @@
             // SettingSerialportMenuItem
             // 
             this.SettingSerialportMenuItem.Name = "SettingSerialportMenuItem";
-            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(171, 22);
             this.SettingSerialportMenuItem.Text = "シリアルポート(&E)...";
             this.SettingSerialportMenuItem.Click += new System.EventHandler(this.SettingSerialportMenuItem_Click);
             // 
             // SettingDeviceMenuItem
             // 
             this.SettingDeviceMenuItem.Name = "SettingDeviceMenuItem";
-            this.SettingDeviceMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SettingDeviceMenuItem.Size = new System.Drawing.Size(171, 22);
             this.SettingDeviceMenuItem.Text = "パートとデバイス(&P)...";
             this.SettingDeviceMenuItem.Click += new System.EventHandler(this.SettingDeviceMenuItem_Click);
             // 
             // SettingChannelMenuItem
             // 
             this.SettingChannelMenuItem.Name = "SettingChannelMenuItem";
-            this.SettingChannelMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SettingChannelMenuItem.Size = new System.Drawing.Size(171, 22);
             this.SettingChannelMenuItem.Text = "Midiチャネル(&C)...";
             this.SettingChannelMenuItem.Click += new System.EventHandler(this.SettingChannelMenuItem_Click);
-            // 
-            // PlayerMenuItem
-            // 
-            this.PlayerMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.PlayModeMenuItem});
-            this.PlayerMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.PlayerMenuItem.Name = "PlayerMenuItem";
-            this.PlayerMenuItem.Size = new System.Drawing.Size(79, 20);
-            this.PlayerMenuItem.Text = "プレイヤー(&P)";
-            // 
-            // PlayModeMenuItem
-            // 
-            this.PlayModeMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.SetFileModeMenuItem,
-            this.SetPlaylistModeMenuItem});
-            this.PlayModeMenuItem.Name = "PlayModeMenuItem";
-            this.PlayModeMenuItem.Size = new System.Drawing.Size(146, 22);
-            this.PlayModeMenuItem.Text = "プレイモード(&M)";
-            // 
-            // SetFileModeMenuItem
-            // 
-            this.SetFileModeMenuItem.Name = "SetFileModeMenuItem";
-            this.SetFileModeMenuItem.Size = new System.Drawing.Size(141, 22);
-            this.SetFileModeMenuItem.Text = "ファイル(&F)";
-            this.SetFileModeMenuItem.Click += new System.EventHandler(this.checkBoxTest_CheckedChanged);
-            // 
-            // SetPlaylistModeMenuItem
-            // 
-            this.SetPlaylistModeMenuItem.Name = "SetPlaylistModeMenuItem";
-            this.SetPlaylistModeMenuItem.Size = new System.Drawing.Size(141, 22);
-            this.SetPlaylistModeMenuItem.Text = "プレイリスト(&L)";
-            this.SetPlaylistModeMenuItem.Click += new System.EventHandler(this.checkBoxPlaylist_CheckedChanged);
             // 
             // menuStrip1
             // 
@@ -342,7 +291,6 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FileMenuItem,
             this.SettingMenuItem,
-            this.PlayerMenuItem,
             this.HelpMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -366,7 +314,7 @@
             this.toolStripStatusLabel2,
             this.BaseDeviceLabel,
             this.DrumDeviceLabel});
-            this.PartStatus.Location = new System.Drawing.Point(0, 389);
+            this.PartStatus.Location = new System.Drawing.Point(0, 249);
             this.PartStatus.Name = "PartStatus";
             this.PartStatus.Size = new System.Drawing.Size(584, 22);
             this.PartStatus.TabIndex = 17;
@@ -406,7 +354,7 @@
             this.GuitarDevicePortLabel,
             this.FileLabel,
             this.PlaylistLabel});
-            this.PortFileStatus.Location = new System.Drawing.Point(0, 365);
+            this.PortFileStatus.Location = new System.Drawing.Point(0, 225);
             this.PortFileStatus.Name = "PortFileStatus";
             this.PortFileStatus.Size = new System.Drawing.Size(584, 24);
             this.PortFileStatus.SizingGrip = false;
@@ -448,12 +396,13 @@
             // FileterBox
             // 
             this.FileterBox.Controls.Add(this.filterCheckBox);
-            this.FileterBox.Location = new System.Drawing.Point(6, 245);
+            this.FileterBox.Location = new System.Drawing.Point(9, 80);
             this.FileterBox.Name = "FileterBox";
-            this.FileterBox.Size = new System.Drawing.Size(77, 88);
+            this.FileterBox.Padding = new System.Windows.Forms.Padding(0);
+            this.FileterBox.Size = new System.Drawing.Size(77, 86);
             this.FileterBox.TabIndex = 19;
             this.FileterBox.TabStop = false;
-            this.FileterBox.Text = "LogFileter";
+            this.FileterBox.Text = "Fileter";
             // 
             // filterCheckBox
             // 
@@ -468,31 +417,18 @@
             this.filterCheckBox.Size = new System.Drawing.Size(68, 60);
             this.filterCheckBox.TabIndex = 0;
             // 
-            // ShowLogCheckBox1
-            // 
-            this.ShowLogCheckBox1.AutoSize = true;
-            this.ShowLogCheckBox1.Location = new System.Drawing.Point(6, 150);
-            this.ShowLogCheckBox1.Name = "ShowLogCheckBox1";
-            this.ShowLogCheckBox1.Size = new System.Drawing.Size(75, 16);
-            this.ShowLogCheckBox1.TabIndex = 20;
-            this.ShowLogCheckBox1.Text = "ログを表示";
-            this.ShowLogCheckBox1.UseVisualStyleBackColor = true;
-            this.ShowLogCheckBox1.CheckedChanged += new System.EventHandler(this.ShowLogCheckBox1_CheckedChanged);
-            // 
             // PlayerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.ClientSize = new System.Drawing.Size(584, 411);
-            this.Controls.Add(this.ShowLogCheckBox1);
+            this.ClientSize = new System.Drawing.Size(584, 271);
             this.Controls.Add(this.FileterBox);
             this.Controls.Add(this.PortFileStatus);
             this.Controls.Add(this.PartStatus);
             this.Controls.Add(this.tableLayoutPanel5);
             this.Controls.Add(this.LabelTime);
             this.Controls.Add(this.trackBar);
-            this.Controls.Add(this.LogTextBox);
             this.Controls.Add(this.NowPlaying);
             this.Controls.Add(this.tableLayoutPanel4);
             this.Controls.Add(this.menuStrip1);
@@ -532,7 +468,6 @@
         private System.Windows.Forms.CheckBox RandomCheck;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
-        private System.Windows.Forms.TextBox LogTextBox;
         private System.Windows.Forms.TrackBar trackBar;
         private System.Windows.Forms.Label LabelTime;
         private System.Windows.Forms.ToolStripMenuItem FileMenuItem;
@@ -541,10 +476,6 @@
         private System.Windows.Forms.ToolStripMenuItem SettingMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SettingSerialportMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SettingDeviceMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem PlayerMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem PlayModeMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SetFileModeMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SetPlaylistModeMenuItem;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.StatusStrip PartStatus;
         private System.Windows.Forms.ToolStripStatusLabel MelodyDeviceLabel;
@@ -560,7 +491,6 @@
         private System.Windows.Forms.GroupBox FileterBox;
         private System.Windows.Forms.CheckedListBox filterCheckBox;
         private System.Windows.Forms.ToolStripMenuItem SettingChannelMenuItem;
-        private System.Windows.Forms.CheckBox ShowLogCheckBox1;
     }
 }
 

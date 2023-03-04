@@ -53,6 +53,7 @@ namespace EMH_Player
             SpeedComboBox.Items.Add("153600");
             SpeedComboBox.Items.Add("230400");
             SpeedComboBox.Items.Add("460800");
+            SpeedComboBox.SelectedIndex = 0;
         }
 
         private void DeviceComboBox_DropDown(object sender, EventArgs e)
@@ -60,6 +61,7 @@ namespace EMH_Player
             DeviceComboBox.Items.Clear();
             DeviceComboBox.Items.Add("ElectricDevice");
             DeviceComboBox.Items.Add("GuitarDevice");
+            DeviceComboBox.SelectedIndex = 0;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -70,7 +72,7 @@ namespace EMH_Player
         {
             return PortComboBox.SelectedItem.ToString();
         }
-        public int GetBaundRate()
+        public int GetBandRate()
         {
             return int.Parse(SpeedComboBox.SelectedItem.ToString());
         }

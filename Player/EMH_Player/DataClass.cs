@@ -43,6 +43,7 @@ namespace EMH_Player
             public Part playPart;
             public Device playDevice;
             public int channel;
+            public int harmony;
             public int[] timerIndex;
         }
         //ヘッダーチャンク解析用
@@ -64,13 +65,12 @@ namespace EMH_Player
         {
             public double delay;
             public Part playPart;
-            public byte dataLen;
-            public string logTxt;
-            public int serialBin;
+            public byte msgLen;
+            public string logTxt, serialTxt;
+            public List<uint> midiMsg;
         }
         public struct DelegateData
         {
-            public delegate void LogTextDelegate(string text);
             public delegate void StartButtonDelegate();
             public delegate void StopButtonDelegate();
             public delegate void TrackBarDelegate();
