@@ -39,7 +39,7 @@ namespace EMH_Player
             CharSet = System.Runtime.InteropServices.CharSet.Auto)]
         private static extern int mciSendString(string command,
             System.Text.StringBuilder buffer, int bufferSize, IntPtr hwndCallback);*/
-        private int timePos = 0, counter = 0, allTime = 0;
+        private int timePos = 0, fileCounter = 0, allTime = 0;
         private List<DataClass.FileData> fileList = new List<DataClass.FileData>();
         private List<DataClass.TempoData> tempoList = new List<DataClass.TempoData>();
         private List<DataClass.MidiData>[] noteList = new List<DataClass.MidiData>[16];
@@ -114,7 +114,7 @@ namespace EMH_Player
             Invoke(new DataClass.DelegateData.LabelTimeDelegate(UpDateLabelTime));
         }
         //各種シリアルポートの設定
-        public void startSerial(string portName, int baundRate, string device)
+        public void startSerial(string portName, int baudRate, string device)
         {
             SerialPort port = (device == "ElectricDevice") ? serialPort1 : serialPort2;
             ToolStripStatusLabel label = (device == "ElectricDevice") ? ElectricDevicePortLabel : GuitarDevicePortLabel;
@@ -135,7 +135,7 @@ namespace EMH_Player
                 port.Close();
                 label.Text = device + "Port : ";
             }
-            port.BaudRate = baundRate;
+            port.BaudRate = baudRate;
             port.PortName = portName;
             port.Open();
             label.Enabled = true;
@@ -154,10 +154,10 @@ namespace EMH_Player
             partIndex = new int[cnt];
             timer = new TickTimer(SerialSendTask, 1);
             lastTime = new Int64[cnt];
-            preTime = DateTime.Now.Ticks / 10000;
+            preTime = (long)Math.Round(DateTime.Now.Ticks / 10000.0);
             for (int i = 0; i < cnt; i++)
             {
-                lastTime[i] = DateTime.Now.Ticks / 10000;
+                lastTime[i] = (long)Math.Round(DateTime.Now.Ticks / 10000.0);
             }
             timer.Start();
         }
@@ -167,26 +167,32 @@ namespace EMH_Player
             string[] serialData = new string[2] { "", "" };
             SerialPort[] port = new SerialPort[] { serialPort1 , serialPort2};
             List<uint> msgs = new List<uint>();
-            for(int i = 0; i < cnt; i++)
+            double currentTime = DateTime.Now.Ticks / 10000.0;
+            for (int i = 0; i < cnt; i++)
             {
-                if (noteList[partList[i].channel] != null && noteList[partList[i].channel].Count > 0 && partIndex[i] < noteList[partList[i].channel].Count)
+                int channel = partList[i].channel;
+                int pIdx = partIndex[i];
+                if (noteList[channel] != null && noteList[channel].Count > 0 && pIdx < noteList[channel].Count)
                 {
-                    if ((DateTime.Now.Ticks / 10000 - lastTime[i]) >= (Int64)noteList[partList[i].channel][partIndex[i]].delay)
+                    if (currentTime - lastTime[i] >= (Int64)noteList[channel][pIdx].delay)
                     {
                         int idx = (i > 1) ? 0 : i;
                         if (filterCheckBox.GetItemChecked(i) && port[idx].IsOpen)
                         {
-                            serialData[idx] += noteList[partList[i].channel][partIndex[i]].serialTxt;
-                            msgs.AddRange(noteList[partList[i].channel][partIndex[i]].midiMsg);
+                            serialData[idx] += noteList[channel][pIdx].serialTxt;
+                            msgs.AddRange(noteList[channel][pIdx].midiMsg);
                         }
                         partIndex[i]++;
-                        lastTime[i] = DateTime.Now.Ticks / 10000;
+                        lastTime[i] = (long)Math.Round(currentTime);
                     }
                 }
             }
-            foreach (uint msg in msgs)
+            if(msgs.Count > 0)
             {
-                midiOutShortMsg(this.hMidi, msg);
+                foreach (uint msg in msgs)
+                {
+                    midiOutShortMsg(this.hMidi, msg);
+                }
             }
             if (serialData[0] != "")
             {
@@ -196,7 +202,7 @@ namespace EMH_Player
             {
                 port[1].Write(Convert.ToString(serialData[1].Length, 2).PadLeft(8, '0') + serialData[1]);
             }
-            if (DateTime.Now.Ticks / 10000 - preTime >= allTime)
+            if (currentTime - preTime >= allTime)
             {
                 timer.Stop();
                 Invoke(new DataClass.DelegateData.StopButtonDelegate(Stp));
@@ -245,7 +251,6 @@ namespace EMH_Player
         //タスク取り消用メソッド
         private void TaskCancel()
         {
-            timer.Stop();
             LabelTime.Enabled = false;
             trackBar.Enabled = false;
         }
@@ -326,7 +331,7 @@ namespace EMH_Player
         {
             tempoList.Clear();
             //ヘッダチャンクの解析
-            using(FileStream stream = new FileStream(fileList[counter].filePath, FileMode.Open, FileAccess.Read))
+            using(FileStream stream = new FileStream(fileList[fileCounter].filePath, FileMode.Open, FileAccess.Read))
             using(BinaryReader reader = new BinaryReader(stream))
             {
                 headerChunk.chunkID = reader.ReadBytes(4);
@@ -358,8 +363,8 @@ namespace EMH_Player
                 }
                 if(headerChunk.format != 1)
                 {
-                    MessageBox.Show(Path.GetFileNameWithoutExtension(fileList[counter].filePath) + "は対応していないフォーマットです。");
-                    if(counter++ >= fileList.Count)
+                    MessageBox.Show(Path.GetFileNameWithoutExtension(fileList[fileCounter].filePath) + "は対応していないフォーマットです。");
+                    if(fileCounter++ >= fileList.Count)
                     {
                         StopButton.PerformClick();
                     }
@@ -399,13 +404,14 @@ namespace EMH_Player
             {
                 uint deltaTime = 0;
                 byte laneIndex = 0;
+                byte channel = 0, velocity = 0;
                 DataClass.NoteType type = new DataClass.NoteType { };
                 while (true)
                 {
                     //デルタタイムの抽出
-                    byte tmp = data[i++];
-                    deltaTime |= tmp & (uint)0x7f;
-                    if ((tmp & 0x80) == 0) break;
+                    byte temp = data[i++];
+                    deltaTime |= temp & (uint)0x7f;
+                    if ((temp & 0x80) == 0) break;
                     deltaTime = deltaTime << 7;
                 }
                 currentTime += deltaTime;
@@ -420,7 +426,7 @@ namespace EMH_Player
 
                 if (statusByte >= 0x80 && statusByte <= 0xef)
                 {
-                    byte channel = (byte)(statusByte & 0x0f), velocity = 0;
+                    channel = (byte)(statusByte & 0x0f);
                     if (noteList[channel] == null) noteList[channel] = new List<DataClass.MidiData>();
                     switch (statusByte & 0xf0)
                     {
@@ -452,6 +458,12 @@ namespace EMH_Player
                                 }
                             }
                             break;
+                        //音色設定
+                        case 0xc0:
+                            byte harmony = data[i++];
+                            uint msg = (uint)((harmony << 8) + statusByte);
+                            midiOutShortMsg(this.hMidi, msg);
+                            break;
                         //これ以降はインクリメント用
                         case 0xa0:
                             i += 2;
@@ -459,36 +471,12 @@ namespace EMH_Player
                         case 0xb0:
                             i += 2;
                             break;
-                        //音色設定
-                        case 0xc0:
-                            byte harmony = data[i++];
-                            uint msg = (uint)((harmony << 8) + statusByte);
-                            midiOutShortMsg(this.hMidi, msg);
-                            break;
                         case 0xd0:
                             i += 1;
                             break;
                         case 0xe0:
                             i += 2;
                             break;
-                    }
-                    float bpm = 0;
-                    //bpmの抽出
-                    for (int j = tempoList.Count - 1; j >= 0; j--)
-                    {
-                        if (currentTime > tempoList[j].eventTime)
-                        {
-                            bpm = tempoList[j].bpm;
-                            break;
-                        }
-                    }
-                    double tmp = Math.Round(60000.0 * (double)deltaTime / (double)bpm / (double)headerChunk.division);
-                    delayOffset += tmp;
-                    delay += tmp;
-                    if(laneIndex != 0)
-                    {
-                        storeNoteData(partIndex, channel, delayOffset, laneIndex, velocity, type);
-                        delayOffset = 0;
                     }
                 }
                 //SysExイベント用、インクリメントオンリー
@@ -506,7 +494,7 @@ namespace EMH_Player
                     {
                         //曲名を格納
                         case 0x03:
-                            if (fileList[counter].title == "")
+                            if (fileList[fileCounter].title == "")
                             {
                                 NowPlaying.Text = "";
                                 byte[] bytes = new byte[100];
@@ -521,8 +509,8 @@ namespace EMH_Player
                                 }
                                 DataClass.FileData fileData = new DataClass.FileData();
                                 fileData.title += Encoding.GetEncoding("Shift_JIS").GetString(bytes);
-                                fileData.filePath = fileList[counter].filePath;
-                                fileList[counter] = fileData;
+                                fileData.filePath = fileList[fileCounter].filePath;
+                                fileList[fileCounter] = fileData;
                                 NowPlaying.Text = fileData.title;
                             }
                             else
@@ -563,21 +551,43 @@ namespace EMH_Player
                             break;
                     }
                 }
+                float bpm = 0;
+                //bpmの抽出
+                for (int j = tempoList.Count - 1; j >= 0; j--)
+                {
+                    if (currentTime > tempoList[j].eventTime)
+                    {
+                        bpm = tempoList[j].bpm;
+                        break;
+                    }
+                }
+                if(bpm != 0)
+                {
+                    double tmp = 60000.0 * deltaTime / bpm / headerChunk.division;
+                    delayOffset += tmp;
+                    delay += tmp;
+                }
+                if (laneIndex != 0)
+                {
+                    double pos = storeNoteData(partIndex, channel, delayOffset, laneIndex, velocity, type);
+                    if(pos >= 0)
+                        delayOffset = pos;
+                }
                 //ループ最後に残っているデータを格納
-                if(i >= data.Length)
+                if (i >= data.Length)
                 {
                     break;
                 }
             }
             allTime = (allTime < delay) ? (int)delay : allTime;
         }
-        private void storeNoteData(int[] partIdx, byte channel, double delay,
+        private double storeNoteData(int[] partIdx, byte channel, double delay,
             byte laneIndex, byte velocity, DataClass.NoteType type)
         {
             int idx = 0, listIdx = Array.FindIndex(partList, a => a.channel == channel), partMax = 0, bin = 0;
             string text = "", binTxt = "";
             DataClass.MidiData data = new DataClass.MidiData();
-            if (listIdx < 0) return;
+            if (listIdx < 0) return -1;
             data.playPart = partList[listIdx].playPart;
             partMax = partList[listIdx].timerIndex.Length;
             if (type == DataClass.NoteType.On)
@@ -591,7 +601,7 @@ namespace EMH_Player
                         break;
                     }
                 }
-                if (idx == 0) return;
+                if (idx == 0) return -1;
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 text = (timerOffset + 1).ToString() + ",ON," + laneIndex.ToString() + ",";
@@ -615,7 +625,12 @@ namespace EMH_Player
                         break;
                     }
                 }
-                if (idx == 0) return;
+                if (idx == 0) return -1;
+                if (partList[listIdx].playPart == DataClass.Part.Drum)
+                {
+                    //ドラムのノーツオフはスルーする
+                    return delay;
+                }
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 text += (timerOffset + 1).ToString() + ",OFF,";
@@ -626,14 +641,14 @@ namespace EMH_Player
                 bin += 0;
                 data.midiMsg = new List<uint>() { (uint)((velocity << 16) + (laneIndex << 8) + 0x80 + channel) };
             }
-            data.msgLen = 24;
             data.logTxt = text;
             data.serialTxt = binTxt;
-            if (delay >= 8)
+            if (delay > 0)
             {
                 data.delay = delay;
                 //新しく要素を作成
                 noteList[channel].Add(data);
+                return 0;
             }
             else
             {
@@ -641,9 +656,10 @@ namespace EMH_Player
                 data.delay = noteList[channel][noteList[channel].Count-1].delay;
                 data.logTxt = noteList[channel][noteList[channel].Count - 1].logTxt + data.logTxt;
                 data.serialTxt = noteList[channel][noteList[channel].Count - 1].serialTxt + data.serialTxt;
-                data.msgLen = (byte)(noteList[channel][noteList[channel].Count - 1].msgLen + 24);
                 data.midiMsg.AddRange(noteList[channel][noteList[channel].Count - 1].midiMsg);
+                data.midiMsg.Sort();
                 noteList[channel][noteList[channel].Count - 1] = data;
+                return delay;
             }
         }
         //ランダムなインデックス作成（シャッフル時）
@@ -664,9 +680,9 @@ namespace EMH_Player
             timePos = 0;
             StartButton.Enabled = false;
             menuStrip1.Enabled = false;
-            if (counter >= fileList.Count)
+            if (fileCounter >= fileList.Count)
             {
-                counter = 0;
+                fileCounter = 0;
                 if (!RepeatCheck.Checked)
                 {
                     NextButton.Enabled = true;
@@ -707,8 +723,8 @@ namespace EMH_Player
             midiOutClose(this.hMidi);
             //string text = "1,OFF,2,OFF,3,OFF,4,OFF,5,OFF,6,OFF,7,OFF,8,OFF,9,OFF,10,OFF,";
             string binTxt = "000110010000000010001000011001000";
-            if (serialPort1.IsOpen) serialPort1.Write(binTxt);
-            if(serialPort2.IsOpen) serialPort2.Write(binTxt);
+            //if (serialPort1.IsOpen) serialPort1.Write(binTxt);
+            //if(serialPort2.IsOpen) serialPort2.Write(binTxt);
             StartButton.Enabled = true;
             LabelTime.Enabled = false;
             trackBar.Enabled = false;
@@ -737,7 +753,7 @@ namespace EMH_Player
             StopButton.PerformClick();
             NextButton.Enabled = false;
             ReturnButton.Enabled = false;
-            counter++;
+            fileCounter++;
             StartButton.PerformClick();
         }
         private void ReturnButton_Click(object sender, EventArgs e)
@@ -745,13 +761,13 @@ namespace EMH_Player
             StopButton.PerformClick();
             NextButton.Enabled = false;
             ReturnButton.Enabled = false;
-            if (counter <= 1)
+            if (fileCounter <= 1)
             {
-                counter = 0;
+                fileCounter = 0;
             }
             else
             {
-                counter--;
+                fileCounter--;
             }
             StartButton.PerformClick();
         }
@@ -773,7 +789,7 @@ namespace EMH_Player
             }
             else
             {
-                string playlist = fileList[counter].playlistPath;
+                string playlist = fileList[fileCounter].playlistPath;
                 fileList.Clear();
                 FileEncoder(playlist);
             }
@@ -799,7 +815,7 @@ namespace EMH_Player
             {
                 if (!form.IsDisposed)
                 {
-                    startSerial(form.GetPortName(), form.GetBandRate(), form.GetDevice());
+                    startSerial(form.GetPortName(), form.GetBaudRate(), form.GetDevice());
                     form.Close();
                     OpenPlaylistMenuItem.Enabled = true;
                     OpenMidiFileMenuItem.Enabled = true;

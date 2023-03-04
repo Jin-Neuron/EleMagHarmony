@@ -25,8 +25,8 @@ namespace EMH_Player
         //ノートの種類
         public enum NoteType
         {
-            On,
             Off,
+            On,
         }
         //テンポを格納する構造体
         public struct TempoData
@@ -65,7 +65,6 @@ namespace EMH_Player
         {
             public double delay;
             public Part playPart;
-            public byte msgLen;
             public string logTxt, serialTxt;
             public List<uint> midiMsg;
         }

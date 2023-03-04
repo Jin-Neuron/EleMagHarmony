@@ -72,7 +72,7 @@ namespace EMH_Player
         {
             return PortComboBox.SelectedItem.ToString();
         }
-        public int GetBandRate()
+        public int GetBaudRate()
         {
             return int.Parse(SpeedComboBox.SelectedItem.ToString());
         }
