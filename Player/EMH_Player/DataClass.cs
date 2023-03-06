@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NAudio.Midi;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -65,9 +66,10 @@ namespace EMH_Player
         public struct MidiData
         {
             public double delay;
-            public Part playPart;
-            public string logTxt, serialTxt, serialRstTxt;
-            public List<uint> midiMsg, midiRstMsg;
+            public List<Part> playPart;
+            public string logTxt;
+            public string[] serialTxt, serialRstTxt;
+            public List<MidiMessage> midiMsg, midiRstMsg;
         }
         public struct DelegateData
         {
