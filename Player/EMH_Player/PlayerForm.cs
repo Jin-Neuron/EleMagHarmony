@@ -25,17 +25,16 @@ namespace EMH_Player
     public partial class PlayerForm : Form
     {
         //変数宣言部
-        private static int timePos = 0, fileCounter = 0, allTime = 0, timIdx = 0;
+        private static int timePos = 0, fileCounter = 0, timIdx = 0;
         private static List<DataClass.FileData> fileList = new List<DataClass.FileData>();
         private static List<DataClass.TempoData> tempoList = new List<DataClass.TempoData>();
-        private static List<DataClass.MidiData>[] noteList = new List<DataClass.MidiData>[16];
         private static List<DataClass.MidiData> playData = new List<DataClass.MidiData>();
         private static DataClass.PartData[] partList = new DataClass.PartData[4];
         private static DataClass.HeaderData headerChunk = new DataClass.HeaderData();
         private static TimeSpan maxTime, changeTime;
         private static System.Threading.Timer trackbar_tim;
         private static TickTimer timer;
-        private static double lastTime, preTime;
+        private static double lastTime, allTime = 0, preTime;
         private static MidiOut midi;
         public PlayerForm()
         {
@@ -142,114 +141,50 @@ namespace EMH_Player
             timIdx = 0;
             lastTime = DateTime.Now.Ticks / 10000.0;
             preTime = DateTime.Now.Ticks / 10000.0;
-            NoteSum();
             timer.Start();
-        }
-        private void NoteSum()
-        {
-            playData.Clear();
-            int cnt = partList.Length;
-            playData.AddRange(noteList[partList[0].channel]);
-            for (int i = 1; i < cnt; i++)
-            {
-                int channel = partList[i].channel;
-                int idx = 0;
-                double pos = playData[idx].delay, currentDelay = 0;
-                for (int j = 0; j < noteList[channel].Count;)
-                {
-                    if (currentDelay + noteList[channel][j].delay > pos)
-                    {
-                        if (idx + 1 >= playData.Count || currentDelay + noteList[channel][j].delay < pos + playData[idx + 1].delay)
-                        {
-                            DataClass.MidiData data = noteList[channel][j++];
-                            currentDelay += data.delay;
-                            data.delay = currentDelay - pos;
-                            pos = currentDelay;
-                            playData.Insert(++idx, data);
-                            if (idx < playData.Count - 1)
-                            {
-                                data = playData[idx + 1];
-                                data.delay -= playData[idx].delay;
-                                playData[idx + 1] = data;
-                            }
-                        }
-                        else
-                        {
-                            pos += playData[++idx].delay;
-                        }
-                    }else if(currentDelay + noteList[channel][j].delay < pos)
-                    {
-                        //最初のデータを格納
-                        pos = noteList[channel][j].delay;
-                        currentDelay = pos;
-                        playData.Insert(idx, noteList[channel][j++]);
-                        DataClass.MidiData data = playData[idx + 1];
-                        data.delay -= playData[idx].delay;
-                        playData[idx + 1] = data;
-                    }
-                    else if(currentDelay + noteList[channel][j].delay == pos)
-                    {
-                        int k = (idx > 1) ? 0 : 1;
-                        currentDelay = pos;
-                        DataClass.MidiData data = noteList[channel][j++];
-                        //delayが0の時はリストの前要素を編集
-                        data.delay = playData[idx].delay;
-                        data.logTxt = playData[idx].logTxt + data.logTxt;
-                        data.serialTxt[k] = playData[idx].serialTxt[k] + data.serialTxt[k];
-                        data.serialRstTxt[k] = playData[idx].serialRstTxt[k] + data.serialRstTxt[k];
-                        data.playPart.InsertRange(0, playData[idx].playPart);
-                        data.midiMsg.InsertRange(0, playData[idx].midiMsg);
-                        data.midiRstMsg.InsertRange(0, playData[idx].midiRstMsg);
-                        playData[idx] = data;
-                    }
-                }
-            }
         }
         private void SerialSendTask(object status)
         {
-            //string[] logData = new string[2] { "", "" };
+            string[] serialData = new string[2] { "", "" };
             List<uint> msgs = new List<uint>();
-            double currentTime = DateTime.Now.Ticks / 10000.0;
-            if (playData != null && playData.Count > 0 && timIdx < playData.Count)
+            double currentTime = Math.Round(DateTime.Now.Ticks / 10000.0);
+            if (playData == null || playData.Count < 1) return;
+            if (timIdx < playData.Count)
             {
-                if (currentTime - lastTime >= (Int64)playData[timIdx].delay)
+                if (currentTime - lastTime >= Math.Floor(playData[timIdx].delay))
                 {
-                    /*for(int i = 0; i < cnt; i++)
+                    for(int i = 0; i < playData[timIdx].midiMsg.Count; i++)
                     {
-                        int idx = (i > 1) ? 0 : i;
-                        if (filterCheckBox.GetItemChecked(i) && partList[i].port.IsOpen)
+                        midi.Send(playData[timIdx].midiMsg[i].RawData);
+                        int idx = (int)playData[timIdx].playPart[i];
+                        if (filterCheckBox.GetItemChecked(idx))
                         {
-                            serialData[idx] += playData[timIdx].serialTxt;
-                            //logData[idx] += pIdx.ToString() + " : " + noteList[channel][pIdx].logTxt;
-                            //msgs.AddRange(noteList[channel][pIdx].midiMsg);
-                            foreach (MidiMessage msg in playData[timIdx].midiMsg)
-                                midi.Send(msg.RawData);
+                            //チェックオンの時は音を鳴らし、midi送信データに値を格納する
+                            idx = (idx != 1) ? 0 : 1;
+                            serialData[idx] += playData[timIdx].serialTxt[idx];
+                            midi.Send(playData[timIdx].midiMsg[i].RawData);
                         }
-                        else if (!filterCheckBox.GetItemChecked(i) && partList[i].port.IsOpen)
+                        else if (!filterCheckBox.GetItemChecked(idx))
                         {
+                            //チェックオフ時はノーツオフのデータ(restMessage)を格納
+                            idx = (idx != 1) ? 0 : 1;
                             serialData[idx] += playData[timIdx].serialRstTxt;
-                            //msgs.AddRange(noteList[channel][pIdx].midiRstMsg);
-                            foreach (MidiMessage msg in playData[timIdx].midiRstMsg)
-                                midi.Send(msg.RawData);
+                            midi.Send(playData[timIdx].midiRstMsg[i].RawData);
                         }
-                    }*/
-                    foreach (MidiMessage msg in playData[timIdx].midiMsg)
-                        midi.Send(msg.RawData);
+                    }
+                    if (playData[timIdx].serialTxt[0] != null && playData[timIdx].serialTxt[0] != "" && serialPort1.IsOpen)
+                    {
+                        serialPort1.Write(Convert.ToString(serialData[0].Length, 2).PadLeft(8, '0') + serialData[0]);
+                    }
+                    if (playData[timIdx].serialTxt[1] != null && playData[timIdx].serialTxt[1] != "" && serialPort2.IsOpen)
+                    {
+                        serialPort1.Write(Convert.ToString(serialData[1].Length, 2).PadLeft(8, '0') + serialData[1]);
+                    }
                     timIdx++;
-                    lastTime = DateTime.Now.Ticks / 10000.0;
+                    lastTime = currentTime;
                 }
             }
-            if (playData[timIdx].serialTxt[0] != null && playData[timIdx].serialTxt[0] != "")
-            {
-                playData[timIdx].serialTxt[0] = Convert.ToString(playData[timIdx].serialTxt[0].Length, 2).PadLeft(8, '0') + playData[timIdx].serialTxt[0];
-                serialPort1.Write(playData[timIdx].serialTxt[0]);
-            }
-            if (playData[timIdx].serialTxt[1] != null && playData[timIdx].serialTxt[1] != "")
-            {
-                playData[timIdx].serialTxt[1] = Convert.ToString(playData[timIdx].serialTxt[1].Length, 2).PadLeft(8, '0') + playData[timIdx].serialTxt[1];
-                serialPort2.Write(playData[timIdx].serialTxt[1]);
-            }
-            if (currentTime - preTime > allTime)
+            else
             {
                 timer.Stop();
                 Invoke(new DataClass.DelegateData.StopButtonDelegate(Stp));
@@ -442,11 +377,11 @@ namespace EMH_Player
         private void TrackDataAnalysis(byte[] data)
         {
             uint currentTime = 0, currentTempoDelay = 0, tempoEvent = 0;
-            double delayOffset = 0;
+            double delayOffset = 0, pos = (playData.Count > 0) ? playData[0].delay : 0, currentDelay = 0;
             bool[] longFlags = new bool[128];
             int[] partIndex = new int[10];
             byte channel = 0, statusByte = 0;
-            int i = 0, currentTempoIndex = 0;
+            int i = 0, currentTempoIndex = 0, delayIndex = 0;
             while (true)
             {
                 uint deltaTime = 0;
@@ -512,7 +447,6 @@ namespace EMH_Player
                 if (statusByte >= 0x80 && statusByte <= 0xef)
                 {
                     channel = (byte)(statusByte & 0x0f);
-                    if (noteList[channel] == null) noteList[channel] = new List<DataClass.MidiData>();
                     switch (statusByte & 0xf0)
                     {
                         //ノートオフ
@@ -546,8 +480,6 @@ namespace EMH_Player
                         //音色設定
                         case 0xc0:
                             byte harmony = data[i++];
-                            /*uint msg = (uint)((harmony << 8) + statusByte);
-                            midiOutShortMsg(this.hMidi, msg); */
                             midi.Send(MidiMessage.ChangePatch(harmony, channel+1).RawData);
                             break;
                         //これ以降はインクリメント用
@@ -619,11 +551,8 @@ namespace EMH_Player
                         case 0x7f:
                             i += dataLength;
                             break;
+                        //トラックの終了
                         case 0x2f:
-                            double delay = 0;
-                            if (noteList[channel] != null)
-                                delay = noteList[channel].Sum(a => a.delay);
-                            allTime = (allTime < delay) ? (int)delay : allTime;
                             return;
                         //テンポ情報を格納
                         case 0x51:
@@ -645,17 +574,15 @@ namespace EMH_Player
                 }
                 if (laneIndex != 0)
                 {
-                    double pos = storeNoteData(partIndex, channel, delayOffset, laneIndex, velocity, type);
-                    if(pos >= 0)
-                        delayOffset = pos;
+                    storeNoteData(partIndex, channel, ref delayOffset, ref currentDelay, ref pos, ref delayIndex, laneIndex, velocity, type);
                 }
             }
         }
-        private double storeNoteData(int[] partIdx, byte channel, double delay,
+        private void storeNoteData(int[] partIdx, byte channel, ref double delay, ref double currentDelay, ref double pos, ref int index,
             byte laneIndex, byte velocity, DataClass.NoteType type)
         {
             int idx = 0, listIdx = Array.FindIndex(partList, a => a.channel == channel), partMax = 0;
-            if (listIdx < 0) return -1;
+            if (listIdx < 0) return;
 
             DataClass.MidiData data = new DataClass.MidiData();
             data.playPart = new List<DataClass.Part>();
@@ -663,7 +590,7 @@ namespace EMH_Player
             data.serialRstTxt = new string[2];
             data.playPart.Add(partList[listIdx].playPart);
             int dataIdx = 0;
-            if (partList[listIdx].playPart == DataClass.Part.Guitar) dataIdx = 1; ;
+            if (partList[listIdx].playPart == DataClass.Part.Guitar) dataIdx = 1;
             partMax = partList[listIdx].timerIndex.Length;
 
             if (type == DataClass.NoteType.On)
@@ -677,7 +604,7 @@ namespace EMH_Player
                         break;
                     }
                 }
-                if (idx == 0) return -1;
+                if (idx == 0) return;
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 data.logTxt = (timerOffset + 1).ToString() + ",ON," + laneIndex.ToString() + ",";
@@ -697,39 +624,78 @@ namespace EMH_Player
                         break;
                     }
                 }
-                if (idx == 0) return -1;
-                if (partList[listIdx].playPart == DataClass.Part.Drum)
-                {
-                    //ドラムのノーツオフはスルーする
-                    return delay;
-                }
+                if (idx == 0) return;
+                //ドラムのノーツオフはスルーする
+                if (partList[listIdx].playPart == DataClass.Part.Drum) return;
+
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 data.logTxt += (timerOffset + 1).ToString() + ",OFF,";
                 data.serialTxt[dataIdx] = Convert.ToString(timerOffset, 2).PadLeft(4, '0') + "0";
                 data.serialRstTxt[dataIdx] = Convert.ToString(timerOffset, 2).PadLeft(4, '0') + "0";
                 data.midiMsg = new List<MidiMessage>() { MidiMessage.StopNote(laneIndex, velocity, channel + 1) };
-                data.midiRstMsg = data.midiMsg;
+                data.midiRstMsg = new List<MidiMessage>() { MidiMessage.StopNote(laneIndex, velocity, channel + 1) };
             }
-            if (delay > 0 || noteList[channel].Count < 1)
+            while (true)
             {
-                data.delay = delay;
-                //新しく要素を作成
-                noteList[channel].Add(data);
-                return 0;
+                if (playData.Count < 1)
+                {
+                    data.delay = delay;
+                    currentDelay = delay;
+                    pos = currentDelay;
+                    playData.Add(data);
+                    break;
+                }
+                else if (currentDelay + delay > pos)
+                {
+                    if (index + 1 >= playData.Count || currentDelay + delay < pos + playData[index + 1].delay)
+                    {
+                        currentDelay += delay;
+                        data.delay = currentDelay - pos;
+                        pos = currentDelay;
+                        playData.Insert(++index, data);
+                        if (index < playData.Count - 1)
+                        {
+                            data = playData[index + 1];
+                            data.delay -= playData[index].delay;
+                            playData[index + 1] = data;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        pos += playData[++index].delay;
+                    }
+                }
+                else if (currentDelay + delay < pos)
+                {
+                    pos = delay;
+                    currentDelay = delay;
+                    //最初のデータを格納
+                    data.delay = delay;
+                    playData.Insert(index, data);
+                    data = playData[index + 1];
+                    data.delay -= playData[index].delay;
+                    playData[index + 1] = data;
+                    break;
+                }
+                else if (currentDelay + delay == pos)
+                {
+                    currentDelay = pos;
+                    //delayが0の時はリストの前要素を編集
+                    data.delay = playData[index].delay;
+                    data.logTxt = playData[index].logTxt + data.logTxt;
+                    data.serialTxt[dataIdx] = playData[index].serialTxt[dataIdx] + data.serialTxt[dataIdx];
+                    data.serialRstTxt[dataIdx] = playData[index].serialRstTxt[dataIdx] + data.serialRstTxt[dataIdx];
+                    data.playPart.InsertRange(0, playData[index].playPart);
+                    data.midiMsg.InsertRange(0, playData[index].midiMsg);
+                    data.midiRstMsg.InsertRange(0, playData[index].midiRstMsg);
+                    playData[index] = data;
+                    break;
+                }
             }
-            else
-            {
-                //イベントタイムが0の時はリストの前要素を編集
-                data.delay = noteList[channel][noteList[channel].Count-1].delay;
-                data.logTxt = noteList[channel][noteList[channel].Count - 1].logTxt + data.logTxt;
-                data.serialTxt[dataIdx] = noteList[channel][noteList[channel].Count - 1].serialTxt[dataIdx] + data.serialTxt[dataIdx];
-                data.serialRstTxt[dataIdx] = noteList[channel][noteList[channel].Count - 1].serialRstTxt[dataIdx] + data.serialRstTxt[dataIdx];
-                data.midiMsg.InsertRange(0, noteList[channel][noteList[channel].Count - 1].midiMsg);
-                data.midiRstMsg.InsertRange(0, noteList[channel][noteList[channel].Count - 1].midiRstMsg);
-                noteList[channel][noteList[channel].Count - 1] = data;
-                return delay;
-            }
+            delay = 0;
+            return;
         }
         //ランダムなインデックス作成（シャッフル時）
         private void IndexRandom()
@@ -771,8 +737,9 @@ namespace EMH_Player
             ReturnButton.Enabled = true;
             HeaderChunkAnalysis();
             SendSerial();
+            allTime = playData.Sum(a => a.delay);
             trackBar.Maximum = (int)allTime;
-            maxTime = TimeSpan.FromMilliseconds((int)allTime);
+            maxTime = TimeSpan.FromMilliseconds(allTime);
             changeTime = new TimeSpan(0, 0, 0);
             LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
             trackbar_tim.Change(0, 245);
@@ -799,11 +766,7 @@ namespace EMH_Player
             RandomCheck.Enabled = true;
             //データをリセット
             tempoList.Clear();
-            for(int i = 0; i < noteList.Length; i++)
-            {
-                if (noteList[i] == null) continue;
-                noteList[i].Clear();
-            }
+            playData.Clear();
             for(int i = 0; i < fileList.Count; i++)
             {
                 DataClass.FileData data = new DataClass.FileData();
@@ -840,8 +803,7 @@ namespace EMH_Player
         private void HelpMenuItem_Click(object sender, EventArgs e)
         {
             string helpStr = "再生を開始するにはまず、\"設定->シリアルポート\"より各デバイスのシリアルポートを設定してください。\n" +
-                "その後、\"プレイヤー->プレイモード\"よりファイル単体の再生かプレイリスト(m3uファイル)による再生かを選択します。\n" +
-                "最後に\"ファイル->ファイル（プレイリスト）を開く\"を選択して再生したいファイルを選択してください。\n\n" +
+                "次に\"ファイル->ファイル（プレイリスト）を開く\"を選択して再生したいファイルを選択してください。\n\n" +
                 "パートごとのMidiチャネルやデバイスの詳細を設定したい場合は、設定メニューを参照してください。";
             MessageBox.Show(helpStr);
         }
