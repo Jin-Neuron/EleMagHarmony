@@ -168,7 +168,7 @@ namespace EMH_Player
                         {
                             //チェックオフ時はノーツオフのデータ(restMessage)を格納
                             idx = (idx != 1) ? 0 : 1;
-                            serialData[idx] += playData[timIdx].serialRstTxt;
+                            serialData[idx] += playData[timIdx].serialRstTxt[idx];
                             midi.Send(playData[timIdx].midiRstMsg[i].RawData);
                         }
                     }
@@ -233,6 +233,8 @@ namespace EMH_Player
         //タスク取り消用メソッド
         private void TaskCancel()
         {
+            if(timer != null)
+                timer.Stop();
             LabelTime.Enabled = false;
             trackBar.Enabled = false;
         }
