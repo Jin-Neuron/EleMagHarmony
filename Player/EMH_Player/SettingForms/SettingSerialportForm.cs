@@ -41,8 +41,11 @@ namespace EMH_Player
             SpeedComboBox.Items.Clear();
 
             // ボーレートを出力する
-            SpeedComboBox.Items.Add("115200"); //デフォルトなのでこれを最初にもってくる
+            //f303だとこれくらいが限界かも
+            SpeedComboBox.Items.Add("422400");//デフォルトなのでこれを最初にもってくる
 
+            //ボーレートが低いとmidiが遅延する可能性があり、
+            //マイコンはなるべく高い動作周波数のものを選んでボーレートを上げる必要がある
             SpeedComboBox.Items.Add("9600");
             SpeedComboBox.Items.Add("14400");
             SpeedComboBox.Items.Add("19200");
@@ -50,9 +53,12 @@ namespace EMH_Player
             SpeedComboBox.Items.Add("38400");
             SpeedComboBox.Items.Add("57600");
             SpeedComboBox.Items.Add("76800");
+            SpeedComboBox.Items.Add("115200");
             SpeedComboBox.Items.Add("153600");
             SpeedComboBox.Items.Add("230400");
-            SpeedComboBox.Items.Add("460800");
+            SpeedComboBox.Items.Add("345600");
+            SpeedComboBox.Items.Add("460800"); 
+            SpeedComboBox.SelectedIndex = 0;
         }
 
         private void DeviceComboBox_DropDown(object sender, EventArgs e)
@@ -60,6 +66,7 @@ namespace EMH_Player
             DeviceComboBox.Items.Clear();
             DeviceComboBox.Items.Add("ElectricDevice");
             DeviceComboBox.Items.Add("GuitarDevice");
+            DeviceComboBox.SelectedIndex = 0;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -70,7 +77,7 @@ namespace EMH_Player
         {
             return PortComboBox.SelectedItem.ToString();
         }
-        public int GetBaundRate()
+        public int GetBaudRate()
         {
             return int.Parse(SpeedComboBox.SelectedItem.ToString());
         }

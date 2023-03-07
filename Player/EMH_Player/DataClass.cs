@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NAudio.Midi;
+using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,13 +27,13 @@ namespace EMH_Player
         //ノートの種類
         public enum NoteType
         {
-            On,
             Off,
+            On,
         }
         //テンポを格納する構造体
         public struct TempoData
         {
-            public int eventTime;
+            public uint eventTime;
             public float bpm;
         };
         public struct FileData
@@ -42,6 +44,7 @@ namespace EMH_Player
         {
             public Part playPart;
             public Device playDevice;
+            public SerialPort port;
             public int channel;
             public int[] timerIndex;
         }
@@ -63,12 +66,13 @@ namespace EMH_Player
         public struct MidiData
         {
             public double delay;
-            public Part playPart;
-            public string logTxt, serialTxt;
+            public List<Part> playPart;
+            public string logTxt;
+            public string[] serialTxt, serialRstTxt;
+            public List<MidiMessage> midiMsg, midiRstMsg;
         }
         public struct DelegateData
         {
-            public delegate void LogTextDelegate(string text);
             public delegate void StartButtonDelegate();
             public delegate void StopButtonDelegate();
             public delegate void TrackBarDelegate();

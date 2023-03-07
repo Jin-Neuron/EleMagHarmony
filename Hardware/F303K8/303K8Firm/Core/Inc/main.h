@@ -59,8 +59,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define MCO_Pin GPIO_PIN_0
-#define MCO_GPIO_Port GPIOF
+#define Direction3_Pin GPIO_PIN_0
+#define Direction3_GPIO_Port GPIOF
+#define Step3_Pin GPIO_PIN_1
+#define Step3_GPIO_Port GPIOF
 #define Relay1_Pin GPIO_PIN_0
 #define Relay1_GPIO_Port GPIOA
 #define VCP_TX_Pin GPIO_PIN_2
@@ -69,8 +71,10 @@ void Error_Handler(void);
 #define Relay3_GPIO_Port GPIOA
 #define Relay2_Pin GPIO_PIN_6
 #define Relay2_GPIO_Port GPIOA
-#define Direction1_Pin GPIO_PIN_1
+#define Direction1_Pin GPIO_PIN_0
 #define Direction1_GPIO_Port GPIOB
+#define Step2_Pin GPIO_PIN_1
+#define Step2_GPIO_Port GPIOB
 #define Solenoid_Pin GPIO_PIN_8
 #define Solenoid_GPIO_Port GPIOA
 #define Stp_Motor_Pin GPIO_PIN_9
@@ -83,16 +87,12 @@ void Error_Handler(void);
 #define SWCLK_GPIO_Port GPIOA
 #define VCP_RX_Pin GPIO_PIN_15
 #define VCP_RX_GPIO_Port GPIOA
-#define Step1_Pin GPIO_PIN_3
-#define Step1_GPIO_Port GPIOB
-#define Direction2_Pin GPIO_PIN_4
+#define Step2B5_Pin GPIO_PIN_5
+#define Step2B5_GPIO_Port GPIOB
+#define Direction2_Pin GPIO_PIN_6
 #define Direction2_GPIO_Port GPIOB
-#define Step2_Pin GPIO_PIN_5
-#define Step2_GPIO_Port GPIOB
-#define Direction3_Pin GPIO_PIN_6
-#define Direction3_GPIO_Port GPIOB
-#define Step3_Pin GPIO_PIN_7
-#define Step3_GPIO_Port GPIOB
+#define Step1_Pin GPIO_PIN_7
+#define Step1_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
