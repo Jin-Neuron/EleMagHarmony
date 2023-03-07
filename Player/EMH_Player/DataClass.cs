@@ -68,7 +68,7 @@ namespace EMH_Player
             public double delay;
             public List<Part> playPart;
             public string logTxt;
-            public string[] serialTxt, serialRstTxt;
+            public List<byte>[] serialData, serialRstData;
             public List<MidiMessage> midiMsg, midiRstMsg;
         }
         public struct DelegateData

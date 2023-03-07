@@ -54,11 +54,8 @@ UART_HandleTypeDef huart2;
 GPIO_PinState currentState[FloppyNum] ={ GPIO_PIN_RESET};
 uint8_t currentPosition[FloppyNum] = {0};
 
-char dataLength[8];
-char data[255];
-char length[10];
+char data[256];
 uint8_t uartCnt = 0;
-uint8_t dataLen;
 uint16_t notes[10] = {0};
 uint16_t freqs[10] = {0};
 uint16_t noteParFreq[127] = {0};
@@ -188,93 +185,46 @@ float NoteConvert(uint16_t noteNum){
 //Serial interrupt
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+	static uint8_t event = 0;
+	static uint8_t part = 0;
+
 	if(uartCnt){
-			uint8_t part = 0;
-			uint64_t lastIdx = 0;
-			for(uint8_t i = 0; i < dataLen; i++){
-				uint8_t Idx = i - lastIdx;
-				data[i] &= 0x0f;
-				if(Idx < 4){
-					part |= data[i] << (3 - Idx);
-				}else if(Idx < 5){
-					if(data[i] == 0){
-						lastIdx = i + 1;
-						freqs[part] = 0;
-						notes[part] = 0;
-						if(part < TimerNum){
-							if(part < 1){
-								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
-							}else if(part < 5){
-								//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
-							}else{
-								HAL_TIM_Base_Stop_IT(&times[part]);
-							}
-						}
-						part = 0;
-					}
-				}else if(Idx < 13){
-					notes[part] |= data[i] << (12 - Idx);
+		notes[part] = data[0];
+		freqs[part] = noteParFreq[notes[part]];
+		if(part < TimerNum){
+			if(part >= 5){
+				//double the frequency if it is floppy
+				freqs[part] *= 2;
+				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
+			}
+			if(part < 1 && part > 4){
+				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
+			}else{
+				//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
+			}
+		}
+		uartCnt = 0;
+	}else{
+		event = data[0] & 0xf0;
+		part = data[0] & 0x0f;
+		if(event){
+			uartCnt++;
+		}else{
+			notes[part] = 0;
+			freqs[part] = 0;
+			if(part < TimerNum){
+				if(part < 1){
+					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
+					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
+				}else if(part < 5){
+					//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
 				}else{
-					freqs[part] = noteParFreq[notes[part]];
-					if(part < TimerNum){
-						if(part >= 5){
-							//double the frequency if it is floppy
-							freqs[part] *= 2;
-							setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
-						}
-						if(part < 1 && part > 4){
-							setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
-						}else{
-							//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
-						}
-					}
-					lastIdx = i;
-					part = 0;
-				}
-				if(i == dataLen - 1){
-					freqs[part] = noteParFreq[notes[part]];
-					if(part < TimerNum){
-						if(part >= 5){
-							//double the frequency if it is floppy
-							freqs[part] *= 2;
-							setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
-						}
-						if(part < 1 && part > 4){
-							setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
-						}else{
-							//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
-						}
-					}
-					if(Idx < 5){
-						lastIdx = i + 1;
-						freqs[part] = 0;
-						notes[part] = 0;
-						if(part < TimerNum){
-							if(part < 1){
-								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-								HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
-							}else if(part < 5){
-								//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
-							}else{
-								HAL_TIM_Base_Stop_IT(&times[part]);
-							}
-						}
-						part = 0;
-					}
+					HAL_TIM_Base_Stop_IT(&times[part]);
 				}
 			}
-			uartCnt = 0;
-			HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
-			return;
 		}
-		dataLen = 0;
-		for(uint8_t i = 0; i < 8; i++){
-			dataLength[i] &= 0x0f;
-			dataLen |= dataLength[i] << (7 - i);
-		}
-		HAL_UART_Receive_IT(&huart2, (uint8_t *)data, dataLen);
-		uartCnt++;
+	}
+	HAL_UART_Receive_IT(&huart2, (uint8_t *)data, 1);
 }
 
 
@@ -353,7 +303,7 @@ int main(void)
   //reset floppy
   resetStep();
   //start UART interrupt
-  HAL_UART_Receive_IT(&huart2, (uint8_t *)dataLength, 8);
+  HAL_UART_Receive_IT(&huart2, (uint8_t *)data, 1);
   for(uint8_t i = 0; i < 127; i++){
   	noteParFreq[i] =  (uint16_t)NoteConvert(i);
   }

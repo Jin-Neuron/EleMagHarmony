@@ -159,26 +159,18 @@ namespace EMH_Player
                         int idx = (int)playData[timIdx].playPart[i];
                         if (filterCheckBox.GetItemChecked(idx))
                         {
-                            //チェックオンの時は音を鳴らし、midi送信データに値を格納する
-                            idx = (idx != 1) ? 0 : 1;
-                            serialData[idx] += playData[timIdx].serialTxt[idx];
+                            if (partList[idx].port.IsOpen)
+                                partList[idx].port.Write(playData[timIdx].serialData[(idx != 1) ? 0 : 1].ToArray(), 
+                                    0, playData[timIdx].serialData[(idx != 1) ? 0 : 1].Count);
                             midi.Send(playData[timIdx].midiMsg[i].RawData);
                         }
                         else if (!filterCheckBox.GetItemChecked(idx))
                         {
-                            //チェックオフ時はノーツオフのデータ(restMessage)を格納
-                            idx = (idx != 1) ? 0 : 1;
-                            serialData[idx] += playData[timIdx].serialRstTxt[idx];
+                            if (partList[idx].port.IsOpen)
+                                partList[idx].port.Write(playData[timIdx].serialRstData[(idx != 1) ? 0 : 1].ToArray(),
+                                    0, playData[timIdx].serialRstData[(idx != 1) ? 0 : 1].Count);
                             midi.Send(playData[timIdx].midiRstMsg[i].RawData);
                         }
-                    }
-                    if (playData[timIdx].serialTxt[0] != null && playData[timIdx].serialTxt[0] != "" && serialPort1.IsOpen)
-                    {
-                        serialPort1.Write(Convert.ToString(serialData[0].Length, 2).PadLeft(8, '0') + serialData[0]);
-                    }
-                    if (playData[timIdx].serialTxt[1] != null && playData[timIdx].serialTxt[1] != "" && serialPort2.IsOpen)
-                    {
-                        serialPort1.Write(Convert.ToString(serialData[1].Length, 2).PadLeft(8, '0') + serialData[1]);
                     }
                     timIdx++;
                     lastTime = currentTime;
@@ -588,8 +580,8 @@ namespace EMH_Player
 
             DataClass.MidiData data = new DataClass.MidiData();
             data.playPart = new List<DataClass.Part>();
-            data.serialTxt = new string[2];
-            data.serialRstTxt = new string[2];
+            data.serialData = new List<byte>[2];
+            data.serialRstData = new List<byte>[2];
             data.playPart.Add(partList[listIdx].playPart);
             int dataIdx = 0;
             if (partList[listIdx].playPart == DataClass.Part.Guitar) dataIdx = 1;
@@ -610,8 +602,8 @@ namespace EMH_Player
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 data.logTxt = (timerOffset + 1).ToString() + ",ON," + laneIndex.ToString() + ",";
-                data.serialTxt[dataIdx] = Convert.ToString(timerOffset, 2).PadLeft(4, '0') + "1" + Convert.ToString(laneIndex, 2).PadLeft(8, '0');
-                data.serialRstTxt[dataIdx] = Convert.ToString(timerOffset, 2).PadLeft(4, '0') + "0";
+                data.serialData[dataIdx] = new List<byte>() { (byte)(0x10 + timerOffset), laneIndex };
+                data.serialRstData[dataIdx] = new List<byte>() { (byte)(0x00  + timerOffset) };
                 data.midiMsg = new List<MidiMessage>() { MidiMessage.StartNote(laneIndex, velocity, channel+1) };
                 data.midiRstMsg = new List<MidiMessage>() { MidiMessage.StopNote(laneIndex, velocity, channel+1) };
             }
@@ -633,8 +625,8 @@ namespace EMH_Player
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 data.logTxt += (timerOffset + 1).ToString() + ",OFF,";
-                data.serialTxt[dataIdx] = Convert.ToString(timerOffset, 2).PadLeft(4, '0') + "0";
-                data.serialRstTxt[dataIdx] = Convert.ToString(timerOffset, 2).PadLeft(4, '0') + "0";
+                data.serialData[dataIdx] = new List<byte>() { (byte)(0x00 + timerOffset) };
+                data.serialRstData[dataIdx] = new List<byte>() { (byte)(0x00 + timerOffset) };
                 data.midiMsg = new List<MidiMessage>() { MidiMessage.StopNote(laneIndex, velocity, channel + 1) };
                 data.midiRstMsg = new List<MidiMessage>() { MidiMessage.StopNote(laneIndex, velocity, channel + 1) };
             }
@@ -687,9 +679,23 @@ namespace EMH_Player
                     //delayが0の時はリストの前要素を編集
                     data.delay = playData[index].delay;
                     data.logTxt = playData[index].logTxt + data.logTxt;
-                    data.serialTxt[dataIdx] = playData[index].serialTxt[dataIdx] + data.serialTxt[dataIdx];
-                    data.serialRstTxt[dataIdx] = playData[index].serialRstTxt[dataIdx] + data.serialRstTxt[dataIdx];
                     data.playPart.InsertRange(0, playData[index].playPart);
+                    for(int i = 0; i < dataIdx; i++)
+                    {
+                        if (playData[index].serialData[i] != null)
+                        {
+                            if (data.serialData[i] != null)
+                            {
+                                data.serialData[i].InsertRange(0, playData[index].serialData[i]);
+                                data.serialRstData[i].InsertRange(0, playData[index].serialRstData[i]);
+                            }
+                            else
+                            {
+                                data.serialData[i] = playData[index].serialData[i];
+                                data.serialRstData[i] = playData[index].serialRstData[i];
+                            }
+                        }
+                    }
                     data.midiMsg.InsertRange(0, playData[index].midiMsg);
                     data.midiRstMsg.InsertRange(0, playData[index].midiRstMsg);
                     playData[index] = data;
@@ -756,9 +762,9 @@ namespace EMH_Player
             TaskCancel();
             midi.Close();
             midi.Dispose();
-            string binTxt = "0000000010001000011001000010100110001110";
-            if (serialPort1.IsOpen) serialPort1.Write(Convert.ToString(binTxt.Length, 2).PadLeft(8, '0') + binTxt);
-            if(serialPort2.IsOpen) serialPort2.Write(Convert.ToString(binTxt.Length, 2).PadLeft(8, '0') + binTxt);
+            byte[] rstBin = new byte[10] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
+            if (serialPort1.IsOpen) serialPort1.Write(rstBin, 0, 8);
+            if(serialPort2.IsOpen) serialPort2.Write(rstBin, 0, 6);
             StartButton.Enabled = true;
             LabelTime.Enabled = false;
             trackBar.Enabled = false;
