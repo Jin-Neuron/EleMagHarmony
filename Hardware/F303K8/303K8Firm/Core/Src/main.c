@@ -192,15 +192,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		notes[part] = data[0];
 		freqs[part] = noteParFreq[notes[part]];
 		if(part < TimerNum){
+			//double the frequency if it is floppy
 			if(part >= 5){
-				//double the frequency if it is floppy
-				freqs[part] *= 2;
+					freqs[part] *= 2;
 				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
-			}
-			if(part < 1 && part > 4){
+			}else if(part < 1){
 				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
 			}else{
-				//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
+				notes[part] = 0;
+				HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
 			}
 		}
 		uartCnt = 0;
@@ -216,9 +216,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				if(part < 1){
 					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
 					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
-				}else if(part < 5){
-					//HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
-				}else{
+				}else if(part > 4){
 					HAL_TIM_Base_Stop_IT(&times[part]);
 				}
 			}
