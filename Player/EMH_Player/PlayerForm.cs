@@ -19,6 +19,8 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using NAudio.Midi;
 using System.Net.Configuration;
+using MetroFramework.Controls;
+using System.Windows.Media;
 
 namespace EMH_Player
 {
@@ -26,12 +28,14 @@ namespace EMH_Player
     {
         //変数宣言部
         private static int timePos = 0, fileCounter = 0, timIdx = 0;
+        private static bool isRepeat = false, isShuffle = false;
         private static List<DataClass.FileData> fileList = new List<DataClass.FileData>();
         private static List<DataClass.TempoData> tempoList = new List<DataClass.TempoData>();
         private static List<DataClass.MidiData> playData = new List<DataClass.MidiData>();
         private static DataClass.PartData[] partList = new DataClass.PartData[4];
         private static DataClass.HeaderData headerChunk = new DataClass.HeaderData();
         private static TimeSpan maxTime, changeTime;
+        private static DataClass.PlayStatus status = new DataClass.PlayStatus();
         private static System.Threading.Timer trackbar_tim;
         private static TickTimer timer;
         private static double lastTime, allTime = 0, preTime;
@@ -40,26 +44,61 @@ namespace EMH_Player
         {
             InitializeComponent();
             trackbar_tim = new System.Threading.Timer(TimerCallBack, null, Timeout.Infinite, Timeout.Infinite);
+            ToolStripMenuItem checkMarginOnly = new ToolStripMenuItem("CheckMargin");
+            (OpenMidiFileMenuItem.DropDown as ToolStripDropDownMenu).ShowCheckMargin = false;
+            menuStrip1.Renderer = new MyRenderer();
             this.FormClosing += (s, e) =>
             {
+                if (timer != null)
+                    timer.Stop();
+                if (midi != null)
+                {
+                    midi.Close();
+                    midi.Dispose();
+                }
                 trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
                 trackbar_tim.Dispose();
             };
         }
+        private class MyRenderer : ToolStripProfessionalRenderer
+        {
+            public MyRenderer() : base(new MyColors()) { }
+        }
+
+        private class MyColors : ProfessionalColorTable
+        {
+            //境界線関係
+            public override System.Drawing.Color MenuBorder
+            { get { return System.Drawing.Color.FromArgb(51, 54, 49); } }
+            public override System.Drawing.Color MenuItemBorder
+            { get { return System.Drawing.Color.FromArgb(51, 54, 49); } }
+            public override System.Drawing.Color ToolStripBorder
+            { get { return System.Drawing.Color.FromArgb(51, 54, 49); } }
+            public override System.Drawing.Color ToolStripDropDownBackground
+            { get { return System.Drawing.Color.FromArgb(71, 75, 66); } }
+
+            //メニューアイテム選択時のbackground
+            public override System.Drawing.Color MenuItemSelected
+            { get { return System.Drawing.Color.FromArgb(71, 75, 66); } }
+            public override System.Drawing.Color MenuItemSelectedGradientBegin
+            { get { return System.Drawing.Color.FromArgb(91, 99, 86); } }
+            public override System.Drawing.Color MenuItemSelectedGradientEnd
+            { get { return System.Drawing.Color.FromArgb(91, 99, 86); } }
+            public override System.Drawing.Color MenuItemPressedGradientBegin
+            { get { return System.Drawing.Color.FromArgb(71, 75, 66); } }
+            public override System.Drawing.Color MenuItemPressedGradientEnd
+            { get { return System.Drawing.Color.FromArgb(71, 75, 66); } }
+
+        }
         //フォーム１の初期設定
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.Height = 310;
-            this.MinimumSize = new Size(630, 310);
-            this.MaximumSize = new Size(800, 310);
-            ElectricDevicePortLabel.Enabled = false;
-            GuitarDevicePortLabel.Enabled = false;
+            status = DataClass.PlayStatus.Stopping;
             PartReset(partList);
             SetPartStatus();
-            UiReset();
         }
         private void SetPartStatus() {
-            ToolStripStatusLabel[] deviceLabel = new ToolStripStatusLabel[] { MelodyDeviceLabel, BaseDeviceLabel, DrumDeviceLabel };
+            ToolStripStatusLabel[] deviceLabel = new ToolStripStatusLabel[] { ElectricDeviceLabel, BaseDeviceLabel, DrumDeviceLabel };
             string text = "";
             for(int i = 0; i < 4; i++)
             {
@@ -96,8 +135,11 @@ namespace EMH_Player
         //スレッドタイマーのコールバックメソッド
         private void TimerCallBack(object state)
         {
-            Invoke(new DataClass.DelegateData.TrackBarDelegate(UpDateTrackBar));
-            Invoke(new DataClass.DelegateData.LabelTimeDelegate(UpDateLabelTime));
+            try
+            {
+                Invoke(new DataClass.DelegateData.TrackBarDelegate(UpDateTrackBar));
+                Invoke(new DataClass.DelegateData.LabelTimeDelegate(UpDateLabelTime));
+            }catch (Exception ex) { }
         }
         //各種シリアルポートの設定
         public void startSerial(string portName, int baudRate, string device)
@@ -109,12 +151,10 @@ namespace EMH_Player
             {
                 serialPort1.Close();
                 ElectricDevicePortLabel.Text = "ElectricDevicePort : ";
-                ElectricDevicePortLabel.Enabled = false;
             }else if(portName == serialPort2.PortName)
             {
                 serialPort2.Close();
                 GuitarDevicePortLabel.Text = "GuitarDevicePort : ";
-                GuitarDevicePortLabel.Enabled=false;
             }
             if (port.IsOpen)
             {
@@ -124,24 +164,8 @@ namespace EMH_Player
             port.BaudRate = baudRate;
             port.PortName = portName;
             port.Open();
-            label.Enabled = true;
             label.Text += portName;
             trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
-            if (fileList.Count > 0)
-            {
-                StartButton.Enabled = true;
-                NowPlaying.Enabled = true;
-            }
-        }
-        //非同期処理によるギターとリレーの同時通信
-        private void SendSerial()
-        {
-            int cnt = partList.Length;
-            timer = new TickTimer(SerialSendTask, 1);
-            timIdx = 0;
-            lastTime = DateTime.Now.Ticks / 10000.0;
-            preTime = DateTime.Now.Ticks / 10000.0;
-            timer.Start();
         }
         private void SerialSendTask(object status)
         {
@@ -187,6 +211,7 @@ namespace EMH_Player
             }
 
         }
+        //Invoke用メソッド
         private void UpDateTrackBar()
         {
             timePos += 250;
@@ -213,39 +238,13 @@ namespace EMH_Player
         }
         private void Stt()
         {
-            NextButton.Enabled = false;
-            ReturnButton.Enabled = false;
-            StartButton.Enabled = true;
-            StartButton.PerformClick();
+            PlayerButton_Click(PlayButton, EventArgs.Empty);
         }
         private void Stp()
         {
-            StopButton.PerformClick();
+            PlayerButton_Click(StopButton, EventArgs.Empty);
         }
-        //タスク取り消用メソッド
-        private void TaskCancel()
-        {
-            if(timer != null)
-                timer.Stop();
-            LabelTime.Enabled = false;
-            trackBar.Enabled = false;
-        }
-        //UIのリセット用メソッド
-        private void UiReset() {
-            //全てのUIをfalseに設定
-            StartButton.Enabled = false;
-            StopButton.Enabled = false;
-            NextButton.Enabled = false;
-            ReturnButton.Enabled = false;
-            OpenPlaylistMenuItem.Enabled = false;
-            OpenMidiFileMenuItem.Enabled = false;
-            RepeatCheck.Enabled = false;
-            RandomCheck.Enabled = false;
-            PlaylistLabel.Enabled = false;
-            FileLabel.Enabled = false;
-            NowPlaying.Enabled = false;
-            LabelTime.Enabled = false;
-        }
+        //ファイルメニューのクリックイベント
         private void OpenFileMenuItem_Click(object sender, EventArgs e)
         {
             fileList.Clear();
@@ -254,12 +253,6 @@ namespace EMH_Player
             openFileDialog.Filter = (ctlName == menuItem[0].Name) ? "midiファイル(*.mid)|*.mid" : "プレイリストファイル(*.m3u) | *.m3u";
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                StartButton.Enabled = true;
-                NowPlaying.Enabled = true;
-                NextButton.Enabled = true;
-                ReturnButton.Enabled = true;
-                RandomCheck.Enabled = true;
-                RepeatCheck.Enabled = true;
                 if (ctlName == menuItem[0].Name)
                 {
                     DataClass.FileData data = new DataClass.FileData();
@@ -273,11 +266,12 @@ namespace EMH_Player
                     string playlistPath = openFileDialog.FileName;
                     PlaylistLabel.Text = "MidiPlaylist : " + Path.GetFileNameWithoutExtension(playlistPath);
                     FileEncoder(playlistPath);
-                    if (RandomCheck.Checked)
+                    if (isShuffle)
                     {
                         IndexRandom();
                     }
                 }
+                if (status != DataClass.PlayStatus.Stopping) PlayerButton_Click(StopButton, EventArgs.Empty);
             }
         }
         //プレイリストファイルからすべてのパスを取得して格納
@@ -307,7 +301,7 @@ namespace EMH_Player
         {
             tempoList.Clear();
             //ヘッダチャンクの解析
-            using(FileStream stream = new FileStream(fileList[fileCounter].filePath, FileMode.Open, FileAccess.Read))
+            using( FileStream stream = new FileStream(fileList[fileCounter].filePath, FileMode.Open, FileAccess.Read))
             using(BinaryReader reader = new BinaryReader(stream))
             {
                 headerChunk.chunkID = reader.ReadBytes(4);
@@ -342,7 +336,7 @@ namespace EMH_Player
                     MessageBox.Show(Path.GetFileNameWithoutExtension(fileList[fileCounter].filePath) + "は対応していないフォーマットです。");
                     if(fileCounter++ >= fileList.Count)
                     {
-                        StopButton.PerformClick();
+                        PlayerButton_Click(StopButton, EventArgs.Empty);
                     }
                     return;
                 }
@@ -718,94 +712,125 @@ namespace EMH_Player
             }
         }
         //以下各種音楽再生用ボタンクリックイベント
-        private void StartButton_Click(object sender, EventArgs e)
+        private void PlayerButton_Click(object sender, EventArgs e)
         {
-            timePos = 0;
-            StartButton.Enabled = false;
-            menuStrip1.Enabled = false;
-            if (fileCounter >= fileList.Count)
+            sender = (PictureBox)sender;
+            if(sender != PlayButton)
             {
-                fileCounter = 0;
-                if (!RepeatCheck.Checked)
+                PlayButton.Image = Image.FromFile(@".\IMG\play_icon.png");
+                menuStrip1.Enabled = true;
+                allTime = 0;
+                trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
+                changeTime = new TimeSpan(0, 0, 0);
+                if (timer != null)
+                    timer.Stop();
+                if (midi != null)
                 {
-                    NextButton.Enabled = true;
-                    ReturnButton.Enabled = true;
-                    StopButton.Enabled = true;
-                    StopButton.PerformClick();
-                    return;
+                    midi.Close();
+                    midi.Dispose();
+                }
+                byte[] rstBin = new byte[10] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
+                if (serialPort1.IsOpen) serialPort1.Write(rstBin, 0, 8);
+                if (serialPort2.IsOpen) serialPort2.Write(rstBin, 0, 6);
+                timePos = 0;
+                timIdx = 0;
+                trackBar.Value = 0;
+                //データをリセット
+                tempoList.Clear();
+                playData.Clear();
+                for (int i = 0; i < fileList.Count; i++)
+                {
+                    DataClass.FileData data = new DataClass.FileData();
+                    data.playlistPath = fileList[i].playlistPath;
+                    data.filePath = fileList[i].filePath;
+                    data.title = "";
+                    fileList[i] = data;
+                }
+                status = DataClass.PlayStatus.Stopping;
+            }
+            if(sender != StopButton)
+            {
+                if (sender != PlayButton)
+                {
+                    fileCounter = (sender == NextButton) ? fileCounter + 1 : (fileCounter <= 1) ? 0 : fileCounter - 1;
+                    timePos = 0;
+                    timIdx = 0;
+                }
+                if (status != DataClass.PlayStatus.Playing)
+                {
+                    PlayButton.Image = Image.FromFile(@".\IMG\pause_icon.png");
+                    menuStrip1.Enabled = false;
+                    if (fileCounter >= fileList.Count)
+                    {
+                        fileCounter = 0;
+                        if (!isRepeat)
+                        {
+                            PlayerButton_Click(StopButton, EventArgs.Empty);
+                            return;
+                        }
+                    }
+                    midi = new MidiOut(0);
+                    HeaderChunkAnalysis();
+                    timer = new TickTimer(SerialSendTask, 1);
+                    lastTime = DateTime.Now.Ticks / 10000.0;
+                    preTime = DateTime.Now.Ticks / 10000.0;
+                    timer.Start();
+                    if (status == DataClass.PlayStatus.Stopping)
+                    {
+                        allTime = playData.Sum(a => a.delay);
+                        trackBar.Maximum = (int)Math.Round(allTime);
+                        maxTime = TimeSpan.FromMilliseconds(allTime);
+                        changeTime = new TimeSpan(0, 0, 0);
+                        LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+                    }
+                    trackbar_tim.Change(0, 245);
+                    status = DataClass.PlayStatus.Playing;
+                }
+                else
+                {
+                    PlayButton.Image = Image.FromFile(@".\IMG\play_icon.png");
+                    menuStrip1.Enabled = true;
+                    trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
+                    if (timer != null)
+                        timer.Stop();
+                    if (midi != null)
+                    {
+                        midi.Close();
+                        midi.Dispose();
+                    }
+                    status = DataClass.PlayStatus.Pausing;
                 }
             }
-            midi = new MidiOut(0);
-            StopButton.Enabled = true;
-            RepeatCheck.Enabled = false;
-            RandomCheck.Enabled = false;
-            LabelTime.Enabled = true;
-            trackBar.Enabled = true;
-            NextButton.Enabled = true;
-            ReturnButton.Enabled = true;
-            HeaderChunkAnalysis();
-            SendSerial();
-            allTime = playData.Sum(a => a.delay);
-            trackBar.Maximum = (int)allTime;
-            maxTime = TimeSpan.FromMilliseconds(allTime);
-            changeTime = new TimeSpan(0, 0, 0);
-            LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
-            trackbar_tim.Change(0, 245);
         }
-        private void StopButton_Click(object sender, EventArgs e)
+        private void PlayControlButtonClick(object sender, EventArgs e)
         {
-            StopButton.Enabled = false;
-            menuStrip1.Enabled = true;
-            allTime = 0;
-            trackbar_tim.Change(Timeout.Infinite, Timeout.Infinite);
-            changeTime = new TimeSpan(0, 0, 0);
-            TaskCancel();
-            midi.Close();
-            midi.Dispose();
-            byte[] rstBin = new byte[10] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
-            if (serialPort1.IsOpen) serialPort1.Write(rstBin, 0, 8);
-            if(serialPort2.IsOpen) serialPort2.Write(rstBin, 0, 6);
-            StartButton.Enabled = true;
-            LabelTime.Enabled = false;
-            trackBar.Enabled = false;
-            timePos = 0;
-            trackBar.Value = 0;
-            RepeatCheck.Enabled = true;
-            RandomCheck.Enabled = true;
-            //データをリセット
-            tempoList.Clear();
-            playData.Clear();
-            for(int i = 0; i < fileList.Count; i++)
+            if((PictureBox)sender == RepeatButton)
             {
-                DataClass.FileData data = new DataClass.FileData();
-                data.playlistPath = fileList[i].playlistPath;
-                data.filePath = fileList[i].filePath;
-                data.title = "";
-                fileList[i] = data;
+                isRepeat = !isRepeat;
+                if (isRepeat)
+                    RepeatButton.Image = System.Drawing.Image.FromFile(@".\IMG\repeat_icon_enable.png");
+                else
+                    RepeatButton.Image = System.Drawing.Image.FromFile(@".\IMG\repeat_icon_disable.png");
             }
-        }
-        private void NextButton_Click(object sender, EventArgs e)
-        {
-            StopButton.PerformClick();
-            NextButton.Enabled = false;
-            ReturnButton.Enabled = false;
-            fileCounter++;
-            StartButton.PerformClick();
-        }
-        private void ReturnButton_Click(object sender, EventArgs e)
-        {
-            StopButton.PerformClick();
-            NextButton.Enabled = false;
-            ReturnButton.Enabled = false;
-            if (fileCounter <= 1)
+            if((PictureBox)sender == ShuffleButton)
             {
-                fileCounter = 0;
+                isShuffle = !isShuffle;
+                if (isShuffle)
+                {
+                    ShuffleButton.Image = System.Drawing.Image.FromFile(@".\IMG\random_icon_enable.png");
+                    IndexRandom();
+                }
+                else
+                {
+                    if (fileList[0].playlistPath != null)
+                    {
+                        string playlist = fileList[0].playlistPath;
+                        fileList.Clear();
+                        FileEncoder(playlist);
+                    }
+                    ShuffleButton.Image = System.Drawing.Image.FromFile(@".\IMG\random_icon_disable.png");
+                }
             }
-            else
-            {
-                fileCounter--;
-            }
-            StartButton.PerformClick();
         }
 
         private void HelpMenuItem_Click(object sender, EventArgs e)
@@ -814,20 +839,6 @@ namespace EMH_Player
                 "次に\"ファイル->ファイル（プレイリスト）を開く\"を選択して再生したいファイルを選択してください。\n\n" +
                 "パートごとのMidiチャネルやデバイスの詳細を設定したい場合は、設定メニューを参照してください。";
             MessageBox.Show(helpStr);
-        }
-
-        private void RandomCheck_CheckedChanged(object sender, EventArgs e)
-        {
-            if (RandomCheck.Checked)
-            {
-                IndexRandom();
-            }
-            else
-            {
-                string playlist = fileList[fileCounter].playlistPath;
-                fileList.Clear();
-                FileEncoder(playlist);
-            }
         }
         //トラックバーのスクロールの変更はNG
         private void trackBar_Scroll(object sender, EventArgs e)
@@ -842,7 +853,7 @@ namespace EMH_Player
             }
         }
 
-        private void SettingSerialportMenuItem_Click(object sender, EventArgs e)
+        private void SettingSerialPortMenuItem_Click(object sender, EventArgs e)
         {
             SettingSerialportForm form = new SettingSerialportForm();
             form.ShowDialog();
@@ -852,8 +863,6 @@ namespace EMH_Player
                 {
                     startSerial(form.GetPortName(), form.GetBaudRate(), form.GetDevice());
                     form.Close();
-                    OpenPlaylistMenuItem.Enabled = true;
-                    OpenMidiFileMenuItem.Enabled = true;
                 }
             }catch(Exception ex)
             {

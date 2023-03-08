@@ -10,6 +10,12 @@ namespace EMH_Player
 {
     public partial class DataClass
     {
+        public enum PlayStatus
+        {
+            Playing,
+            Pausing,
+            Stopping
+        }
         public enum Part
         {
             Melody,
