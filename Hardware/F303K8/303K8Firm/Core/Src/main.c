@@ -91,18 +91,14 @@ void resetStep(){
 	for(uint8_t i = 0; i < FloppyNum * 2; i+=2){
 		//i : Direction, i+1 : Step
 		HAL_GPIO_WritePin(floppyPort[i], floppyPin[i], GPIO_PIN_SET);
-		//LL_GPIO_SetOutputPin(floppyPort[i], floppyPin[i]);
 		for(uint8_t j = 0; j < 79; j++){
 			HAL_GPIO_WritePin(floppyPort[i+1], floppyPin[i+1], GPIO_PIN_SET);
 			HAL_GPIO_WritePin(floppyPort[i+1], floppyPin[i+1], GPIO_PIN_RESET);
 			HAL_Delay(10);
-			//LL_GPIO_SetOutputPin(floppyPort[i+1], floppyPin[i+1]);
-			//LL_GPIO_ResetOutputPin(floppyPort[i+1], floppyPin[i+1]);
 		}
 		currentPosition[i / 2] = 0;
 		currentState[i / 2] = GPIO_PIN_RESET;
 		HAL_GPIO_WritePin(floppyPort[i], floppyPin[i], GPIO_PIN_RESET);
-		//LL_GPIO_ResetOutputPin(floppyPort[i], floppyPin[i]);
 	}
 }
 
@@ -124,14 +120,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(currentPosition[floppyIdx] <= 0){
 			currentState[floppyIdx] = GPIO_PIN_RESET;
 			HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
-			//LL_GPIO_ResetOutputPin(floppyPort[(timerIdx - 5) * 2], floppyPin[(timerIdx - 5) * 2]);
 		}else if(currentPosition[floppyIdx] >= 158){
 			currentState[floppyIdx] = GPIO_PIN_SET;
 			HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
-			//LL_GPIO_SetOutputPin(floppyPort[(timerIdx - 5) * 2], floppyPin[(timerIdx - 5) * 2]);
 		}
 		HAL_GPIO_TogglePin(floppyPort[floppyIdx * 2 + 1], floppyPin[floppyIdx * 2 + 1]);
-		//LL_GPIO_TogglePin(floppyPort[(timerIdx - 5) * 2 + 1], floppyPin[(timerIdx - 5) * 2 + 1]);
 	}
 }
 
@@ -163,8 +156,8 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler, uint32_t
 	  HAL_TIM_PWM_ConfigChannel(&htim, &sConfigOC, TIM_CHANNEL_2);
 
 	  //start
-	  HAL_TIM_PWM_Start_IT(&htim, TIM_CHANNEL_1);
-	  HAL_TIM_PWM_Start_IT(&htim, TIM_CHANNEL_2);
+	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_1);
+	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_2);
 
 	}else{
 	  HAL_TIM_Base_Init(&htim);
@@ -195,9 +188,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			//double the frequency if it is floppy
 			if(part >= 5){
 					freqs[part] *= 2;
-				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
+				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
 			}else if(part < 1){
-				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),50);
+				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
 			}else{
 				notes[part] = 0;
 				HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
