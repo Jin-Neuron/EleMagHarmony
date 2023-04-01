@@ -140,10 +140,10 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler, uint32_t
   htim.Init.Period = timerPeriod - 1;	//because of start with 0
   htim.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  HAL_TIM_Base_Init(&htim);
 
 	if(part < 1){
-		TIM_OC_InitTypeDef sConfigOC = {0};	//pwm setting only
-	  HAL_TIM_PWM_Init(&htim);
+	  TIM_OC_InitTypeDef sConfigOC = {0};	//pwm setting only
 
 	  sConfigOC.OCMode = TIM_OCMODE_PWM1;
 	  sConfigOC.Pulse = pwm;
@@ -153,14 +153,29 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler, uint32_t
 	  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
 	  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
 	  HAL_TIM_PWM_ConfigChannel(&htim, &sConfigOC, TIM_CHANNEL_1);
-	  HAL_TIM_PWM_ConfigChannel(&htim, &sConfigOC, TIM_CHANNEL_2);
 
 	  //start
 	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_1);
-	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_2);
+
+
+	  sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
+	  sConfigOC.Pulse = 0;
+	  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+	  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+
+	  HAL_TIM_OC_ConfigChannel(&htim, &sConfigOC, TIM_CHANNEL_2);
+	  HAL_TIM_OC_Start(&htim, TIM_CHANNEL_2);
+	  HAL_TIMEx_OCN_Start(&htim, TIM_CHANNEL_2);
+
+	  sConfigOC.Pulse = timerPeriod / 2 - 1;
+	  HAL_TIM_OC_ConfigChannel(&htim, &sConfigOC, TIM_CHANNEL_3);
+	  HAL_TIM_OC_Start(&htim, TIM_CHANNEL_3);
+	  HAL_TIMEx_OCN_Start(&htim, TIM_CHANNEL_3);
 
 	}else{
-	  HAL_TIM_Base_Init(&htim);
 	  // start
 	  HAL_TIM_Base_Start_IT(&htim);
 	}
@@ -186,7 +201,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		freqs[part] = noteParFreq[notes[part]];
 		if(part < TimerNum){
 			//double the frequency if it is floppy
-			if(part >= 5){
+			if(part >= 5 || part < 1){
 					freqs[part] *= 2;
 				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
 			}else if(part < 1){
@@ -208,7 +223,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			if(part < TimerNum){
 				if(part < 1){
 					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
+					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
+					HAL_TIMEx_OCN_Stop(&times[part], TIM_CHANNEL_2);
+					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_3);	//stp_motor only
+					HAL_TIMEx_OCN_Stop(&times[part], TIM_CHANNEL_3);
 				}else if(part > 4){
 					HAL_TIM_Base_Stop_IT(&times[part]);
 				}
@@ -396,6 +414,10 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_OC_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
@@ -414,7 +436,12 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  sConfigOC.OCMode = TIM_OCMODE_TIMING;
+  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -601,11 +628,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOF, Direction3_Pin|Step3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Relay1_Pin|Relay3_Pin|Relay2_Pin|Relay4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Relay1_Pin|Relay3_Pin|Relay2_Pin|Direction1_Pin
+                          |Relay4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Direction1_Pin|Step2_Pin|Step2B5_Pin|Direction2_Pin
-                          |Step1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, Step2_Pin|Direction2_Pin|Step1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : Direction3_Pin Step3_Pin */
   GPIO_InitStruct.Pin = Direction3_Pin|Step3_Pin;
@@ -614,17 +641,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Relay1_Pin Relay3_Pin Relay2_Pin Relay4_Pin */
-  GPIO_InitStruct.Pin = Relay1_Pin|Relay3_Pin|Relay2_Pin|Relay4_Pin;
+  /*Configure GPIO pins : Relay1_Pin Relay3_Pin Relay2_Pin Direction1_Pin
+                           Relay4_Pin */
+  GPIO_InitStruct.Pin = Relay1_Pin|Relay3_Pin|Relay2_Pin|Direction1_Pin
+                          |Relay4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Direction1_Pin Step2_Pin Step2B5_Pin Direction2_Pin
-                           Step1_Pin */
-  GPIO_InitStruct.Pin = Direction1_Pin|Step2_Pin|Step2B5_Pin|Direction2_Pin
-                          |Step1_Pin;
+  /*Configure GPIO pins : Step2_Pin Direction2_Pin Step1_Pin */
+  GPIO_InitStruct.Pin = Step2_Pin|Direction2_Pin|Step1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
