@@ -628,11 +628,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOF, Direction3_Pin|Step3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Relay1_Pin|Relay3_Pin|Relay2_Pin|Direction1_Pin
-                          |Relay4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Relay1_Pin|Relay2_Pin|Relay3_Pin|Relay4_Pin
+                          |Step1_Pin|Direction1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Step2_Pin|Direction2_Pin|Step1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, Step2_Pin|Direction2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : Direction3_Pin Step3_Pin */
   GPIO_InitStruct.Pin = Direction3_Pin|Step3_Pin;
@@ -641,17 +641,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Relay1_Pin Relay3_Pin Relay2_Pin Direction1_Pin
-                           Relay4_Pin */
-  GPIO_InitStruct.Pin = Relay1_Pin|Relay3_Pin|Relay2_Pin|Direction1_Pin
-                          |Relay4_Pin;
+  /*Configure GPIO pins : Relay1_Pin Relay2_Pin Relay3_Pin Relay4_Pin
+                           Step1_Pin Direction1_Pin */
+  GPIO_InitStruct.Pin = Relay1_Pin|Relay2_Pin|Relay3_Pin|Relay4_Pin
+                          |Step1_Pin|Direction1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Step2_Pin Direction2_Pin Step1_Pin */
-  GPIO_InitStruct.Pin = Step2_Pin|Direction2_Pin|Step1_Pin;
+  /*Configure GPIO pins : Step2_Pin Direction2_Pin */
+  GPIO_InitStruct.Pin = Step2_Pin|Direction2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

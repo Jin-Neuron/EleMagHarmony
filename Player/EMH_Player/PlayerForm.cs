@@ -822,7 +822,7 @@ namespace EMH_Player
                 }
                 else
                 {
-                    if (fileList[0].playlistPath != null)
+                    if (fileList.Count > 0 && fileList[0].playlistPath != null)
                     {
                         string playlist = fileList[0].playlistPath;
                         fileList.Clear();
