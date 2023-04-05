@@ -167,7 +167,6 @@ namespace EMH_Player
                 {
                     for(int i = 0; i < playData[timIdx].midiMsg.Count; i++)
                     {
-                        midi.Send(playData[timIdx].midiMsg[i].RawData);
                         int idx = (int)playData[timIdx].playPart[i];
                         if (filterCheckBox.GetItemChecked(idx))
                         {
@@ -188,7 +187,6 @@ namespace EMH_Player
                     lastTime = timePos;
                 }
                 Invoke(new DataClass.DelegateData.TrackBarDelegate(UpDateTrackBar));
-                Invoke(new DataClass.DelegateData.LabelTimeDelegate(UpDateLabelTime));
             }
             else
             {
@@ -200,24 +198,16 @@ namespace EMH_Player
         //Invoke用メソッド
         private void UpDateTrackBar()
         {
+            changeTime = new TimeSpan(0, 0, 0, 0, (int)(timePos));
             if (timePos > trackBar.Maximum || timePos < trackBar.Minimum)
             {
                 trackBar.Value = trackBar.Minimum;
-            }else
-            {
-                trackBar.Value = (int)timePos;
-            }
-        }
-        private void UpDateLabelTime()
-        {
-            changeTime = new TimeSpan(0, 0, 0, 0, (int)(timePos));
-            if (changeTime < maxTime)
-            {
-                LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+                LabelTime.Text = maxTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
             }
             else
             {
-                LabelTime.Text = maxTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+                trackBar.Value = (int)timePos;
+                LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
             }
         }
         private void PlayCtl(object sender)
@@ -258,7 +248,6 @@ namespace EMH_Player
                 trackBar.Maximum = (int)Math.Round(allTime);
                 maxTime = TimeSpan.FromMilliseconds(allTime);
                 LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
-                if (status != DataClass.PlayStatus.Stopping) PlayerButton_Click(StopButton, EventArgs.Empty);
             }
         }
         //プレイリストファイルからすべてのパスを取得して格納
@@ -603,7 +592,6 @@ namespace EMH_Player
                 if (idx == 0) return;
                 //ドラムのノーツオフはスルーする
                 if (partList[listIdx].playPart == DataClass.Part.Drum) return;
-
                 int timerOffset = partList[listIdx].timerIndex[idx - 1] - 1;
                 timerOffset = (timerOffset < 5) ? timerOffset : timerOffset - 3;
                 data.logTxt += (timerOffset + 1).ToString() + ",OFF,";
@@ -687,6 +675,64 @@ namespace EMH_Player
             delay = 0;
             return;
         }
+        //timePosの位置からtimIdxを検索する
+        private void FindTimeIdx()
+        {
+            double del = allTime;
+            if (playData.Count > 0)
+            {
+                for (timIdx = playData.Count - 1; timIdx >= 1; timIdx--)
+                {
+                    del -= playData[timIdx].delay;
+                    if (timePos >= del)
+                    {
+                        timIdx++;
+                        break;
+                    }
+                }
+                lastTime = (del > playData[0].delay) ? del : 0;
+            }
+            else
+            {
+                timIdx = 0;
+            }
+        }
+        //midiとタイマーをスタートさせる
+        private void StartTimer()
+        {
+            midi = new MidiOut(0);
+            for (int i = 0; i < partList.Count(); i++)
+                midi.Send(MidiMessage.ChangePatch(partList[i].harmony, partList[i].channel + 1).RawData);
+            timer = new TickTimer(SendSerial, 1);
+            startTime = Math.Round(DateTime.Now.Ticks / 10000.0);
+            timer.Start();
+        }
+        //midiとタイマーをストップする
+        private void StopTimer()
+        {
+            if (timer != null)
+                timer.Stop();
+            if (midi != null)
+            {
+                midi.Close();
+                midi.Dispose();
+            }
+            timeOffset = timePos;
+            byte[] rstBin = new byte[10] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
+            if (serialPort1.IsOpen) serialPort1.Write(rstBin, 0, 8);
+            if (serialPort2.IsOpen) serialPort2.Write(rstBin, 0, 6);
+        }
+        //midiのデータと時間のラベル再セットする
+        private void ResetData()
+        {
+            playData.Clear();
+            tempoList.Clear();
+            HeaderChunkAnalysis();
+            allTime = playData.Sum(a => a.delay);
+            trackBar.Maximum = (int)Math.Round(allTime);
+            maxTime = TimeSpan.FromMilliseconds(allTime);
+            LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+        }
         //ランダムなインデックス作成（シャッフル時）
         private void IndexRandom()
         {
@@ -708,16 +754,7 @@ namespace EMH_Player
                 PlayButton.Image = System.Drawing.Image.FromFile(@".\IMG\play_icon.png");
                 menuStrip1.Enabled = true;
                 changeTime = new TimeSpan(0, 0, 0);
-                if (timer != null)
-                    timer.Stop();
-                if (midi != null)
-                {
-                    midi.Close();
-                    midi.Dispose();
-                }
-                byte[] rstBin = new byte[10] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
-                if (serialPort1.IsOpen) serialPort1.Write(rstBin, 0, 8);
-                if (serialPort2.IsOpen) serialPort2.Write(rstBin, 0, 6);
+                StopTimer();
                 //データをリセット
                 timePos = 0;
                 timIdx = 0;
@@ -740,56 +777,24 @@ namespace EMH_Player
             {
                 if (sender != PlayButton)
                 {
-                    fileCounter = (sender == NextButton) ? fileCounter + 1 : (fileCounter <= 1) ? 0 : fileCounter - 1;
-                    timePos = 0;
-                    timIdx = 0;
-                    trackBar.Value = 0;
-                    startTime = 0;
-                    timeOffset = 0;
-                    lastTime = 0;
-                    playData.Clear();
-                    tempoList.Clear();
-                    if (fileCounter >= fileList.Count)
-                    {
-                        fileCounter = 0;
-                        if (!isRepeat)
-                        {
-                            HeaderChunkAnalysis();
-                            PlayerButton_Click(StopButton, EventArgs.Empty);
-                            return;
-                        }
-                    }
-                    HeaderChunkAnalysis();
-                    allTime = playData.Sum(a => a.delay);
-                    trackBar.Maximum = (int)Math.Round(allTime);
-                    changeTime = new TimeSpan(0, 0, 0, 0, (int)(timePos));
-                    maxTime = TimeSpan.FromMilliseconds(allTime);
-                    LabelTime.Text = changeTime.ToString(@"mm\:ss") + "/" + maxTime.ToString(@"mm\:ss");
+                    fileCounter = (sender == NextButton) ? (fileCounter + 1 >= fileList.Count) ? 0 : fileCounter + 1 
+                                                            : (fileCounter <= 1) ? 0 : fileCounter - 1;
+                    ResetData();
+                    if (fileCounter == 0 && sender == NextButton && !isRepeat)
+                        return;
                 }
                 if (status != DataClass.PlayStatus.Playing)
                 {
                     PlayButton.Image = System.Drawing.Image.FromFile(@".\IMG\pause_icon.png");
                     menuStrip1.Enabled = false;
-                    midi = new MidiOut(0);
-                    timer = new TickTimer(SendSerial, 1);
-                    for (int i = 0; i < partList.Count(); i++)
-                        midi.Send(MidiMessage.ChangePatch(partList[i].harmony, partList[i].channel + 1).RawData);
-                    startTime = Math.Round(DateTime.Now.Ticks / 10000.0);
-                    timer.Start();
+                    StartTimer();
                     status = DataClass.PlayStatus.Playing;
                 }
-                else
+                else if(status == DataClass.PlayStatus.Playing)
                 {
                     PlayButton.Image = System.Drawing.Image.FromFile(@".\IMG\play_icon.png");
                     menuStrip1.Enabled = true;
-                    if (timer != null)
-                        timer.Stop();
-                    if (midi != null)
-                    {
-                        midi.Close();
-                        midi.Dispose();
-                    }
-                    timeOffset = timePos;
+                    StopTimer();
                     status = DataClass.PlayStatus.Pausing;
                 }
             }
@@ -834,43 +839,15 @@ namespace EMH_Player
         }
         private void trackBar_MouseDown(object sender, MouseEventArgs e)
         {
-            if (timer != null)
-                timer.Stop();
-            if (midi != null)
-            {
-                midi.Close();
-                midi.Dispose();
-            }
-            timeOffset = timePos;
+            StopTimer();
         }
 
         private void trackBar_MouseUp(object sender, MouseEventArgs e)
         {
-            double del = allTime;
-            if(playData.Count > 0)
+            FindTimeIdx();
+            if (status == DataClass.PlayStatus.Playing)
             {
-                for (timIdx = playData.Count - 1; timIdx >= 1; timIdx--)
-                {
-                    del -= playData[timIdx].delay;
-                    if (timePos >= del)
-                    {
-                        timIdx++;
-                        break;
-                    }
-                }
-                lastTime = (del > playData[0].delay) ? del : 0;
-            }
-            if(status == DataClass.PlayStatus.Playing)
-            {
-                midi = new MidiOut(0);
-                for (int i = 0; i < partList.Count(); i++)
-                    midi.Send(MidiMessage.ChangePatch(partList[i].harmony, partList[i].channel + 1).RawData);
-                if (timer != null)
-                {
-                    startTime = Math.Round(DateTime.Now.Ticks / 10000.0);
-                    timer = new TickTimer(SendSerial, 1);
-                    timer.Start();
-                }
+                StartTimer();
             }
         }
         private void trackBar_Scroll(object sender, EventArgs e)
@@ -942,9 +919,8 @@ namespace EMH_Player
                         partList = data;
                         SetPartStatus();
                         MessageBox.Show("チャネルを設定しました。");
-                        playData.Clear();
-                        tempoList.Clear();
-                        HeaderChunkAnalysis();
+                        ResetData();
+                        FindTimeIdx();
                     }
                     SettingChannelMenuItem.PerformClick();
                 }

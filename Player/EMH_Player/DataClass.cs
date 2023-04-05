@@ -83,7 +83,6 @@ namespace EMH_Player
         {
             public delegate void PlayerButtonDelegate(object sender);
             public delegate void TrackBarDelegate();
-            public delegate void LabelTimeDelegate();
         }
     }
 }
