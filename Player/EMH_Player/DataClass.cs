@@ -52,6 +52,7 @@ namespace EMH_Player
             public Device playDevice;
             public SerialPort port;
             public int channel;
+            public int harmony;
             public int[] timerIndex;
         }
         //ヘッダーチャンク解析用
@@ -77,10 +78,10 @@ namespace EMH_Player
             public List<byte>[] serialData, serialRstData;
             public List<MidiMessage> midiMsg, midiRstMsg;
         }
+        //デリゲートの構造体
         public struct DelegateData
         {
-            public delegate void StartButtonDelegate();
-            public delegate void StopButtonDelegate();
+            public delegate void PlayerButtonDelegate(object sender);
             public delegate void TrackBarDelegate();
             public delegate void LabelTimeDelegate();
         }

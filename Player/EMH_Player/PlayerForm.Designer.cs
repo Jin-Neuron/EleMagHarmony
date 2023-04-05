@@ -426,6 +426,7 @@
             // trackBar
             // 
             this.trackBar.BackColor = System.Drawing.Color.Transparent;
+            this.trackBar.LargeChange = 1;
             this.trackBar.Location = new System.Drawing.Point(12, 80);
             this.trackBar.Margin = new System.Windows.Forms.Padding(0);
             this.trackBar.Name = "trackBar";
@@ -436,6 +437,8 @@
             this.trackBar.UseCustomBackColor = true;
             this.trackBar.Value = 0;
             this.trackBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.trackBar_Scroll);
+            this.trackBar.MouseDown += new System.Windows.Forms.MouseEventHandler(this.trackBar_MouseDown);
+            this.trackBar.MouseUp += new System.Windows.Forms.MouseEventHandler(this.trackBar_MouseUp);
             // 
             // tableLayoutPanel1
             // 
