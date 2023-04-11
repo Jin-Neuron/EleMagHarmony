@@ -373,10 +373,11 @@ namespace EMH_Player
                 for (int j = 0; j < tempoList.Count; j++)
                 {
                     int cnt = 0;
-                    if (currentTime >= currentTempoDelay
+                    if ((currentTime >= currentTempoDelay
                         && currentTime + deltaTime <= tempoList.Sum(a => {
                             if (cnt++ <= j) return a.eventTime;
                             return 0;}))
+                        ||)
                     {
                         for (int k = currentTempoIndex; ++k <= j;)
                         {
@@ -398,7 +399,7 @@ namespace EMH_Player
                             }
                         }
                     }
-                    else if (currentTime + deltaTime > tempoList.Sum(a => a.eventTime))
+                    else if (currentTempoIndex > tempoList.Count - 1)
                     {
                         tmp += 60000.0 * deltaTime / tempoList[tempoList.Count - 1].bpm / headerChunk.division;
                         break;
@@ -919,8 +920,11 @@ namespace EMH_Player
                         partList = data;
                         SetPartStatus();
                         MessageBox.Show("チャネルを設定しました。");
-                        ResetData();
-                        FindTimeIdx();
+                        if(playData.Count() > 0)
+                        {
+                            ResetData();
+                            FindTimeIdx();
+                        }
                     }
                     SettingChannelMenuItem.PerformClick();
                 }

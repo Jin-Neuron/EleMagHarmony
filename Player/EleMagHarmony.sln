@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "setup", "setup\setup.vdproj", "{CD880C55-CB78-482E-AD4B-CA2104936ED5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMH_Player", "EMH_Player\EMH_Player.csproj", "{BCE21265-8BAE-42EB-BF9F-773966FFB02B}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "setup", "setup\setup.vdproj", "{42B53839-F1AE-4801-AAD0-3B7BC5D9AFC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,12 +13,12 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CD880C55-CB78-482E-AD4B-CA2104936ED5}.Debug|Any CPU.ActiveCfg = Debug
-		{CD880C55-CB78-482E-AD4B-CA2104936ED5}.Release|Any CPU.ActiveCfg = Release
 		{BCE21265-8BAE-42EB-BF9F-773966FFB02B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BCE21265-8BAE-42EB-BF9F-773966FFB02B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCE21265-8BAE-42EB-BF9F-773966FFB02B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCE21265-8BAE-42EB-BF9F-773966FFB02B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42B53839-F1AE-4801-AAD0-3B7BC5D9AFC3}.Debug|Any CPU.ActiveCfg = Debug
+		{42B53839-F1AE-4801-AAD0-3B7BC5D9AFC3}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
