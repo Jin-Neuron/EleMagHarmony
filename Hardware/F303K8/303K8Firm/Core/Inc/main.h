@@ -73,10 +73,6 @@ void Error_Handler(void);
 #define Relay3_GPIO_Port GPIOA
 #define Relay4_Pin GPIO_PIN_4
 #define Relay4_GPIO_Port GPIOA
-#define Step1_Pin GPIO_PIN_5
-#define Step1_GPIO_Port GPIOA
-#define Direction1_Pin GPIO_PIN_6
-#define Direction1_GPIO_Port GPIOA
 #define Stp_Motor_AN_Pin GPIO_PIN_0
 #define Stp_Motor_AN_GPIO_Port GPIOB
 #define Stp_Motor_BN_Pin GPIO_PIN_1
@@ -93,6 +89,10 @@ void Error_Handler(void);
 #define SWCLK_GPIO_Port GPIOA
 #define VCP_RX_Pin GPIO_PIN_15
 #define VCP_RX_GPIO_Port GPIOA
+#define Step1_Pin GPIO_PIN_4
+#define Step1_GPIO_Port GPIOB
+#define Direction1_Pin GPIO_PIN_5
+#define Direction1_GPIO_Port GPIOB
 #define Step2_Pin GPIO_PIN_6
 #define Step2_GPIO_Port GPIOB
 #define Direction2_Pin GPIO_PIN_7
