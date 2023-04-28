@@ -11,12 +11,12 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 3141)
+    (start_pass_no 30)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
       (preferred_direction_trace_costs 1.0)
-      (against_preferred_direction_trace_costs 2.3)
+      (against_preferred_direction_trace_costs 2.5)
     )
     (layer_rule B.Cu
       (active on)
@@ -68,22 +68,23 @@
     GND "Net-(C3-Pad1)" "Net-(C3-Pad2)" "Net-(C4-Pad1)" "Net-(C4-Pad2)" "Net-(IC1-Pad5)" /Solenoid /Direction1
     /Step1 /Step2 /Direction2 /Direction3 /Step3 "Net-(IC2-Pad11)" "Net-(IC2-Pad12)" "Net-(IC2-Pad13)"
     "Net-(IC2-Pad14)" "Net-(IC2-Pad15)" "Net-(IC2-Pad16)" "Net-(IC2-Pad17)" "Net-(IC2-Pad18)" /Relay1 /Relay2 /Relay3
-    "Net-(IC3-Pad11)" "Net-(IC3-Pad12)" "Net-(IC3-Pad13)" "Net-(IC3-Pad14)" "Net-(IC3-Pad15)" "Net-(IC3-Pad16)" "Net-(IC3-Pad17)" "Net-(IC3-Pad18)"
-    /Relay4 "unconnected-(IC4-Pad11)" "unconnected-(IC4-Pad12)" "unconnected-(IC4-Pad13)" "unconnected-(IC4-Pad14)" "unconnected-(IC4-Pad15)" "unconnected-(IC4-Pad16)" "Net-(IC4-Pad17)"
-    "Net-(IC4-Pad18)" +3.3V "/Stp_BN" "/Stp_B" "/Stp_A" "/Stp_AN" "unconnected-(J17-Pad3)" "unconnected-(J17-Pad4)"
-    "unconnected-(J18-Pad1)" "unconnected-(J18-Pad2)" "unconnected-(J18-Pad3)" "unconnected-(J18-Pad4)" "unconnected-(J18-Pad5)" "unconnected-(J18-Pad6)" "unconnected-(J18-Pad7)" "unconnected-(J18-Pad8)"
-    "unconnected-(J18-Pad9)" "unconnected-(J18-Pad10)" "unconnected-(J18-Pad13)" "unconnected-(J18-Pad14)" "unconnected-(J18-Pad15)" "unconnected-(J18-Pad16)" "unconnected-(J18-Pad21)" "unconnected-(J18-Pad22)"
-    "unconnected-(J18-Pad23)" "unconnected-(J18-Pad24)" "unconnected-(J18-Pad25)" "unconnected-(J18-Pad26)" "unconnected-(J18-Pad27)" "unconnected-(J18-Pad28)" "unconnected-(J18-Pad29)" "unconnected-(J18-Pad30)"
-    "unconnected-(J18-Pad31)" "unconnected-(J18-Pad32)" "unconnected-(J18-Pad33)" "unconnected-(J18-Pad34)" "unconnected-(J19-Pad3)" "unconnected-(J19-Pad4)" "unconnected-(J20-Pad1)" "unconnected-(J20-Pad2)"
-    "unconnected-(J20-Pad3)" "unconnected-(J20-Pad4)" "unconnected-(J20-Pad5)" "unconnected-(J20-Pad6)" "unconnected-(J20-Pad7)" "unconnected-(J20-Pad8)" "unconnected-(J20-Pad9)" "unconnected-(J20-Pad10)"
-    "unconnected-(J20-Pad13)" "unconnected-(J20-Pad14)" "unconnected-(J20-Pad15)" "unconnected-(J20-Pad16)" "unconnected-(J20-Pad21)" "unconnected-(J20-Pad22)" "unconnected-(J20-Pad23)" "unconnected-(J20-Pad24)"
-    "unconnected-(J20-Pad25)" "unconnected-(J20-Pad26)" "unconnected-(J20-Pad27)" "unconnected-(J20-Pad28)" "unconnected-(J20-Pad29)" "unconnected-(J20-Pad30)" "unconnected-(J20-Pad31)" "unconnected-(J20-Pad32)"
-    "unconnected-(J20-Pad33)" "unconnected-(J20-Pad34)" "unconnected-(J21-Pad3)" "unconnected-(J21-Pad4)" "unconnected-(J22-Pad1)" "unconnected-(J22-Pad2)" "unconnected-(J22-Pad3)" "unconnected-(J22-Pad4)"
-    "unconnected-(J22-Pad5)" "unconnected-(J22-Pad6)" "unconnected-(J22-Pad7)" "unconnected-(J22-Pad8)" "unconnected-(J22-Pad9)" "unconnected-(J22-Pad10)" "unconnected-(J22-Pad13)" "unconnected-(J22-Pad14)"
-    "unconnected-(J22-Pad15)" "unconnected-(J22-Pad16)" "unconnected-(J22-Pad21)" "unconnected-(J22-Pad22)" "unconnected-(J22-Pad23)" "unconnected-(J22-Pad24)" "unconnected-(J22-Pad25)" "unconnected-(J22-Pad26)"
-    "unconnected-(J22-Pad27)" "unconnected-(J22-Pad28)" "unconnected-(J22-Pad29)" "unconnected-(J22-Pad30)" "unconnected-(J22-Pad31)" "unconnected-(J22-Pad32)" "unconnected-(J22-Pad33)" "unconnected-(J22-Pad34)"
-    "unconnected-(U1-Pad4_1)" "unconnected-(U1-Pad3_3)" "unconnected-(U1-Pad4_3)" "unconnected-(U1-Pad4_4)" "unconnected-(U1-Pad3_5)" "unconnected-(U1-Pad4_5)" "unconnected-(U1-Pad4_6)" "unconnected-(U1-Pad3_13)"
-    "unconnected-(U1-Pad4_13)" "unconnected-(U1-Pad3_14)" "unconnected-(U1-Pad3_15)" "unconnected-(U1-Pad4_15)"
+    "Net-(J11-Pad2)" "Net-(J10-Pad2)" "Net-(IC3-Pad13)" "Net-(IC3-Pad14)" "Net-(IC3-Pad15)" "Net-(IC3-Pad16)" "Net-(IC3-Pad17)" "Net-(IC3-Pad18)"
+    /Relay4 "unconnected-(IC4-Pad11)" "unconnected-(IC4-Pad12)" "unconnected-(IC4-Pad13)" "Net-(J16-Pad2)" "Net-(J15-Pad2)" "Net-(J14-Pad2)" "Net-(J13-Pad2)"
+    "Net-(J12-Pad2)" "/Stp_BN" "/Stp_B" "/Stp_A" "/Stp_AN" "unconnected-(J17-Pad3)" "unconnected-(J17-Pad4)" "unconnected-(J18-Pad1)"
+    "unconnected-(J18-Pad2)" "unconnected-(J18-Pad3)" "unconnected-(J18-Pad4)" "unconnected-(J18-Pad5)" "unconnected-(J18-Pad6)" "unconnected-(J18-Pad7)" "unconnected-(J18-Pad8)" "unconnected-(J18-Pad9)"
+    "unconnected-(J18-Pad10)" "unconnected-(J18-Pad13)" "unconnected-(J18-Pad14)" "unconnected-(J18-Pad15)" "unconnected-(J18-Pad16)" "unconnected-(J18-Pad21)" "unconnected-(J18-Pad22)" "unconnected-(J18-Pad23)"
+    "unconnected-(J18-Pad24)" "unconnected-(J18-Pad25)" "unconnected-(J18-Pad26)" "unconnected-(J18-Pad27)" "unconnected-(J18-Pad28)" "unconnected-(J18-Pad29)" "unconnected-(J18-Pad30)" "unconnected-(J18-Pad31)"
+    "unconnected-(J18-Pad32)" "unconnected-(J18-Pad33)" "unconnected-(J18-Pad34)" "unconnected-(J19-Pad3)" "unconnected-(J19-Pad4)" "unconnected-(J20-Pad1)" "unconnected-(J20-Pad2)" "unconnected-(J20-Pad3)"
+    "unconnected-(J20-Pad4)" "unconnected-(J20-Pad5)" "unconnected-(J20-Pad6)" "unconnected-(J20-Pad7)" "unconnected-(J20-Pad8)" "unconnected-(J20-Pad9)" "unconnected-(J20-Pad10)" "unconnected-(J20-Pad13)"
+    "unconnected-(J20-Pad14)" "unconnected-(J20-Pad15)" "unconnected-(J20-Pad16)" "unconnected-(J20-Pad21)" "unconnected-(J20-Pad22)" "unconnected-(J20-Pad23)" "unconnected-(J20-Pad24)" "unconnected-(J20-Pad25)"
+    "unconnected-(J20-Pad26)" "unconnected-(J20-Pad27)" "unconnected-(J20-Pad28)" "unconnected-(J20-Pad29)" "unconnected-(J20-Pad30)" "unconnected-(J20-Pad31)" "unconnected-(J20-Pad32)" "unconnected-(J20-Pad33)"
+    "unconnected-(J20-Pad34)" "unconnected-(J21-Pad3)" "unconnected-(J21-Pad4)" "unconnected-(J22-Pad1)" "unconnected-(J22-Pad2)" "unconnected-(J22-Pad3)" "unconnected-(J22-Pad4)" "unconnected-(J22-Pad5)"
+    "unconnected-(J22-Pad6)" "unconnected-(J22-Pad7)" "unconnected-(J22-Pad8)" "unconnected-(J22-Pad9)" "unconnected-(J22-Pad10)" "unconnected-(J22-Pad13)" "unconnected-(J22-Pad14)" "unconnected-(J22-Pad15)"
+    "unconnected-(J22-Pad16)" "unconnected-(J22-Pad21)" "unconnected-(J22-Pad22)" "unconnected-(J22-Pad23)" "unconnected-(J22-Pad24)" "unconnected-(J22-Pad25)" "unconnected-(J22-Pad26)" "unconnected-(J22-Pad27)"
+    "unconnected-(J22-Pad28)" "unconnected-(J22-Pad29)" "unconnected-(J22-Pad30)" "unconnected-(J22-Pad31)" "unconnected-(J22-Pad32)" "unconnected-(J22-Pad33)" "unconnected-(J22-Pad34)" "unconnected-(U1-Pad4_1)"
+    "unconnected-(U1-Pad3_3)" "unconnected-(U1-Pad4_3)" "unconnected-(U1-Pad4_4)" "unconnected-(U1-Pad3_5)" "unconnected-(U1-Pad4_5)" "unconnected-(U1-Pad4_6)" "unconnected-(U1-Pad3_13)" "unconnected-(U1-Pad4_13)"
+    "unconnected-(J18-Pad11)" "unconnected-(J18-Pad17)" "unconnected-(U1-Pad4_15)" "unconnected-(J18-Pad19)" "unconnected-(J20-Pad11)" "unconnected-(J20-Pad17)" "unconnected-(J20-Pad19)" "unconnected-(J22-Pad11)"
+    "unconnected-(J22-Pad17)" "unconnected-(J22-Pad19)" "unconnected-(U1-Pad4_7)" "unconnected-(U1-Pad4_8)" "unconnected-(U1-Pad4_14)"
     (clearance_class default)
     (via_rule default)
     (rule
