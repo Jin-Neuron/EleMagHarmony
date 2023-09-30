@@ -59,10 +59,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Direction3_Pin GPIO_PIN_0
-#define Direction3_GPIO_Port GPIOF
-#define Step3_Pin GPIO_PIN_1
-#define Step3_GPIO_Port GPIOF
+#define Direction2_Pin GPIO_PIN_0
+#define Direction2_GPIO_Port GPIOF
+#define Step2_Pin GPIO_PIN_1
+#define Step2_GPIO_Port GPIOF
 #define Relay1_Pin GPIO_PIN_0
 #define Relay1_GPIO_Port GPIOA
 #define Relay2_Pin GPIO_PIN_1
@@ -73,16 +73,16 @@ void Error_Handler(void);
 #define Relay3_GPIO_Port GPIOA
 #define Relay4_Pin GPIO_PIN_4
 #define Relay4_GPIO_Port GPIOA
-#define Stp_Motor_AN_Pin GPIO_PIN_0
-#define Stp_Motor_AN_GPIO_Port GPIOB
-#define Stp_Motor_BN_Pin GPIO_PIN_1
-#define Stp_Motor_BN_GPIO_Port GPIOB
-#define Solenoid_Pin GPIO_PIN_8
-#define Solenoid_GPIO_Port GPIOA
-#define Stp_Motor_A_Pin GPIO_PIN_9
-#define Stp_Motor_A_GPIO_Port GPIOA
-#define Stp_Motor_B_Pin GPIO_PIN_10
-#define Stp_Motor_B_GPIO_Port GPIOA
+#define Guitar4_Pin GPIO_PIN_0
+#define Guitar4_GPIO_Port GPIOB
+#define StpMotor_Pin GPIO_PIN_8
+#define StpMotor_GPIO_Port GPIOA
+#define Guitar1_Pin GPIO_PIN_9
+#define Guitar1_GPIO_Port GPIOA
+#define Guitar2_Pin GPIO_PIN_10
+#define Guitar2_GPIO_Port GPIOA
+#define Guitar3_Pin GPIO_PIN_12
+#define Guitar3_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
@@ -93,10 +93,10 @@ void Error_Handler(void);
 #define Step1_GPIO_Port GPIOB
 #define Direction1_Pin GPIO_PIN_5
 #define Direction1_GPIO_Port GPIOB
-#define Step2_Pin GPIO_PIN_6
-#define Step2_GPIO_Port GPIOB
-#define Direction2_Pin GPIO_PIN_7
-#define Direction2_GPIO_Port GPIOB
+#define Guitar5_Pin GPIO_PIN_6
+#define Guitar5_GPIO_Port GPIOB
+#define Guitar6_Pin GPIO_PIN_7
+#define Guitar6_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

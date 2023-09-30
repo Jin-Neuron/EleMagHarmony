@@ -33,8 +33,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TimerNum 8
-#define FloppyNum 3
+#define FloppyNum 2
 #define RelayNum 4
+#define GuitarNum 6
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,8 +45,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
+TIM_HandleTypeDef htim15;
+TIM_HandleTypeDef htim16;
 TIM_HandleTypeDef htim17;
 
 UART_HandleTypeDef huart2;
@@ -69,6 +74,8 @@ GPIO_TypeDef* relayPort[RelayNum] = {};
 uint32_t relayPin[RelayNum] = {};
 GPIO_TypeDef* floppyPort[FloppyNum * 2] = {};
 uint32_t floppyPin[FloppyNum * 2] = {};
+GPIO_TypeDef* guitarPort[GuitarNum] = {};
+uint32_t guitarPin[GuitarNum] = {};
 TIM_HandleTypeDef times[TimerNum] = {};
 /* USER CODE END PV */
 
@@ -80,6 +87,10 @@ static void MX_TIM1_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_TIM17_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
+static void MX_TIM15_Init(void);
+static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -277,6 +288,10 @@ int main(void)
   MX_TIM6_Init();
   MX_TIM7_Init();
   MX_TIM17_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
+  MX_TIM15_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
 
   //floppy1 --> 0 : direction, 1 : step
@@ -286,14 +301,10 @@ int main(void)
   floppyPort[1] = Step1_GPIO_Port;
   floppyPort[2] = Direction2_GPIO_Port;
   floppyPort[3] = Step2_GPIO_Port;
-  floppyPort[4] = Direction3_GPIO_Port;
-  floppyPort[5] = Step3_GPIO_Port;
   floppyPin[0] = Direction1_Pin;
   floppyPin[1] = Step1_Pin;
   floppyPin[2] = Direction2_Pin;
   floppyPin[3] = Step2_Pin;
-  floppyPin[4] = Direction3_Pin;
-  floppyPin[5] = Step3_Pin;
   relayPort[0] = Relay1_GPIO_Port;
   relayPort[1] = Relay2_GPIO_Port;
   relayPort[2] = Relay3_GPIO_Port;
@@ -302,6 +313,18 @@ int main(void)
   relayPin[1] = Relay2_Pin;
   relayPin[2] = Relay3_Pin;
   relayPin[3] = Relay4_Pin;
+  guitarPort[0] = Guitar1_GPIO_Port;
+  guitarPort[1] = Guitar2_GPIO_Port;
+  guitarPort[2] = Guitar3_GPIO_Port;
+  guitarPort[3] = Guitar4_GPIO_Port;
+  guitarPort[4] = Guitar5_GPIO_Port;
+  guitarPort[5] = Guitar6_GPIO_Port;
+  guitarPin[0] = Guitar1_Pin;
+  guitarPin[1] = Guitar2_Pin;
+  guitarPin[2] = Guitar3_Pin;
+  guitarPin[3] = Guitar4_Pin;
+  guitarPin[4] = Guitar5_Pin;
+  guitarPin[5] = Guitar6_Pin;
 
   for(uint8_t i = 0; i < RelayNum; i++){
 	  HAL_GPIO_WritePin(relayPort[i], relayPin[i], GPIO_PIN_RESET);
@@ -309,12 +332,20 @@ int main(void)
   for(uint8_t i = 0; i < FloppyNum * 2; i++){
 	  HAL_GPIO_WritePin(floppyPort[i], floppyPin[i], GPIO_PIN_RESET);
   }
+  for(uint8_t i = 0; i < GuitarNum; i++){
+  	HAL_GPIO_WritePin(guitarPort[i], guitarPin[i], GPIO_PIN_RESET);
+  }
 
   //Melody by Solenoid and Stp_Motor
   times[0] = htim1;
+  //Guitar by Solenoid
+  times[1] = htim2;
+  times[2] = htim3;
+  times[3] = htim6;
+  times[4] = htim7;
+  times[5] = htim15;
+  times[6] = htim16;
   //Base by FloppyDrive
-  times[5] = htim6;
-  times[6] = htim7;
   times[7] = htim17;
 
   //reset floppy
@@ -422,10 +453,6 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_OC_Init(&htim1) != HAL_OK)
-  {
-    Error_Handler();
-  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
@@ -441,15 +468,6 @@ static void MX_TIM1_Init(void)
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_TIMING;
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -472,6 +490,96 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 2 */
   HAL_TIM_MspPostInit(&htim1);
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 799;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 99;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 799;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 99;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
 
 }
 
@@ -548,6 +656,84 @@ static void MX_TIM7_Init(void)
   /* USER CODE BEGIN TIM7_Init 2 */
 
   /* USER CODE END TIM7_Init 2 */
+
+}
+
+/**
+  * @brief TIM15 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM15_Init(void)
+{
+
+  /* USER CODE BEGIN TIM15_Init 0 */
+
+  /* USER CODE END TIM15_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM15_Init 1 */
+
+  /* USER CODE END TIM15_Init 1 */
+  htim15.Instance = TIM15;
+  htim15.Init.Prescaler = 799;
+  htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim15.Init.Period = 99;
+  htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim15.Init.RepetitionCounter = 0;
+  htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim15) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim15, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim15, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM15_Init 2 */
+
+  /* USER CODE END TIM15_Init 2 */
+
+}
+
+/**
+  * @brief TIM16 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM16_Init(void)
+{
+
+  /* USER CODE BEGIN TIM16_Init 0 */
+
+  /* USER CODE END TIM16_Init 0 */
+
+  /* USER CODE BEGIN TIM16_Init 1 */
+
+  /* USER CODE END TIM16_Init 1 */
+  htim16.Instance = TIM16;
+  htim16.Init.Prescaler = 799;
+  htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim16.Init.Period = 99;
+  htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim16.Init.RepetitionCounter = 0;
+  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM16_Init 2 */
+
+  /* USER CODE END TIM16_Init 2 */
 
 }
 
@@ -633,30 +819,36 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, Direction3_Pin|Step3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, Direction2_Pin|Step2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Relay1_Pin|Relay2_Pin|Relay3_Pin|Relay4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Relay1_Pin|Relay2_Pin|Relay3_Pin|Relay4_Pin
+                          |Guitar1_Pin|Guitar2_Pin|Guitar3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Step1_Pin|Direction1_Pin|Step2_Pin|Direction2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, Guitar4_Pin|Step1_Pin|Direction1_Pin|Guitar5_Pin
+                          |Guitar6_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : Direction3_Pin Step3_Pin */
-  GPIO_InitStruct.Pin = Direction3_Pin|Step3_Pin;
+  /*Configure GPIO pins : Direction2_Pin Step2_Pin */
+  GPIO_InitStruct.Pin = Direction2_Pin|Step2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Relay1_Pin Relay2_Pin Relay3_Pin Relay4_Pin */
-  GPIO_InitStruct.Pin = Relay1_Pin|Relay2_Pin|Relay3_Pin|Relay4_Pin;
+  /*Configure GPIO pins : Relay1_Pin Relay2_Pin Relay3_Pin Relay4_Pin
+                           Guitar1_Pin Guitar2_Pin Guitar3_Pin */
+  GPIO_InitStruct.Pin = Relay1_Pin|Relay2_Pin|Relay3_Pin|Relay4_Pin
+                          |Guitar1_Pin|Guitar2_Pin|Guitar3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Step1_Pin Direction1_Pin Step2_Pin Direction2_Pin */
-  GPIO_InitStruct.Pin = Step1_Pin|Direction1_Pin|Step2_Pin|Direction2_Pin;
+  /*Configure GPIO pins : Guitar4_Pin Step1_Pin Direction1_Pin Guitar5_Pin
+                           Guitar6_Pin */
+  GPIO_InitStruct.Pin = Guitar4_Pin|Step1_Pin|Direction1_Pin|Guitar5_Pin
+                          |Guitar6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
