@@ -196,15 +196,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	static uint8_t event = 0;
 	static uint8_t part = 0;
 
+	//whether data header or data body
 	if(uartCnt){
 		notes[part] = data[0];
 		freqs[part] = noteParFreq[notes[part]];
 		if(part < TimerNum){
-			//double the frequency if it is floppy
 			if(part >= 5 || part < 1){
-					freqs[part] *= 2;
-				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
-			}else if(part < 1){
+				//double the frequency if it is floppy or stp motor
+				freqs[part] *= 2;
 				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
 			}else{
 				notes[part] = 0;
@@ -216,23 +215,29 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		event = data[0] & 0xf0;
 		part = data[0] & 0x0f;
 		if(event){
+			//note On
 			uartCnt++;
 		}else{
+			//note Off
+			//reset value
 			notes[part] = 0;
 			freqs[part] = 0;
 			if(part < TimerNum){
 				if(part < 1){
+					//reset Timer of melody(solenoid & stp motor)
 					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_2);	//stp_motor only
+					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_2);
 					HAL_TIMEx_OCN_Stop(&times[part], TIM_CHANNEL_2);
-					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_3);	//stp_motor only
+					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_3);
 					HAL_TIMEx_OCN_Stop(&times[part], TIM_CHANNEL_3);
 				}else if(part > 4){
+					//reset timer of floppy
 					HAL_TIM_Base_Stop_IT(&times[part]);
 				}
 			}
 		}
 	}
+	//next data
 	HAL_UART_Receive_IT(&huart2, (uint8_t *)data, 1);
 }
 

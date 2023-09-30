@@ -377,7 +377,7 @@ namespace EMH_Player
                         && currentTime + deltaTime <= tempoList.Sum(a => {
                             if (cnt++ <= j) return a.eventTime;
                             return 0;}))
-                        ||)
+                        )
                     {
                         for (int k = currentTempoIndex; ++k <= j;)
                         {
