@@ -61,10 +61,10 @@ uint8_t currentPosition[FloppyNum] = {0};
 
 char data[256];
 uint8_t uartCnt = 0;
-uint16_t notes[10] = {0};
-uint16_t freqs[10] = {0};
+uint16_t notes[12] = {0};
+uint16_t freqs[12] = {0};
 uint16_t noteParFreq[127] = {0};
-double tmp[10] = {0};
+double tmp[12] = {0};
 
 const double timer_clock = 64e6;
 const uint8_t timerPeriod = 100;
@@ -121,21 +121,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(htim->Instance == times[timerIdx].Instance)
 			break;
 	}
-	if(timerIdx < TimerNum){
+	//timer0 -> StpMotor(Melody)
+	//timer1-6 -> GuitaNoid(Guitar)
+	//timer7 -> FloppyDrive(Base)
+	if(timerIdx == 7){
 		//Update position
-		//timer : 5 --> floppy : 0, 1
-		//timer : 6 --> floppy : 2, 3
-		//timer : 7 --> floppy : 4, 5
-		uint8_t floppyIdx = timerIdx - 5;
-		currentPosition[floppyIdx] = (currentState[floppyIdx] == GPIO_PIN_SET) ? currentPosition[floppyIdx] - 1 : currentPosition[floppyIdx] + 1;
-		if(currentPosition[floppyIdx] <= 0){
-			currentState[floppyIdx] = GPIO_PIN_RESET;
-			HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
-		}else if(currentPosition[floppyIdx] >= 158){
-			currentState[floppyIdx] = GPIO_PIN_SET;
-			HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
+		for(uint8_t floppyIdx = timerIdx - 7; floppyIdx < FloppyNum; floppyIdx++){
+			currentPosition[floppyIdx] = (currentState[floppyIdx] == GPIO_PIN_SET) ? currentPosition[floppyIdx] - 1 : currentPosition[floppyIdx] + 1;
+			if(currentPosition[floppyIdx] <= 0){
+				currentState[floppyIdx] = GPIO_PIN_RESET;
+				HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
+			}else if(currentPosition[floppyIdx] >= 158){
+				currentState[floppyIdx] = GPIO_PIN_SET;
+				HAL_GPIO_WritePin(floppyPort[floppyIdx * 2], floppyPin[floppyIdx * 2], currentState[floppyIdx]);
+			}
+			HAL_GPIO_TogglePin(floppyPort[floppyIdx * 2 + 1], floppyPin[floppyIdx * 2 + 1]);
 		}
-		HAL_GPIO_TogglePin(floppyPort[floppyIdx * 2 + 1], floppyPin[floppyIdx * 2 + 1]);
+	}else if(timerIdx > 0){
+		uint8_t guitarIdx = timerIdx - 1;
+		HAL_GPIO_TogglePin(guitarPort[guitarIdx], guitarPin[guitarIdx]);
 	}
 }
 
@@ -158,7 +162,6 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler, uint32_t
 
 	  sConfigOC.OCMode = TIM_OCMODE_PWM1;
 	  sConfigOC.Pulse = pwm;
-	  //set duty
 	  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
@@ -212,14 +215,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		notes[part] = data[0];
 		freqs[part] = noteParFreq[notes[part]];
 		if(part < TimerNum){
-			if(part >= 5 || part < 1){
-				//double the frequency if it is floppy or stp motor
-				freqs[part] *= 2;
-				setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
-			}else{
-				notes[part] = 0;
-				HAL_GPIO_TogglePin(relayPort[part - 1], relayPin[part - 1]);
-			}
+			//double the frequency if it is floppy, stp motor, or guitar
+			freqs[part] *= 2;
+			setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
+		}else if(part < TimerNum + RelayNum){
+			notes[part] = 0;
+			HAL_GPIO_TogglePin(relayPort[part - TimerNum], relayPin[part - TimerNum]);
 		}
 		uartCnt = 0;
 	}else{
