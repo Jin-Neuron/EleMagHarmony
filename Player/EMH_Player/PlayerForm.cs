@@ -119,7 +119,7 @@ namespace EMH_Player
                 data[index].playPart = part;
                 data[index].playDevice = (DataClass.Device)deviceArray.GetValue(index);
                 data[index].port = (index == 1) ? serialPort2 : serialPort1;
-                data[index].channel = (index == 3) ? 9 : index;
+                data[index].channel = (index == 3) ? 9 : (index == 1) ? 3 : index;
                 filterCheckBox.SetItemCheckState(index, CheckState.Checked);
                 for (int i = 0; i < timerIndex.Length; i++)
                 {
