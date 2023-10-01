@@ -373,35 +373,68 @@ namespace EMH_Player
                 for (int j = 0; j < tempoList.Count; j++)
                 {
                     int cnt = 0;
-                    if ((currentTime >= currentTempoDelay
-                        && currentTime + deltaTime <= tempoList.Sum(a => {
-                            if (cnt++ <= j) return a.eventTime;
-                            return 0;}))
-                        )
+                    long tempoSum = tempoList.Sum(a => {
+                        if (cnt++ <= j) return a.eventTime;
+                        return 0;
+                    });
+                    long allSum = tempoList.Sum(a => a.eventTime);
+                    if (currentTime >= currentTempoDelay
+                        && currentTime + deltaTime <= tempoSum)
                     {
                         for (int k = currentTempoIndex; ++k <= j;)
                         {
                             float bpm = tempoList[currentTempoIndex].bpm;
                             if (currentTime + deltaTime >= currentTempoDelay + tempoList[k].eventTime)
                             {
-                                tmp += 60000.0 * 
+                                tmp += 60000.0 *
                                     ((currentTime > currentTempoDelay) ? currentTempoDelay + tempoList[k].eventTime - currentTime
                                     : tempoList[k].eventTime) / bpm / headerChunk.division;
                                 currentTempoDelay += (uint)tempoList[k].eventTime;
                                 currentTempoIndex = k;
                             }
-                            else{
-                                tmp += 60000.0 * 
-                                    ((currentTime < currentTempoDelay) ? currentTime + deltaTime - currentTempoDelay : deltaTime) 
+                            else
+                            {
+                                tmp += 60000.0 *
+                                    ((currentTime < currentTempoDelay) ? currentTime + deltaTime - currentTempoDelay : deltaTime)
                                     / bpm / headerChunk.division;
                                 j = tempoList.Count;
                                 break;
                             }
                         }
                     }
-                    else if (currentTempoIndex > tempoList.Count - 1)
+                    else if (currentTime + deltaTime > allSum)
                     {
-                        tmp += 60000.0 * deltaTime / tempoList[tempoList.Count - 1].bpm / headerChunk.division;
+                        if (currentTime < allSum)
+                        {
+                            uint preSum = 0;
+                            cnt = 0;
+                            foreach(DataClass.TempoData t in tempoList)
+                            {
+                                if(preSum <= currentTime)
+                                {
+                                    cnt++;
+                                    preSum += t.eventTime;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            if (preSum > currentTime)
+                            {
+                                tmp += 60000.0 * (preSum - currentTime) / tempoList[cnt - 2].bpm / headerChunk.division;
+                            }
+                            for (int k = cnt; k < tempoList.Count; k++)
+                            {
+                                tmp += 60000.0 * (tempoList[k].eventTime) / tempoList[k - 1].bpm / headerChunk.division;
+                                preSum += tempoList[k].eventTime;
+                            }
+                            tmp += 60000.0 * (deltaTime + currentTime - allSum) / tempoList[tempoList.Count - 1].bpm / headerChunk.division;
+                        }
+                        else
+                        {
+                            tmp += 60000.0 * deltaTime / tempoList[tempoList.Count - 1].bpm / headerChunk.division;
+                        }
                         break;
                     }
                 }
