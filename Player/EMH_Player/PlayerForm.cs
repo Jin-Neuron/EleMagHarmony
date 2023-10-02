@@ -153,7 +153,7 @@ namespace EMH_Player
                         {
                             if (serialPort1.IsOpen)
                                 serialPort1.Write(playData[timIdx].serialData.ToArray(), 
-                                    0, playData[timIdx].serialData.Count);
+                                    0, playData[timIdx].serialData.Count());
                             if (!muteCheckBox.Checked)
                                 midi.Send(playData[timIdx].midiMsg[i].RawData);
                         }
@@ -161,8 +161,8 @@ namespace EMH_Player
                         {
                             if (serialPort1.IsOpen)
                                 serialPort1.Write(playData[timIdx].serialRstData.ToArray(),
-                                    0, playData[timIdx].serialRstData.Count);
-                            if(!muteCheckBox.Checked)
+                                    0, playData[timIdx].serialRstData.Count());
+                            if(muteCheckBox.Checked)
                                 midi.Send(playData[timIdx].midiRstMsg[i].RawData);
                         }
                     }

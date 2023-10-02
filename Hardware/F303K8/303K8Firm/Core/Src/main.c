@@ -171,8 +171,7 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler, uint32_t
 	  //start
 	  HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_1);
 
-
-	  sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
+	  /*sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
 	  sConfigOC.Pulse = 0;
 	  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
@@ -187,7 +186,7 @@ void setTimer(uint8_t part, TIM_HandleTypeDef htim, uint32_t prescaler, uint32_t
 	  sConfigOC.Pulse = timerPeriod / 2 - 1;
 	  HAL_TIM_OC_ConfigChannel(&htim, &sConfigOC, TIM_CHANNEL_3);
 	  HAL_TIM_OC_Start(&htim, TIM_CHANNEL_3);
-	  HAL_TIMEx_OCN_Start(&htim, TIM_CHANNEL_3);
+	  HAL_TIMEx_OCN_Start(&htim, TIM_CHANNEL_3);*/
 
 	}else{
 	  // start
@@ -780,7 +779,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 422400;
+  huart2.Init.BaudRate = 345600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
