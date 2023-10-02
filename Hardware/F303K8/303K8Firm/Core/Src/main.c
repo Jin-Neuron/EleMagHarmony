@@ -212,14 +212,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 	//whether data header or data body
 	if(uartCnt){
-		notes[part] = data[0];
-		freqs[part] = noteParFreq[notes[part]];
 		if(part < TimerNum){
+			notes[part] = data[0];
+			freqs[part] = noteParFreq[notes[part]];
 			//double the frequency if it is floppy, stp motor, or guitar
 			freqs[part] *= 2;
 			setTimer(part, times[part], (timer_clock / (freqs[part] * timerPeriod) - 1),70);
 		}else if(part < TimerNum + RelayNum){
-			notes[part] = 0;
 			HAL_GPIO_TogglePin(relayPort[part - TimerNum], relayPin[part - TimerNum]);
 		}
 		uartCnt = 0;
@@ -236,14 +235,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			freqs[part] = 0;
 			if(part < TimerNum){
 				if(part < 1){
-					//reset Timer of melody(solenoid & stp motor)
+					//reset Timer of melody(stp motor)
 					HAL_TIM_PWM_Stop(&times[part], TIM_CHANNEL_1);
-					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_2);
-					HAL_TIMEx_OCN_Stop(&times[part], TIM_CHANNEL_2);
-					HAL_TIM_OC_Stop(&times[part], TIM_CHANNEL_3);
-					HAL_TIMEx_OCN_Stop(&times[part], TIM_CHANNEL_3);
-				}else if(part > 4){
-					//reset timer of floppy
+				}else{
+					//reset timer of solenoid and floppy
 					HAL_TIM_Base_Stop_IT(&times[part]);
 				}
 			}
@@ -297,7 +292,6 @@ int main(void)
 
   //floppy1 --> 0 : direction, 1 : step
   //floppy2 --> 2 : direction, 3 : step
-  //floppy3 --> 4 : direction, 5 : step
   floppyPort[0] = Direction1_GPIO_Port;
   floppyPort[1] = Step1_GPIO_Port;
   floppyPort[2] = Direction2_GPIO_Port;

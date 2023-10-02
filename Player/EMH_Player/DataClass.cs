@@ -50,7 +50,6 @@ namespace EMH_Player
         {
             public Part playPart;
             public Device playDevice;
-            public SerialPort port;
             public int channel;
             public int harmony;
             public int[] timerIndex;
@@ -75,7 +74,7 @@ namespace EMH_Player
             public double delay;
             public List<Part> playPart;
             public string logTxt;
-            public List<byte>[] serialData, serialRstData;
+            public List<byte> serialData, serialRstData;
             public List<MidiMessage> midiMsg, midiRstMsg;
         }
         //デリゲートの構造体

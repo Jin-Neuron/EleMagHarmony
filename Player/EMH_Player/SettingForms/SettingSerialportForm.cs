@@ -60,15 +60,6 @@ namespace EMH_Player
             SpeedComboBox.Items.Add("460800"); 
             SpeedComboBox.SelectedIndex = 0;
         }
-
-        private void DeviceComboBox_DropDown(object sender, EventArgs e)
-        {
-            DeviceComboBox.Items.Clear();
-            DeviceComboBox.Items.Add("ElectricDevice");
-            DeviceComboBox.Items.Add("GuitarDevice");
-            DeviceComboBox.SelectedIndex = 0;
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             this.Hide();
@@ -80,10 +71,6 @@ namespace EMH_Player
         public int GetBaudRate()
         {
             return int.Parse(SpeedComboBox.SelectedItem.ToString());
-        }
-        public string GetDevice()
-        {
-            return DeviceComboBox.SelectedItem.ToString();
         }
 
         private void SettingSerialportForm_FormClosed(object sender, FormClosedEventArgs e)
