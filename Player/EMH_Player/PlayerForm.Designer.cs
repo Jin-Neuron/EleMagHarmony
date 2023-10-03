@@ -88,10 +88,9 @@
             this.LabelTime.AutoSize = true;
             this.LabelTime.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.LabelTime.ForeColor = System.Drawing.Color.White;
-            this.LabelTime.Location = new System.Drawing.Point(609, 156);
-            this.LabelTime.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.LabelTime.Location = new System.Drawing.Point(457, 125);
             this.LabelTime.Name = "LabelTime";
-            this.LabelTime.Size = new System.Drawing.Size(160, 30);
+            this.LabelTime.Size = new System.Drawing.Size(128, 24);
             this.LabelTime.TabIndex = 15;
             this.LabelTime.Text = "00:00/00:00";
             // 
@@ -103,7 +102,7 @@
             this.FileMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.FileMenuItem.ForeColor = System.Drawing.Color.White;
             this.FileMenuItem.Name = "FileMenuItem";
-            this.FileMenuItem.Size = new System.Drawing.Size(106, 24);
+            this.FileMenuItem.Size = new System.Drawing.Size(84, 20);
             this.FileMenuItem.Text = "ファイル（&F）";
             // 
             // OpenMidiFileMenuItem
@@ -111,7 +110,7 @@
             this.OpenMidiFileMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(54)))), ((int)(((byte)(49)))));
             this.OpenMidiFileMenuItem.ForeColor = System.Drawing.Color.White;
             this.OpenMidiFileMenuItem.Name = "OpenMidiFileMenuItem";
-            this.OpenMidiFileMenuItem.Size = new System.Drawing.Size(242, 26);
+            this.OpenMidiFileMenuItem.Size = new System.Drawing.Size(193, 22);
             this.OpenMidiFileMenuItem.Text = "midiファイルを開く(&M)";
             this.OpenMidiFileMenuItem.Click += new System.EventHandler(this.OpenFileMenuItem_Click);
             // 
@@ -120,7 +119,7 @@
             this.OpenPlaylistMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(54)))), ((int)(((byte)(49)))));
             this.OpenPlaylistMenuItem.ForeColor = System.Drawing.Color.White;
             this.OpenPlaylistMenuItem.Name = "OpenPlaylistMenuItem";
-            this.OpenPlaylistMenuItem.Size = new System.Drawing.Size(242, 26);
+            this.OpenPlaylistMenuItem.Size = new System.Drawing.Size(193, 22);
             this.OpenPlaylistMenuItem.Text = "midiプレイリストを開く(&L)";
             this.OpenPlaylistMenuItem.Click += new System.EventHandler(this.OpenFileMenuItem_Click);
             // 
@@ -132,7 +131,7 @@
             this.SettingMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.SettingMenuItem.ForeColor = System.Drawing.Color.White;
             this.SettingMenuItem.Name = "SettingMenuItem";
-            this.SettingMenuItem.Size = new System.Drawing.Size(91, 24);
+            this.SettingMenuItem.Size = new System.Drawing.Size(74, 20);
             this.SettingMenuItem.Text = "設定（&S）";
             // 
             // SettingSerialportMenuItem
@@ -140,7 +139,7 @@
             this.SettingSerialportMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(54)))), ((int)(((byte)(49)))));
             this.SettingSerialportMenuItem.ForeColor = System.Drawing.Color.White;
             this.SettingSerialportMenuItem.Name = "SettingSerialportMenuItem";
-            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(204, 26);
+            this.SettingSerialportMenuItem.Size = new System.Drawing.Size(162, 22);
             this.SettingSerialportMenuItem.Text = "シリアルポート(&E)...";
             this.SettingSerialportMenuItem.Click += new System.EventHandler(this.SettingSerialPortMenuItem_Click);
             // 
@@ -149,7 +148,7 @@
             this.SettingChannelMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(54)))), ((int)(((byte)(49)))));
             this.SettingChannelMenuItem.ForeColor = System.Drawing.Color.White;
             this.SettingChannelMenuItem.Name = "SettingChannelMenuItem";
-            this.SettingChannelMenuItem.Size = new System.Drawing.Size(204, 26);
+            this.SettingChannelMenuItem.Size = new System.Drawing.Size(162, 22);
             this.SettingChannelMenuItem.Text = "Midiチャネル(&C)...";
             this.SettingChannelMenuItem.Click += new System.EventHandler(this.SettingChannelMenuItem_Click);
             // 
@@ -163,7 +162,8 @@
             this.HelpMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 28);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(600, 24);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -172,7 +172,7 @@
             this.HelpMenuItem.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.HelpMenuItem.ForeColor = System.Drawing.Color.White;
             this.HelpMenuItem.Name = "HelpMenuItem";
-            this.HelpMenuItem.Size = new System.Drawing.Size(82, 24);
+            this.HelpMenuItem.Size = new System.Drawing.Size(65, 20);
             this.HelpMenuItem.Text = "ヘルプ(&H)";
             this.HelpMenuItem.Click += new System.EventHandler(this.HelpMenuItem_Click);
             // 
@@ -186,10 +186,9 @@
             this.toolStripStatusLabel1,
             this.BaseDeviceLabel,
             this.DrumDeviceLabel});
-            this.PartStatus.Location = new System.Drawing.Point(0, 303);
+            this.PartStatus.Location = new System.Drawing.Point(0, 248);
             this.PartStatus.Name = "PartStatus";
-            this.PartStatus.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.PartStatus.Size = new System.Drawing.Size(800, 26);
+            this.PartStatus.Size = new System.Drawing.Size(600, 22);
             this.PartStatus.TabIndex = 17;
             this.PartStatus.Text = "statusStrip1";
             // 
@@ -197,20 +196,20 @@
             // 
             this.ElectricDeviceLabel.ForeColor = System.Drawing.Color.White;
             this.ElectricDeviceLabel.Name = "ElectricDeviceLabel";
-            this.ElectricDeviceLabel.Size = new System.Drawing.Size(195, 20);
+            this.ElectricDeviceLabel.Size = new System.Drawing.Size(146, 17);
             this.ElectricDeviceLabel.Spring = true;
             this.ElectricDeviceLabel.Text = "Melody : Motor[1]";
             // 
             // toolStripStatusLabel2
             // 
             this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(0, 20);
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(0, 17);
             // 
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.ForeColor = System.Drawing.Color.White;
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(195, 20);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(146, 17);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.Text = "Guitar : Solenoid[2..7]";
             // 
@@ -218,7 +217,7 @@
             // 
             this.BaseDeviceLabel.ForeColor = System.Drawing.Color.White;
             this.BaseDeviceLabel.Name = "BaseDeviceLabel";
-            this.BaseDeviceLabel.Size = new System.Drawing.Size(195, 20);
+            this.BaseDeviceLabel.Size = new System.Drawing.Size(146, 17);
             this.BaseDeviceLabel.Spring = true;
             this.BaseDeviceLabel.Text = "Base : FloppyDrive[8]";
             // 
@@ -226,7 +225,7 @@
             // 
             this.DrumDeviceLabel.ForeColor = System.Drawing.Color.White;
             this.DrumDeviceLabel.Name = "DrumDeviceLabel";
-            this.DrumDeviceLabel.Size = new System.Drawing.Size(195, 20);
+            this.DrumDeviceLabel.Size = new System.Drawing.Size(146, 17);
             this.DrumDeviceLabel.Spring = true;
             this.DrumDeviceLabel.Text = "Drum : Relay[9..13]";
             // 
@@ -238,10 +237,9 @@
             this.EleMagPortLabel,
             this.FileLabel,
             this.PlaylistLabel});
-            this.PortFileStatus.Location = new System.Drawing.Point(0, 273);
+            this.PortFileStatus.Location = new System.Drawing.Point(0, 224);
             this.PortFileStatus.Name = "PortFileStatus";
-            this.PortFileStatus.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.PortFileStatus.Size = new System.Drawing.Size(800, 30);
+            this.PortFileStatus.Size = new System.Drawing.Size(600, 24);
             this.PortFileStatus.SizingGrip = false;
             this.PortFileStatus.TabIndex = 18;
             this.PortFileStatus.Text = "statusStrip2";
@@ -251,7 +249,7 @@
             this.EleMagPortLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
             this.EleMagPortLabel.ForeColor = System.Drawing.Color.White;
             this.EleMagPortLabel.Name = "EleMagPortLabel";
-            this.EleMagPortLabel.Size = new System.Drawing.Size(260, 24);
+            this.EleMagPortLabel.Size = new System.Drawing.Size(195, 19);
             this.EleMagPortLabel.Spring = true;
             this.EleMagPortLabel.Text = "EleMag Port : ";
             // 
@@ -261,7 +259,7 @@
             this.FileLabel.ForeColor = System.Drawing.Color.White;
             this.FileLabel.Name = "FileLabel";
             this.FileLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.FileLabel.Size = new System.Drawing.Size(260, 24);
+            this.FileLabel.Size = new System.Drawing.Size(195, 19);
             this.FileLabel.Spring = true;
             this.FileLabel.Text = "MidiFile : ";
             // 
@@ -269,7 +267,7 @@
             // 
             this.PlaylistLabel.ForeColor = System.Drawing.Color.White;
             this.PlaylistLabel.Name = "PlaylistLabel";
-            this.PlaylistLabel.Size = new System.Drawing.Size(260, 24);
+            this.PlaylistLabel.Size = new System.Drawing.Size(195, 19);
             this.PlaylistLabel.Spring = true;
             this.PlaylistLabel.Text = "MidiPlaylist : ";
             // 
@@ -277,11 +275,10 @@
             // 
             this.FileterBox.Controls.Add(this.filterCheckBox);
             this.FileterBox.ForeColor = System.Drawing.Color.White;
-            this.FileterBox.Location = new System.Drawing.Point(31, 156);
-            this.FileterBox.Margin = new System.Windows.Forms.Padding(4);
+            this.FileterBox.Location = new System.Drawing.Point(23, 125);
             this.FileterBox.Name = "FileterBox";
             this.FileterBox.Padding = new System.Windows.Forms.Padding(0);
-            this.FileterBox.Size = new System.Drawing.Size(99, 117);
+            this.FileterBox.Size = new System.Drawing.Size(74, 94);
             this.FileterBox.TabIndex = 19;
             this.FileterBox.TabStop = false;
             this.FileterBox.Text = "Fileter";
@@ -296,10 +293,9 @@
             "Guitar",
             "Base",
             "Drum"});
-            this.filterCheckBox.Location = new System.Drawing.Point(4, 24);
-            this.filterCheckBox.Margin = new System.Windows.Forms.Padding(4);
+            this.filterCheckBox.Location = new System.Drawing.Point(3, 19);
             this.filterCheckBox.Name = "filterCheckBox";
-            this.filterCheckBox.Size = new System.Drawing.Size(89, 89);
+            this.filterCheckBox.Size = new System.Drawing.Size(68, 60);
             this.filterCheckBox.TabIndex = 0;
             // 
             // NowPlaying
@@ -310,10 +306,9 @@
             // 
             // 
             this.NowPlaying.CustomButton.Image = null;
-            this.NowPlaying.CustomButton.Location = new System.Drawing.Point(724, 2);
-            this.NowPlaying.CustomButton.Margin = new System.Windows.Forms.Padding(4);
+            this.NowPlaying.CustomButton.Location = new System.Drawing.Point(541, 2);
             this.NowPlaying.CustomButton.Name = "";
-            this.NowPlaying.CustomButton.Size = new System.Drawing.Size(37, 37);
+            this.NowPlaying.CustomButton.Size = new System.Drawing.Size(29, 29);
             this.NowPlaying.CustomButton.Style = MetroFramework.MetroColorStyle.Blue;
             this.NowPlaying.CustomButton.TabIndex = 1;
             this.NowPlaying.CustomButton.Theme = MetroFramework.MetroThemeStyle.Light;
@@ -323,8 +318,7 @@
             this.NowPlaying.ForeColor = System.Drawing.Color.Aquamarine;
             this.NowPlaying.Lines = new string[] {
         "NowPlaying"};
-            this.NowPlaying.Location = new System.Drawing.Point(16, 50);
-            this.NowPlaying.Margin = new System.Windows.Forms.Padding(4);
+            this.NowPlaying.Location = new System.Drawing.Point(12, 40);
             this.NowPlaying.MaxLength = 32767;
             this.NowPlaying.Name = "NowPlaying";
             this.NowPlaying.PasswordChar = '\0';
@@ -334,7 +328,7 @@
             this.NowPlaying.SelectionLength = 0;
             this.NowPlaying.SelectionStart = 0;
             this.NowPlaying.ShortcutsEnabled = true;
-            this.NowPlaying.Size = new System.Drawing.Size(764, 42);
+            this.NowPlaying.Size = new System.Drawing.Size(573, 34);
             this.NowPlaying.Style = MetroFramework.MetroColorStyle.Teal;
             this.NowPlaying.TabIndex = 21;
             this.NowPlaying.Text = "NowPlaying";
@@ -362,12 +356,11 @@
             this.tableLayoutPanel4.Controls.Add(this.PlayButton, 4, 0);
             this.tableLayoutPanel4.Controls.Add(this.StopButton, 2, 0);
             this.tableLayoutPanel4.Controls.Add(this.ReturnButton, 0, 0);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(173, 215);
-            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(4);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(130, 172);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(441, 58);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(331, 46);
             this.tableLayoutPanel4.TabIndex = 6;
             // 
             // NextButton
@@ -375,10 +368,9 @@
             this.NextButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.NextButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.NextButton.Image = ((System.Drawing.Image)(resources.GetObject("NextButton.Image")));
-            this.NextButton.Location = new System.Drawing.Point(339, 4);
-            this.NextButton.Margin = new System.Windows.Forms.Padding(4);
+            this.NextButton.Location = new System.Drawing.Point(254, 3);
             this.NextButton.Name = "NextButton";
-            this.NextButton.Size = new System.Drawing.Size(98, 50);
+            this.NextButton.Size = new System.Drawing.Size(74, 40);
             this.NextButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.NextButton.TabIndex = 29;
             this.NextButton.TabStop = false;
@@ -389,10 +381,9 @@
             this.PlayButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.PlayButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PlayButton.Image = ((System.Drawing.Image)(resources.GetObject("PlayButton.Image")));
-            this.PlayButton.Location = new System.Drawing.Point(243, 4);
-            this.PlayButton.Margin = new System.Windows.Forms.Padding(4);
+            this.PlayButton.Location = new System.Drawing.Point(182, 3);
             this.PlayButton.Name = "PlayButton";
-            this.PlayButton.Size = new System.Drawing.Size(49, 50);
+            this.PlayButton.Size = new System.Drawing.Size(36, 40);
             this.PlayButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.PlayButton.TabIndex = 28;
             this.PlayButton.TabStop = false;
@@ -403,10 +394,9 @@
             this.StopButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.StopButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.StopButton.Image = ((System.Drawing.Image)(resources.GetObject("StopButton.Image")));
-            this.StopButton.Location = new System.Drawing.Point(145, 4);
-            this.StopButton.Margin = new System.Windows.Forms.Padding(4);
+            this.StopButton.Location = new System.Drawing.Point(110, 3);
             this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(49, 50);
+            this.StopButton.Size = new System.Drawing.Size(36, 40);
             this.StopButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.StopButton.TabIndex = 27;
             this.StopButton.TabStop = false;
@@ -417,10 +407,9 @@
             this.ReturnButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.ReturnButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ReturnButton.Image = ((System.Drawing.Image)(resources.GetObject("ReturnButton.Image")));
-            this.ReturnButton.Location = new System.Drawing.Point(4, 4);
-            this.ReturnButton.Margin = new System.Windows.Forms.Padding(4);
+            this.ReturnButton.Location = new System.Drawing.Point(3, 3);
             this.ReturnButton.Name = "ReturnButton";
-            this.ReturnButton.Size = new System.Drawing.Size(94, 50);
+            this.ReturnButton.Size = new System.Drawing.Size(71, 40);
             this.ReturnButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.ReturnButton.TabIndex = 26;
             this.ReturnButton.TabStop = false;
@@ -430,10 +419,10 @@
             // 
             this.trackBar.BackColor = System.Drawing.Color.Transparent;
             this.trackBar.LargeChange = 1;
-            this.trackBar.Location = new System.Drawing.Point(16, 100);
+            this.trackBar.Location = new System.Drawing.Point(12, 80);
             this.trackBar.Margin = new System.Windows.Forms.Padding(0);
             this.trackBar.Name = "trackBar";
-            this.trackBar.Size = new System.Drawing.Size(764, 56);
+            this.trackBar.Size = new System.Drawing.Size(573, 45);
             this.trackBar.TabIndex = 25;
             this.trackBar.Text = "metroTrackBar1";
             this.trackBar.Theme = MetroFramework.MetroThemeStyle.Dark;
@@ -453,12 +442,11 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45F));
             this.tableLayoutPanel1.Controls.Add(this.ShuffleButton, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.RepeatButton, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(320, 156);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(240, 125);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(144, 51);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(108, 41);
             this.tableLayoutPanel1.TabIndex = 24;
             // 
             // ShuffleButton
@@ -466,10 +454,9 @@
             this.ShuffleButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.ShuffleButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ShuffleButton.Image = ((System.Drawing.Image)(resources.GetObject("ShuffleButton.Image")));
-            this.ShuffleButton.Location = new System.Drawing.Point(82, 4);
-            this.ShuffleButton.Margin = new System.Windows.Forms.Padding(4);
+            this.ShuffleButton.Location = new System.Drawing.Point(61, 3);
             this.ShuffleButton.Name = "ShuffleButton";
-            this.ShuffleButton.Size = new System.Drawing.Size(58, 43);
+            this.ShuffleButton.Size = new System.Drawing.Size(44, 35);
             this.ShuffleButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.ShuffleButton.TabIndex = 29;
             this.ShuffleButton.TabStop = false;
@@ -480,10 +467,9 @@
             this.RepeatButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.RepeatButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.RepeatButton.Image = ((System.Drawing.Image)(resources.GetObject("RepeatButton.Image")));
-            this.RepeatButton.Location = new System.Drawing.Point(4, 4);
-            this.RepeatButton.Margin = new System.Windows.Forms.Padding(4);
+            this.RepeatButton.Location = new System.Drawing.Point(3, 3);
             this.RepeatButton.Name = "RepeatButton";
-            this.RepeatButton.Size = new System.Drawing.Size(56, 43);
+            this.RepeatButton.Size = new System.Drawing.Size(42, 35);
             this.RepeatButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.RepeatButton.TabIndex = 28;
             this.RepeatButton.TabStop = false;
@@ -493,19 +479,21 @@
             // 
             this.muteCheckBox.AutoSize = true;
             this.muteCheckBox.ForeColor = System.Drawing.Color.Transparent;
-            this.muteCheckBox.Location = new System.Drawing.Point(703, 250);
+            this.muteCheckBox.Location = new System.Drawing.Point(527, 200);
+            this.muteCheckBox.Margin = new System.Windows.Forms.Padding(2);
             this.muteCheckBox.Name = "muteCheckBox";
-            this.muteCheckBox.Size = new System.Drawing.Size(85, 19);
+            this.muteCheckBox.Size = new System.Drawing.Size(67, 16);
             this.muteCheckBox.TabIndex = 26;
             this.muteCheckBox.Text = "Mute On";
             this.muteCheckBox.UseVisualStyleBackColor = true;
+            this.muteCheckBox.CheckedChanged += new System.EventHandler(this.muteCheckBox_CheckedChanged);
             // 
             // PlayerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(22)))), ((int)(((byte)(14)))));
-            this.ClientSize = new System.Drawing.Size(800, 329);
+            this.ClientSize = new System.Drawing.Size(600, 270);
             this.Controls.Add(this.muteCheckBox);
             this.Controls.Add(this.LabelTime);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -518,9 +506,8 @@
             this.Controls.Add(this.trackBar);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4);
-            this.MaximumSize = new System.Drawing.Size(1061, 376);
-            this.MinimumSize = new System.Drawing.Size(794, 376);
+            this.MaximumSize = new System.Drawing.Size(616, 309);
+            this.MinimumSize = new System.Drawing.Size(616, 309);
             this.Name = "PlayerForm";
             this.Text = "Ele Mag Player";
             this.Load += new System.EventHandler(this.Form1_Load);

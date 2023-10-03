@@ -808,6 +808,19 @@ namespace EMH_Player
                 }
             }
         }
+
+        private void muteCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (muteCheckBox.Checked)
+            {
+                midi.Close();
+                midi.Dispose();
+                midi = new MidiOut(0);
+                for (int i = 0; i < partList.Count(); i++)
+                    midi.Send(MidiMessage.ChangePatch(partList[i].harmony, partList[i].channel + 1).RawData);
+            }
+        }
+
         private void PlayControlButtonClick(object sender, EventArgs e)
         {
             if((PictureBox)sender == RepeatButton)
