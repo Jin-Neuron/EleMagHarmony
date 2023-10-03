@@ -65,7 +65,7 @@
             this.tableLayoutPanel1.Controls.Add(this.ConnectButton, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.PortComboBox, 1, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(16, 15);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
@@ -82,7 +82,7 @@
             this.SpeedComboBox.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.SpeedComboBox.FormattingEnabled = true;
             this.SpeedComboBox.Location = new System.Drawing.Point(244, 46);
-            this.SpeedComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SpeedComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.SpeedComboBox.Name = "SpeedComboBox";
             this.SpeedComboBox.Size = new System.Drawing.Size(232, 32);
             this.SpeedComboBox.TabIndex = 9;
@@ -105,7 +105,7 @@
             // 
             this.ConnectButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ConnectButton.Location = new System.Drawing.Point(244, 130);
-            this.ConnectButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConnectButton.Margin = new System.Windows.Forms.Padding(4);
             this.ConnectButton.Name = "ConnectButton";
             this.ConnectButton.Size = new System.Drawing.Size(232, 37);
             this.ConnectButton.TabIndex = 6;
@@ -120,7 +120,7 @@
             this.PortComboBox.Font = new System.Drawing.Font("MS UI Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.PortComboBox.FormattingEnabled = true;
             this.PortComboBox.Location = new System.Drawing.Point(244, 4);
-            this.PortComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PortComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.PortComboBox.Name = "PortComboBox";
             this.PortComboBox.Size = new System.Drawing.Size(232, 32);
             this.PortComboBox.TabIndex = 7;
@@ -133,7 +133,7 @@
             this.ClientSize = new System.Drawing.Size(512, 201);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(527, 238);
             this.Name = "SettingSerialportForm";
             this.Text = "SettingSerialportForm";
