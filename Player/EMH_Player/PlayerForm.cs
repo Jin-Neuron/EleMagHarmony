@@ -811,7 +811,7 @@ namespace EMH_Player
 
         private void muteCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (muteCheckBox.Checked)
+            if (muteCheckBox.Checked && midi != null)
             {
                 midi.Close();
                 midi.Dispose();
