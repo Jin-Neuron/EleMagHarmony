@@ -436,6 +436,8 @@ namespace EMH_Player
                             laneIndex = data[i++];
                             //ヴェロシティ
                             velocity = data[i++];
+                            if (laneIndex > 127)
+                                break;
                             if (longFlags[laneIndex])
                             {
                                 type = DataClass.NoteType.Off;
