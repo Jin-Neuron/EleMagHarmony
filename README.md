@@ -1,5 +1,7 @@
 # Ele Mag Harmony
 
+![elemag pic](pic/EleMag.jpg)
+
 ## Requirement
 
 MPU (board) : STM32F303K8T6 (Nucleo-32)
@@ -28,11 +30,15 @@ EleMagDriver、Nucleoボード、電源、そしてバンドの構成楽器各�
 
 ギターにはアンプを接続し、ソレノイドマウントをつけてソレノイドを取り付けます。
 
+![guitar solenoid](pic/Solenoid.jpg)
+
 ソレノイドマウントはHardware -> Guitar　内にstlファイルをアップロードしておりますので、そちらを活用してください。
 
 EleMagDriverは基板のガーバーをアップロードしているので活用してください。v3.0ではオーディオビジュアライザー機能も搭載しています。
 
 EleMag Driverの接続は基板に書かれている通りです。フロッピードライブ以外はxhのコネクタで接続する必要があります。
+
+![PCB](pic/PCB.jpg)
 
 フロッピードライブは2.5mmピッチのQIのコネクタで電源を接続し、信号はFDDの接続に標準的な34ピンのMILコネクタを使用します。
 
